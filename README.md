@@ -7,7 +7,7 @@ httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbra
 
 Create index.http file with following code, then `chmod u+x index.http`
 
-```http request
+```
 #!/usr/bin/env httpx --httpfile
 
 ### get my internet ip
