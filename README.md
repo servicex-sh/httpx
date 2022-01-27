@@ -36,6 +36,13 @@ GRPC localhost:50052/org.mvnsearch.service.Greeter/SayHello
 {
   "name": "Jackie"
 }
+
+### graphql query
+//@name query
+GRAPHQL http://localhost:8080/graphql
+Content-Type: application/graphql
+
+query { hello }
 ```
 
 Then input `httpx myip` or `./index.http myip` to invoke request.
