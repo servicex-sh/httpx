@@ -26,3 +26,29 @@ Content-Type: application/json
 STREAM com.example.UserService.findAll
 Host: 127.0.0.1:42252
 Content-Type: application/json
+
+### query by json
+//@name query_by_json
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ films { title releaseYear}}"
+}
+
+### graphql query
+//@name query
+GRAPHQL http://localhost:8080/graphql
+Content-Type: application/graphql
+
+query {
+  bookById(id: "book-1") {
+    id
+    name
+    pageCount
+    author {
+      firstName
+      lastName
+    }
+  }
+}
