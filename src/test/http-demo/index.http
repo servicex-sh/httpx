@@ -1,0 +1,30 @@
+#!/usr/bin/env httpx --httpfile
+
+### get my internet ip
+# @name myip
+GET {{base-url}}/ip
+
+### inspection http post
+# @name post
+POST https://httpbin.org/post
+Content-Type: application/json
+
+[
+  1
+]
+
+### RSocket Request
+// @name request
+RSOCKET com.example.UserService.findById
+Host: 127.0.0.1:42252
+Content-Type: application/json
+
+1
+
+### grpc call SayHello
+//@name SayHello
+GRPC localhost:50052/org.mvnsearch.service.Greeter/SayHello
+
+{
+  "name": "Jackie"
+}
