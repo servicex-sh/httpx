@@ -45,6 +45,7 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 * HTTP Request
 * RSocket Request
 * GRPC Request: you should install [grpcurl](https://github.com/fullstorydev/grpcurl)
+* GraphQL support: Query, Mutation and Subscribe on HTTP and WebSocket(graphql-ws)
 
 # References
 
