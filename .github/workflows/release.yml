@@ -26,7 +26,7 @@ jobs:
           version: "22.0.0.2"
           java-version: '17'
           components: 'native-image'
-          github-token: ${{ secrets.GRAAL_GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: GraalVM native image build
         run: mvn -Pnative -DskipTests clean package
