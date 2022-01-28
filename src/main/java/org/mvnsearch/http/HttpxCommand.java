@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mvnsearch.http.model.HttpMethod;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
+import org.mvnsearch.http.protocol.GraphqlExecutor;
 import org.mvnsearch.http.protocol.GrpcExecutor;
 import org.mvnsearch.http.protocol.HttpExecutor;
 import org.mvnsearch.http.protocol.RSocketExecutor;
@@ -161,6 +162,8 @@ public class HttpxCommand implements Callable<Integer> {
             new RSocketExecutor().execute(httpRequest);
         } else if (requestMethod.isGrpcMethod()) {
             new GrpcExecutor().execute(httpRequest);
+        } else if (requestMethod.isGraphQLMethod()) {
+            new GraphqlExecutor().execute(httpRequest);
         } else {
             System.out.println("Not support: " + requestMethod.getName());
         }
