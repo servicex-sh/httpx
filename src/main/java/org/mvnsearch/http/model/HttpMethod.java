@@ -54,4 +54,8 @@ public class HttpMethod {
     public boolean isGrpcMethod() {
         return GRPC_METHODS.contains(name);
     }
+
+    public boolean isGraphQLMethod() {
+        return GRAPHQL_METHODS.contains(name);
+    }
 }
