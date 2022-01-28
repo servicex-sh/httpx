@@ -3,6 +3,7 @@ package org.mvnsearch.http.protocol;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.Unpooled;
 import org.jetbrains.annotations.Nullable;
+import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 import reactor.core.publisher.Flux;
@@ -33,6 +34,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
             System.err.println("Failed to parse json body");
             return;
         }
+        final URI requestUri = httpRequest.getRequestTarget().getUri();
         //construct http client
         HttpClient client = httpClient().headers(httpHeaders -> {
             if (httpRequest.getHeaders() != null) {
@@ -45,7 +47,9 @@ public class GraphqlExecutor extends HttpBaseExecutor {
                 }
             }
         });
-        final URI requestUri = httpRequest.getRequestTarget().getUri();
+        for (HttpCookie cookie : cookies(requestUri.getHost())) {
+            client.cookie(cookie.toNettyCookie());
+        }
         System.out.println("GRAPHQL " + requestUri);
         System.out.println();
         if (requestUri.getScheme().startsWith("ws")) {  //websocket with graphql-ws spec

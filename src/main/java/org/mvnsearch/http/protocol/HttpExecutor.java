@@ -1,5 +1,6 @@
 package org.mvnsearch.http.protocol;
 
+import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 import reactor.netty.http.client.HttpClient;
@@ -9,6 +10,7 @@ import java.net.URI;
 
 public class HttpExecutor extends HttpBaseExecutor {
     public void execute(HttpRequest httpRequest) {
+        final URI requestUri = httpRequest.getRequestTarget().getUri();
         HttpClient client = httpClient().headers(httpHeaders -> {
             if (httpRequest.getHeaders() != null) {
                 for (HttpHeader header : httpRequest.getHeaders()) {
@@ -16,6 +18,9 @@ public class HttpExecutor extends HttpBaseExecutor {
                 }
             }
         });
+        for (HttpCookie cookie : cookies(requestUri.getHost())) {
+            client.cookie(cookie.toNettyCookie());
+        }
         final String httpMethod = httpRequest.getMethod().getName();
         HttpClient.ResponseReceiver<?> responseReceiver = switch (httpMethod) {
             case "POST" -> client.post().send(httpRequest.requestBody());
@@ -24,7 +29,6 @@ public class HttpExecutor extends HttpBaseExecutor {
             case "HEAD" -> client.head();
             default -> client.get();
         };
-        final URI requestUri = httpRequest.getRequestTarget().getUri();
         System.out.println(httpMethod + " " + requestUri);
         System.out.println();
         String body = responseReceiver
