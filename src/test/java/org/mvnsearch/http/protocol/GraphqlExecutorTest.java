@@ -1,6 +1,7 @@
 package org.mvnsearch.http.protocol;
 
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
@@ -8,6 +9,7 @@ import org.mvnsearch.http.model.HttpRequestParser;
 import java.util.HashMap;
 import java.util.Map;
 
+@Disabled
 public class GraphqlExecutorTest {
     @Test
     public void testHttpRequest() throws Exception {
