@@ -54,6 +54,26 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 * GRPC Request: you should install [grpcurl](https://github.com/fullstorydev/grpcurl)
 * GraphQL support: Query, Mutation and Subscribe on HTTP and WebSocket(graphql-ws)
 
+# oh-my-zsh integration for shell completion
+
+Please create `~/.oh-my-zsh/custom/plugins/httpx` with following code, then add `httpx` to `plugins` in `.zshrc` file.
+
+```shell
+#compdef index.http
+#autload
+
+local subcmds=()
+
+while read -r line ; do
+   if [[ ! $line == Available* ]] ;
+   then
+      subcmds+=(${line/[[:space:]]*\#/:})
+   fi
+done < <(httpx --summary)
+
+_describe 'command' subcmds
+```
+
 # References
 
 * JetBrains HTTP client: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
