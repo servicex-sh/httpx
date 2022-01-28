@@ -1,5 +1,8 @@
 package org.mvnsearch.http.model;
 
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -49,6 +52,10 @@ public class HttpCookie {
 
     public void setExpired(Date expired) {
         this.expired = expired;
+    }
+
+    public Cookie toNettyCookie() {
+        return new DefaultCookie(this.name, this.value);
     }
 
     public static HttpCookie valueOf(String line) throws Exception {
