@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 
 @SuppressWarnings({"unused", "DuplicatedCode"})
 public class HttpRequest {
@@ -229,13 +228,18 @@ public class HttpRequest {
                 if (this.redirectResponse != null) {
                     lines.remove(this.redirectResponse);
                 }
-                //remove line breaks at then end of text
                 if (!lines.isEmpty()) {
-                    while (Objects.equals(lines.get(lines.size() - 1), "")) {
+                    //remove empty lines after body
+                    while (lines.get(lines.size() - 1).isEmpty()) {
                         lines.remove(lines.size() - 1);
+                        if (lines.isEmpty()) {
+                            break;
+                        }
                     }
-                    String content = String.join(System.lineSeparator(), lines);
-                    this.body = content.getBytes(StandardCharsets.UTF_8);
+                    if (!lines.isEmpty()) {
+                        String content = String.join(System.lineSeparator(), lines);
+                        this.body = content.getBytes(StandardCharsets.UTF_8);
+                    }
                 }
             }
         }
