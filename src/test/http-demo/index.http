@@ -4,6 +4,8 @@
 # @name myip
 GET {{base-url}}/ip
 
+>>! myip.json
+
 ### inspection http post
 # @name post
 POST https://httpbin.org/post
