@@ -14,13 +14,11 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "unused"})
@@ -101,7 +99,7 @@ public class HttpxCommand implements Callable<Integer> {
                             }
                             targetFound = true;
                             request.cleanBody();
-                            execute(request);
+                            execute(httpFilePath, request);
                         }
                     }
                 }
@@ -158,18 +156,51 @@ public class HttpxCommand implements Callable<Integer> {
         return context;
     }
 
-    public void execute(HttpRequest httpRequest) {
+    public void execute(Path httpFilePath, HttpRequest httpRequest) {
         final HttpMethod requestMethod = httpRequest.getMethod();
+        List<byte[]> result;
         if (requestMethod.isHttpMethod()) {
-            new HttpExecutor().execute(httpRequest);
+            result = new HttpExecutor().execute(httpRequest);
         } else if (requestMethod.isRSocketMethod()) {
-            new RSocketExecutor().execute(httpRequest);
+            result = new RSocketExecutor().execute(httpRequest);
         } else if (requestMethod.isGrpcMethod()) {
-            new GrpcExecutor().execute(httpRequest);
+            result = new GrpcExecutor().execute(httpRequest);
         } else if (requestMethod.isGraphQLMethod()) {
-            new GraphqlExecutor().execute(httpRequest);
+            result = new GraphqlExecutor().execute(httpRequest);
         } else {
+            result = Collections.emptyList();
             System.out.println("Not support: " + requestMethod.getName());
+        }
+        if (httpRequest.getRedirectResponse() != null && !result.isEmpty()) {
+            writeResponse(httpFilePath, httpRequest.getRedirectResponse(), result);
+        }
+    }
+
+    void writeResponse(Path httpFilePath, String redirectResponse, List<byte[]> content) {
+        String[] parts = redirectResponse.split("\\s+", 2);
+        String responseFile = parts[1];
+        try {
+            Path responseFilePath;
+            if (responseFile.startsWith("/")) {
+                responseFilePath = Path.of(responseFile);
+            } else {
+                responseFilePath = httpFilePath.toAbsolutePath().getParent().resolve(responseFile);
+            }
+            final File parentDir = responseFilePath.toAbsolutePath().getParent().toFile();
+            if (!parentDir.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                parentDir.mkdirs();
+            }
+            try (FileOutputStream fos = new FileOutputStream(responseFilePath.toFile())) {
+                for (byte[] bytes : content) {
+                    fos.write(bytes);
+                }
+            }
+            System.out.println("---------------------------------");
+            System.out.println("Write to " + responseFile + " successfully!");
+        } catch (Exception e) {
+            System.out.println("---------------------------------");
+            System.out.println("Failed to write file:" + responseFile);
         }
     }
 
