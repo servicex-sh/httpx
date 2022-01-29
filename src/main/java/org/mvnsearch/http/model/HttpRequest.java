@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings({"unused", "DuplicatedCode"})
 public class HttpRequest {
@@ -21,6 +22,9 @@ public class HttpRequest {
     private HttpMethod method;
     private List<HttpHeader> headers;
     private List<String> bodyLines;
+    private byte[] body;
+    private String jsTestCode;
+    private String redirectResponse;
     private HttpRequestTarget requestTarget;
 
     public HttpRequest() {
@@ -138,45 +142,54 @@ public class HttpRequest {
         this.bodyLines.add(line);
     }
 
-    public String getBody() {
-        if (this.bodyLines != null && !bodyLines.isEmpty()) {
-            return String.join(System.lineSeparator(), bodyLines).replaceAll("[\\r\\n]+$", "");
-        } else {
-            return "";
-        }
+    public String getRedirectResponse() {
+        return this.redirectResponse;
     }
 
     public String getJavaScriptTestCode() {
-        if (this.bodyLines != null && !bodyLines.isEmpty()) {
-            int jsScriptStartOffset = bodyLines.size();
-            int jsScriptEndOffset = -1;
-            for (int i = 0; i < bodyLines.size(); i++) {
-                String line = bodyLines.get(i);
-                if (line.startsWith("> {%")) {
-                    jsScriptStartOffset = i;
-                }
-                if (line.equals("%}") && i > jsScriptStartOffset) {
-                    jsScriptEndOffset = i;
-                    break;
-                }
-            }
-            if (jsScriptEndOffset > 0) {
-                return String.join(System.lineSeparator(), bodyLines.subList(jsScriptStartOffset + 1, jsScriptEndOffset));
-            }
-        }
-        return "";
+        return this.jsTestCode;
     }
 
-    public byte[] getBodyBytes() throws Exception {
-        if (this.bodyLines != null && !bodyLines.isEmpty()) {
-            if (bodyLines.get(0).startsWith("> ")) { // load body from an external file
+    public byte[] getBodyBytes() {
+        return this.body;
+    }
+
+    public Mono<ByteBuf> requestBody() {
+        return Mono.create(sink -> {
+            final byte[] bodyBytes = getBodyBytes();
+            if (bodyBytes == null || bodyBytes.length == 0) {
+                sink.success();
+            } else {
+                sink.success(Unpooled.wrappedBuffer(bodyBytes));
+            }
+        });
+    }
+
+    public boolean isFilled() {
+        return method != null && requestTarget != null;
+    }
+
+    public boolean isBodyEmpty() {
+        return bodyLines == null || bodyLines.isEmpty();
+    }
+
+    /**
+     * clean body: extract javascript test code, redirect response etc
+     */
+    public void cleanBody() throws Exception {
+        if (bodyLines != null && !bodyLines.isEmpty()) {
+            if (bodyLines.get(0).startsWith("< ")) { // load body from an external file
                 String firstLine = bodyLines.get(0);
                 String fileName = firstLine.substring(1).trim();
-                return Files.readAllBytes(Path.of(fileName));
+                this.body = Files.readAllBytes(Path.of(fileName));
             } else {
-                List<String> lines = bodyLines.stream()
-                        .filter(line -> !line.startsWith("<> ")) //skip compare line with <>
-                        .toList();
+                List<String> lines = new ArrayList<>();
+                for (String bodyLine : bodyLines) {
+                    if (!bodyLine.startsWith("<>")) {
+                        lines.add(bodyLine);
+                    }
+                }
+                // extract js code block
                 int jsScriptStartOffset = lines.size();
                 int jsScriptEndOffset = -1;
                 for (int i = 0; i < lines.size(); i++) {
@@ -190,36 +203,41 @@ public class HttpRequest {
                     }
                 }
                 if (jsScriptEndOffset > 0) { // javascript test code found
+                    this.jsTestCode = String.join(System.lineSeparator(), lines.subList(jsScriptStartOffset + 1, jsScriptEndOffset));
                     List<String> cleanLines = new ArrayList<>();
                     cleanLines.addAll(lines.subList(0, jsScriptStartOffset));
                     cleanLines.addAll(lines.subList(jsScriptEndOffset + 1, lines.size()));
                     lines = cleanLines;
                 }
+                // extract js file '> /path/to/responseHandler.js'
+                List<String> jsHandlerFiles = new ArrayList<>();
+                for (String line : lines) {
+                    if (line.startsWith("> ") && line.endsWith(".js")) { // response redirect
+                        jsHandlerFiles.add(line);
+                    }
+                }
+                if (!jsHandlerFiles.isEmpty()) {
+                    lines.removeAll(jsHandlerFiles);
+                    //read js block from files
+                }
+                //extract redirect response file
+                for (String line : lines) {
+                    if (line.startsWith(">>")) { // response redirect
+                        this.redirectResponse = line;
+                    }
+                }
+                if (this.redirectResponse != null) {
+                    lines.remove(this.redirectResponse);
+                }
                 //remove line breaks at then end of text
-                String content = String.join(System.lineSeparator(), lines).replaceAll("[\\r\\n]+$", "");
-                return content.getBytes(StandardCharsets.UTF_8);
+                if (!lines.isEmpty()) {
+                    while (Objects.equals(lines.get(lines.size() - 1), "")) {
+                        lines.remove(lines.size() - 1);
+                    }
+                    String content = String.join(System.lineSeparator(), lines);
+                    this.body = content.getBytes(StandardCharsets.UTF_8);
+                }
             }
-        } else {
-            return new byte[]{};
         }
-    }
-
-    public Mono<ByteBuf> requestBody() {
-        return Mono.create(sink -> {
-            try {
-                final byte[] bodyBytes = getBodyBytes();
-                sink.success(Unpooled.wrappedBuffer(bodyBytes));
-            } catch (Exception e) {
-                sink.error(e);
-            }
-        });
-    }
-
-    public boolean isFilled() {
-        return method != null && requestTarget != null;
-    }
-
-    public boolean isBodyEmpty() {
-        return bodyLines == null || bodyLines.isEmpty();
     }
 }
