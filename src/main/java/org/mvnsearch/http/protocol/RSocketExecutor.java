@@ -13,31 +13,35 @@ import org.mvnsearch.http.model.RSocketRequest;
 import reactor.core.publisher.Hooks;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
 
 
-public class RSocketExecutor {
+public class RSocketExecutor implements BaseExecutor {
     static {
         Hooks.onErrorDropped(throwable -> {
 
         });
     }
 
-    public void execute(HttpRequest httpRequest) {
+    public List<byte[]> execute(HttpRequest httpRequest) {
         RSocketRequest rsocketRequest = new RSocketRequest(httpRequest);
         final String requestType = rsocketRequest.getRequestType();
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         System.out.println(requestType + " " + requestUri);
         System.out.println();
-        switch (requestType) {
+        return switch (requestType) {
             case "RSOCKET", "RPC" -> requestResponse(rsocketRequest);
             case "FNF" -> fireAndForget(rsocketRequest);
             case "STREAM" -> requestStream(rsocketRequest);
             case "METADATA_PUSH" -> metadataPush(rsocketRequest);
-        }
+            default -> Collections.emptyList();
+        };
     }
 
-    private void requestResponse(RSocketRequest rsocketRequest) {
+    private List<byte[]> requestResponse(RSocketRequest rsocketRequest) {
         var dataMimeType = rsocketRequest.getAcceptMimeType();
         RSocket clientRSocket = null;
         try {
@@ -45,6 +49,7 @@ public class RSocketExecutor {
             var result = clientRSocket.requestResponse(rsocketRequest.createPayload()).block();
             String text = convertPayloadText(dataMimeType, result);
             System.out.println(text);
+            return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -52,9 +57,10 @@ public class RSocketExecutor {
                 clientRSocket.dispose();
             }
         }
+        return Collections.emptyList();
     }
 
-    private void fireAndForget(RSocketRequest rsocketRequest) {
+    private List<byte[]> fireAndForget(RSocketRequest rsocketRequest) {
         var dataMimeType = rsocketRequest.getAcceptMimeType();
         RSocket clientRSocket = null;
         try {
@@ -68,10 +74,10 @@ public class RSocketExecutor {
                 clientRSocket.dispose();
             }
         }
+        return Collections.emptyList();
     }
 
-    private void metadataPush(RSocketRequest rsocketRequest) {
-        var dataMimeType = rsocketRequest.getAcceptMimeType();
+    private List<byte[]> metadataPush(RSocketRequest rsocketRequest) {
         RSocket clientRSocket = null;
         try {
             clientRSocket = createRSocket(rsocketRequest);
@@ -85,18 +91,21 @@ public class RSocketExecutor {
                 clientRSocket.dispose();
             }
         }
+        return Collections.emptyList();
     }
 
-    private void requestStream(RSocketRequest rsocketRequest) {
+    private List<byte[]> requestStream(RSocketRequest rsocketRequest) {
         var dataMimeType = rsocketRequest.getAcceptMimeType();
         RSocket clientRSocket = null;
         try {
             clientRSocket = createRSocket(rsocketRequest);
-            clientRSocket.requestStream(rsocketRequest.createPayload())
+            return clientRSocket.requestStream(rsocketRequest.createPayload())
                     .doOnNext(payload -> {
                         String text = convertPayloadText(dataMimeType, payload);
                         System.out.println(text);
-                    }).blockLast();
+                    }).map(payload -> payload.getData().array())
+                    .buffer()
+                    .blockLast();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -104,6 +113,7 @@ public class RSocketExecutor {
                 clientRSocket.dispose();
             }
         }
+        return Collections.emptyList();
     }
 
 
@@ -124,7 +134,7 @@ public class RSocketExecutor {
     }
 
     private String convertPayloadText(String dataMimeType, Payload payload) {
-        if (dataMimeType.contains("text") || dataMimeType.contains("json") || dataMimeType.contains("xml")) {
+        if (isPrintable(dataMimeType)) {
             return payload.getDataUtf8();
         } else {
             return Base64.getEncoder().encodeToString(payload.getData().array());

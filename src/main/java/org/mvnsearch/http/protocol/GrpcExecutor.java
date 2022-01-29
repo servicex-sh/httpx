@@ -7,13 +7,14 @@ import org.mvnsearch.http.model.HttpRequest;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class GrpcExecutor {
+public class GrpcExecutor implements BaseExecutor {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void execute(HttpRequest httpRequest) {
+    public List<byte[]> execute(HttpRequest httpRequest) {
         try {
             List<String> command = new ArrayList<>();
             command.add("grpcurl");
@@ -68,10 +69,12 @@ public class GrpcExecutor {
             } else {
                 String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                 System.out.println(output);
+                return List.of(output.getBytes(StandardCharsets.UTF_8));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return Collections.emptyList();
     }
 
 }

@@ -18,7 +18,7 @@ import java.util.*;
 public class GraphqlExecutor extends HttpBaseExecutor {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void execute(HttpRequest httpRequest) {
+    public List<byte[]> execute(HttpRequest httpRequest) {
         String contentType = httpRequest.getHeader("Content-Type");
         byte[] requestJsonBody;
         try {
@@ -32,7 +32,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
             }
         } catch (Exception ignore) {
             System.err.println("Failed to parse json body");
-            return;
+            return Collections.emptyList();
         }
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         //construct http client
@@ -53,53 +53,50 @@ public class GraphqlExecutor extends HttpBaseExecutor {
         System.out.println("GRAPHQL " + requestUri);
         System.out.println();
         if (requestUri.getScheme().startsWith("ws")) {  //websocket with graphql-ws spec
-            httpWebSocket(client, requestUri, httpRequest, requestJsonBody);
+            return httpWebSocket(client, requestUri, httpRequest, requestJsonBody);
         } else {  // http post
-            httpPost(client, requestUri, httpRequest, requestJsonBody);
+            return httpPost(client, requestUri, httpRequest, requestJsonBody);
         }
     }
 
-    public void httpPost(HttpClient httpClient, URI requestUri, HttpRequest httpRequest, byte[] requestJsonBody) {
+    public List<byte[]> httpPost(HttpClient httpClient, URI requestUri, HttpRequest httpRequest, byte[] requestJsonBody) {
         HttpClient.ResponseReceiver<?> responseReceiver = httpClient.post().send(Mono.just(Unpooled.wrappedBuffer(requestJsonBody)));
-        String body = responseReceiver
-                .uri(requestUri)
-                .response((response, byteBufFlux) -> {
-                    System.out.println("Status: " + response.status());
-                    response.responseHeaders().forEach(header -> System.out.println(header.getKey() + ": " + header.getValue()));
-                    return byteBufFlux.asString();
-                }).map(this::prettyJsonFormat)
-                .blockLast();
-        System.out.println(body);
+        return request(responseReceiver, requestUri);
     }
 
-    public void httpWebSocket(HttpClient httpClient, URI requestUri, HttpRequest httpRequest, byte[] requestJsonBody) {
+    public List<byte[]> httpWebSocket(HttpClient httpClient, URI requestUri, HttpRequest httpRequest, byte[] requestJsonBody) {
         String id = UUID.randomUUID().toString();
-        httpClient
+        return httpClient
                 .websocket(WebsocketClientSpec.builder().protocols("graphql-transport-ws").build())
                 .uri(requestUri)
                 .handle((inbound, outbound) -> {
-                    final byte[] connectionInitBytes = graphqlWsMessage("connection_init", null, null);
-                    return outbound.send(Flux.just(Unpooled.wrappedBuffer(connectionInitBytes)))
-                            .then(inbound.receive().asString().handle((responseJsonText, sink) -> {
-                                        try {
-                                            final Map<String, ?> response = objectMapper.readValue(responseJsonText, Map.class);
-                                            String type = (String) response.get("type");
-                                            if ("connection_ack".equals(type)) { //send query
-                                                byte[] queryBytes = graphqlWsMessage("subscribe", id, requestJsonBody);
-                                                outbound.send(Mono.just(Unpooled.wrappedBuffer(queryBytes))).then().subscribe();
-                                            } else if ("next".equals(type)) { //result received
-                                                final Object payload = response.get("payload");
-                                                System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload));
-                                            } else if ("complete".equals(type)) {  // query completed
-                                                outbound.sendClose().subscribe();
-                                                sink.complete();
-                                            }
-                                        } catch (Exception e) {
-                                            sink.error(e);
+                    return Flux.<byte[]>create(fluxSink -> {
+                        final byte[] connectionInitBytes = graphqlWsMessage("connection_init", null, null);
+                        outbound.send(Flux.just(Unpooled.wrappedBuffer(connectionInitBytes)))
+                                .then(inbound.receive().asString().handle((responseJsonText, sink) -> {
+                                    try {
+                                        final Map<String, ?> response = objectMapper.readValue(responseJsonText, Map.class);
+                                        String type = (String) response.get("type");
+                                        if ("connection_ack".equals(type)) { //send query
+                                            byte[] queryBytes = graphqlWsMessage("subscribe", id, requestJsonBody);
+                                            outbound.send(Mono.just(Unpooled.wrappedBuffer(queryBytes))).then().subscribe();
+                                        } else if ("next".equals(type)) { //result received
+                                            final Object payload = response.get("payload");
+                                            final String jsonText = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
+                                            System.out.println(jsonText);
+                                            fluxSink.next(jsonText.getBytes(StandardCharsets.UTF_8));
+                                        } else if ("complete".equals(type)) {  // query completed
+                                            outbound.sendClose().subscribe();
+                                            sink.complete();
+                                            fluxSink.complete();
                                         }
-                                    })
-                                    .then());
-                }).blockLast();
+                                    } catch (Exception e) {
+                                        sink.error(e);
+                                        fluxSink.error(e);
+                                    }
+                                }).then());
+                    });
+                }).buffer().blockLast();
     }
 
     private byte[] graphqlWsMessage(String type, @Nullable String id, byte[] payload) {
@@ -118,19 +115,4 @@ public class GraphqlExecutor extends HttpBaseExecutor {
         }
     }
 
-    private String prettyJsonFormat(String jsonText) {
-        try {
-            if (jsonText.startsWith("{")) {
-                final Map<?, ?> jsonObject = objectMapper.readValue(jsonText, Map.class);
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-            } else if (jsonText.startsWith("[")) {
-                final List<?> jsonArray = objectMapper.readValue(jsonText, List.class);
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonArray);
-            } else {
-                return jsonText;
-            }
-        } catch (Exception e) {
-            return jsonText;
-        }
-    }
 }

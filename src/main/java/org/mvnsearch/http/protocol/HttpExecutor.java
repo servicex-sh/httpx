@@ -6,10 +6,11 @@ import org.mvnsearch.http.model.HttpRequest;
 import reactor.netty.http.client.HttpClient;
 
 import java.net.URI;
+import java.util.List;
 
 
 public class HttpExecutor extends HttpBaseExecutor {
-    public void execute(HttpRequest httpRequest) {
+    public List<byte[]> execute(HttpRequest httpRequest) {
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         HttpClient client = httpClient().headers(httpHeaders -> {
             if (httpRequest.getHeaders() != null) {
@@ -31,13 +32,7 @@ public class HttpExecutor extends HttpBaseExecutor {
         };
         System.out.println(httpMethod + " " + requestUri);
         System.out.println();
-        String body = responseReceiver
-                .uri(requestUri)
-                .response((response, byteBufFlux) -> {
-                    System.out.println("Status: " + response.status());
-                    response.responseHeaders().forEach(header -> System.out.println(header.getKey() + ": " + header.getValue()));
-                    return byteBufFlux.asString();
-                }).blockLast();
-        System.out.println(body);
+        return request(responseReceiver, requestUri);
     }
+
 }

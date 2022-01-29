@@ -1,17 +1,19 @@
 package org.mvnsearch.http.protocol;
 
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import reactor.netty.http.client.HttpClient;
 
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class HttpBaseExecutor {
+public abstract class HttpBaseExecutor implements BaseExecutor {
     protected HttpClient httpClient() {
         return HttpClient.create().secure(sslContextSpec -> {
             try {
@@ -43,5 +45,21 @@ public class HttpBaseExecutor {
             e.printStackTrace();
         }
         return Collections.emptyList();
+    }
+
+    public List<byte[]> request(HttpClient.ResponseReceiver<?> responseReceiver, URI requestUri) {
+        return responseReceiver
+                .uri(requestUri)
+                .response((response, byteBufFlux) -> {
+                    System.out.println("Status: " + response.status());
+                    final HttpHeaders responseHeaders = response.responseHeaders();
+                    responseHeaders.forEach(header -> System.out.println(header.getKey() + ": " + header.getValue()));
+                    String contentType = responseHeaders.get("Content-Type");
+                    return byteBufFlux.asByteArray().doOnNext(bytes -> {
+                        if (contentType != null && isPrintable(contentType)) {
+                            System.out.println(new String(bytes));
+                        }
+                    });
+                }).buffer().blockLast();
     }
 }
