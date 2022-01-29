@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "unused"})
@@ -46,11 +47,13 @@ public class HttpxCommand implements Callable<Integer> {
         }
         try {
             Map<String, Object> context = constructHttpClientContext(httpFilePath);
-            if (profile != null && profile.length > 0) {
-                String activeProfile = profile[profile.length - 1];
-                if (!context.containsKey(activeProfile)) {
-                    System.out.println("profile not found: " + activeProfile);
-                    return -1;
+            if (!context.isEmpty()) {
+                String activeProfile;
+                if (profile != null && profile.length > 0) { // get profile from command line
+                    activeProfile = profile[profile.length - 1];
+                } else {  // get first profile
+                    TreeSet<String> treeSet = new TreeSet<>(context.keySet());
+                    activeProfile = treeSet.first();
                 }
                 //noinspection unchecked
                 context = (Map<String, Object>) context.get(activeProfile);
@@ -97,6 +100,7 @@ public class HttpxCommand implements Callable<Integer> {
                                 System.out.println("=========================================");
                             }
                             targetFound = true;
+                            request.cleanBody();
                             execute(request);
                         }
                     }
