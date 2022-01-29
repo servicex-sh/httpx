@@ -102,6 +102,14 @@ public class HttpRequestTarget {
                 this.host = uri.getHost();
                 this.schema = uri.getScheme();
                 this.port = uri.getPort();
+                final String rawPath = uri.getRawPath();
+                if (rawPath != null && !rawPath.equals("/")) {
+                    if (pathAbsolute == null) {
+                        this.pathAbsolute = rawPath;
+                    } else {
+                        this.pathAbsolute = rawPath + this.pathAbsolute;
+                    }
+                }
             } else if (hostHeader.contains(":")) { // host and port
                 final String[] parts = hostHeader.split(":", 2);
                 if (pathAbsolute == null) {
