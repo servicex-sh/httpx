@@ -68,12 +68,12 @@ public class HttpRequestTarget {
         StringBuilder builder = new StringBuilder();
         if (schema == null) {
             if (HttpMethod.RSOCKET_METHODS.contains(method)) {
-                schema = "tcp://";
+                schema = "tcp";
             } else {
-                schema = "http://";
+                schema = "http";
             }
         }
-        builder.append(schema);
+        builder.append(schema).append("://");
         builder.append(host);
         if (port > 0) {
             builder.append(":").append(port);
