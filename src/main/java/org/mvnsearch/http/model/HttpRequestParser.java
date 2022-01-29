@@ -93,6 +93,8 @@ public class HttpRequestParser {
                 case "$uuid" -> UUID.randomUUID().toString();
                 case "$timestamp" -> System.currentTimeMillis();
                 case "$randomInt" -> new Random().nextInt(1000);
+                case "$projectRoot" -> ".idea";
+                case "$historyFolder" -> ".idea/httpRequests";
                 default -> context.get(name);
             };
             //append value from context
@@ -110,7 +112,6 @@ public class HttpRequestParser {
         }
         return builder.toString();
     }
-
 
 }
 
