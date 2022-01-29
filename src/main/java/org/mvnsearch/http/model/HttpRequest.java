@@ -151,7 +151,7 @@ public class HttpRequest {
     }
 
     public byte[] getBodyBytes() {
-        return this.body;
+        return this.body != null ? this.body : new byte[]{};
     }
 
     public Mono<ByteBuf> requestBody() {
