@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "unused"})
 @Component
-@Command(name = "httpx", version = "0.4.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
+@Command(name = "httpx", version = "0.5.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
 public class HttpxCommand implements Callable<Integer> {
     @Option(names = {"--completions"}, description = "Shell Completion, such as zsh, bash")
     private String completions;
