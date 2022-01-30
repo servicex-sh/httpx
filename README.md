@@ -56,10 +56,10 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 
 # oh-my-zsh integration for shell completion
 
-Please create `~/.oh-my-zsh/custom/plugins/httpx` with following code, then add `httpx` to `plugins` in `.zshrc` file.
+Please create `~/.oh-my-zsh/custom/plugins/httpx` with following code, then add `httpx` to `plugins` in `.zshrc` file. 
 
 ```shell
-#compdef index.http
+#compdef httpx
 #autload
 
 local subcmds=()
@@ -81,3 +81,4 @@ _describe 'command' subcmds
 * RSocket: https://rsocket.io/
 * gRPCurl: https://github.com/fullstorydev/grpcurl
 * picocli: https://picocli.info/
+* type-detecting-hints-for-third-party-libraries: https://github.com/joshlong/type-detecting-hints-for-third-party-libraries
