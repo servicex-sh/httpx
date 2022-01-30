@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 

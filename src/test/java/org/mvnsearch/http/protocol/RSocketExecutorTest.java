@@ -24,6 +24,7 @@ public class RSocketExecutorTest {
                 1
                 """;
         final HttpRequest httpRequest = HttpRequestParser.parse(httpFileCode, new HashMap<>()).get(0);
+        httpRequest.cleanBody();
         new RSocketExecutor().execute(httpRequest);
     }
 
@@ -39,6 +40,7 @@ public class RSocketExecutorTest {
                 1
                 """;
         final HttpRequest httpRequest = HttpRequestParser.parse(httpFileCode, new HashMap<>()).get(0);
+        httpRequest.cleanBody();
         new RSocketExecutor().execute(httpRequest);
     }
 }

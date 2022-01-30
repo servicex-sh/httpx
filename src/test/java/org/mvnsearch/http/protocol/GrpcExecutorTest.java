@@ -26,6 +26,7 @@ public class GrpcExecutorTest {
                 }
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
         System.out.println(request.getRequestTarget().getUri());
         new GrpcExecutor().execute(request);
     }

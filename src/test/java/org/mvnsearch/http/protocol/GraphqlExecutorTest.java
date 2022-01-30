@@ -7,6 +7,7 @@ import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Disabled
@@ -16,22 +17,17 @@ public class GraphqlExecutorTest {
         Map<String, Object> context = new HashMap<>();
         String httpFile = """
                 ### graphql query
-                GRAPHQL http://localhost:8080/graphql
+                GRAPHQL https://countries.trevorblades.com/
                 Content-Type: application/graphql
                  
                 query {
-                   bookById(id: "book-1") {
-                     id
+                   continents {
                      name
-                     pageCount
-                     author {
-                       firstName
-                       lastName
-                     }
                    }
                 }
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
         new GraphqlExecutor().execute(request);
     }
 
@@ -46,7 +42,9 @@ public class GraphqlExecutorTest {
                 query { hello }
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
-        new GraphqlExecutor().execute(request);
+        request.cleanBody();
+        final List<byte[]> bytesList = new GraphqlExecutor().execute(request);
+        System.out.println("======size: " + bytesList.size());
     }
 
     @Test
@@ -60,7 +58,9 @@ public class GraphqlExecutorTest {
                 subscription { greetings }
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
-        new GraphqlExecutor().execute(request);
+        request.cleanBody();
+        final List<byte[]> bytesList = new GraphqlExecutor().execute(request);
+        System.out.println("======size: " + bytesList.size());
     }
 
 }
