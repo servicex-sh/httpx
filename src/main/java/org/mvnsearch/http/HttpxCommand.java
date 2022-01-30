@@ -188,7 +188,7 @@ public class HttpxCommand implements Callable<Integer> {
         String responseFile = parts[1];
         try {
             Path responseFilePath;
-            if (responseFile.startsWith("/")) {
+            if (responseFile.startsWith("/") || responseFile.contains(":\\")) {
                 responseFilePath = Path.of(responseFile);
             } else {
                 responseFilePath = httpFilePath.toAbsolutePath().getParent().resolve(responseFile);
