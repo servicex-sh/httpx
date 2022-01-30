@@ -7,6 +7,7 @@ import org.mvnsearch.http.model.HttpCookie;
 import reactor.netty.http.client.HttpClient;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -57,7 +58,11 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                     String contentType = responseHeaders.get("Content-Type");
                     return byteBufFlux.asByteArray().doOnNext(bytes -> {
                         if (contentType != null && isPrintable(contentType)) {
-                            System.out.println(new String(bytes));
+                            if (contentType.contains("json")) {
+                                System.out.print(prettyJsonFormat(new String(bytes, StandardCharsets.UTF_8)));
+                            } else {
+                                System.out.print(new String(bytes));
+                            }
                         }
                     });
                 }).buffer().blockLast();
