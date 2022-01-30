@@ -56,7 +56,7 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 
 # oh-my-zsh integration for shell completion
 
-Please create `~/.oh-my-zsh/custom/plugins/httpx` with following code, then add `httpx` to `plugins` in `.zshrc` file. 
+Please create `~/.oh-my-zsh/custom/plugins/httpx` with following code, then add `httpx` to `plugins` in `.zshrc` file.
 
 ```shell
 #compdef httpx
@@ -74,6 +74,15 @@ done < <(httpx --summary)
 _describe 'command' subcmds
 ```
 
+# How to build from source?
+
+httpx uses [Toolchains Maven Plugin](https://github.com/linux-china/toolchains-maven-plugin) to build project, 
+and you don't need to install GraalVM first, and GraalVM will be installed in `~/.m2/jdks`.
+
+```
+./mvnw -Pnative -DskipTests clean package
+```
+
 # References
 
 * JetBrains HTTP client: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
@@ -81,4 +90,6 @@ _describe 'command' subcmds
 * RSocket: https://rsocket.io/
 * gRPCurl: https://github.com/fullstorydev/grpcurl
 * picocli: https://picocli.info/
+* GraalVM: https://www.graalvm.org/
+* UPX: Ultimate Packer for eXecutables -  https://upx.github.io/
 * type-detecting-hints-for-third-party-libraries: https://github.com/joshlong/type-detecting-hints-for-third-party-libraries
