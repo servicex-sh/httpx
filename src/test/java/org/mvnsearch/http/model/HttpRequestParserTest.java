@@ -56,6 +56,7 @@ public class HttpRequestParserTest {
         List<HttpRequest> requests = HttpRequestParser.parse(httpFile, context);
         assertThat(requests).isNotEmpty();
         HttpRequest request = requests.get(0);
+        request.cleanBody();
         System.out.println("========JavaScript Code===============");
         System.out.println(request.getJavaScriptTestCode());
         System.out.println("======================================");
@@ -81,7 +82,7 @@ public class HttpRequestParserTest {
     }
 
     @Test
-    public void testMultiRequestParse() {
+    public void testMultiRequestParse() throws Exception {
         Map<String, Object> context = new HashMap<>();
         context.put("base-url", "https://httpbin.org");
         @Language("HTTP Request")
@@ -107,12 +108,13 @@ public class HttpRequestParserTest {
         List<HttpRequest> requests = HttpRequestParser.parse(httpFile, context);
         assertThat(requests).isNotEmpty();
         HttpRequest request = requests.get(0);
+        request.cleanBody();
         assertThat(request.getName()).isEqualTo("post");
         assertThat(request.getMethod().getName()).isEqualTo("POST");
     }
 
     @Test
-    public void testPostParse() {
+    public void testPostParse() throws Exception{
         Map<String, Object> context = new HashMap<>();
         context.put("base-url", "https://httpbin.org");
         context.put("token", "xxx.yyy.zzz");
@@ -131,9 +133,10 @@ public class HttpRequestParserTest {
         List<HttpRequest> httpRequests = HttpRequestParser.parse(httpFile, context);
         assertThat(httpRequests).isNotEmpty();
         HttpRequest httpRequest = httpRequests.get(0);
+        httpRequest.cleanBody();
         assertThat(httpRequest.getMethod().getName()).isEqualTo("POST");
         assertThat(httpRequest.getHeader("Authorization")).isEqualTo("bear xxx.yyy.zzz");
-        assertThat(httpRequest.getBody()).isEqualTo("""
+        assertThat(new String(httpRequest.getBodyBytes())).isEqualTo("""
                 {
                   "id": 1
                 }""");
