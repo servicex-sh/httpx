@@ -3,6 +3,11 @@ httpx: CLI for run http file
 
 httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html).
 
+# How to install?
+
+* Mac : `brew install httpx-sh/tap/httpx`
+* Other platform: download binary from https://github.com/httpx-sh/httpx/releases
+
 # How to use?
 
 Create index.http file with following code, then `chmod u+x index.http`
@@ -76,8 +81,8 @@ _describe 'command' subcmds
 
 # How to build from source?
 
-httpx uses [Toolchains Maven Plugin](https://github.com/linux-china/toolchains-maven-plugin) to build project, 
-and you don't need to install GraalVM first, and GraalVM will be installed in `~/.m2/jdks`.
+httpx uses [Toolchains Maven Plugin](https://github.com/linux-china/toolchains-maven-plugin) to build project, and you don't need to install GraalVM first, and GraalVM will be
+installed in `~/.m2/jdks`.
 
 ```
 ./mvnw -Pnative -DskipTests clean package
