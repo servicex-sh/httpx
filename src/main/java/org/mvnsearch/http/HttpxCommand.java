@@ -213,22 +213,6 @@ public class HttpxCommand implements Callable<Integer> {
 
     private void printShellCompletion() {
         String zshCompletion = """
-                #==========zsh completion for index.http=================
-                #compdef index.http
-                #autload
-                                    
-                local subcmds=()
-                                    
-                while read -r line ; do
-                   if [[ ! $line == Available* ]] ;
-                   then
-                      subcmds+=(${line/[[:space:]]*\\#/:})
-                   fi
-                done < <(httpx --summary)
-                                    
-                _describe 'command' subcmds
-                                    
-                #==========zsh completion for httpx======================
                 #compdef httpx
                 #autload
                                     
