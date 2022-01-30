@@ -8,7 +8,6 @@ import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.WebsocketClientSpec;
 
@@ -72,7 +71,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
                 .websocket(WebsocketClientSpec.builder().protocols("graphql-transport-ws").build())
                 .uri(requestUri)
                 .handle((inbound, outbound) -> Flux.<byte[]>create(fluxSink -> {
-                    inbound.receive().asString().publishOn(Schedulers.boundedElastic()).handle((responseJsonText, sink) -> {
+                    inbound.receive().asString().handle((responseJsonText, sink) -> {
                         try {
                             final Map<String, ?> response = objectMapper.readValue(responseJsonText, Map.class);
                             String type = (String) response.get("type");
