@@ -115,8 +115,9 @@ public class HttpRequest {
         if (name.equalsIgnoreCase("authorization")) {
             // Convert `username password` or `username:password` to Base64
             if (value.startsWith("Basic ")) {
-                if (value.contains(" ") || value.contains(":")) {
-                    String text = value.replace(" ", ":");
+                String token = value.substring(6).trim();
+                if (token.contains(" ") || token.contains(":")) {
+                    String text = token.replace(" ", ":");
                     value = "Basic " + Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
                 }
             }
