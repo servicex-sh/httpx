@@ -25,6 +25,8 @@ import java.util.concurrent.Callable;
 @Component
 @Command(name = "httpx", version = "0.4.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
 public class HttpxCommand implements Callable<Integer> {
+    @Option(names = {"--completions"}, description = "Shell Completion, such as zsh, bash")
+    private String completions;
     @Option(names = {"-p", "--profile"}, description = "Profile")
     private String[] profile;
     @Option(names = {"-f", "--httpfile"}, description = "Http file", defaultValue = "index.http")
@@ -38,6 +40,10 @@ public class HttpxCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        if (completions != null) {
+            printShellCompletion();
+            return 0;
+        }
         final Path httpFilePath = Path.of(httpFile);
         if (!httpFilePath.toFile().exists()) {
             System.out.println("http file not found: " + httpFile);
@@ -169,8 +175,9 @@ public class HttpxCommand implements Callable<Integer> {
             result = new GraphqlExecutor().execute(httpRequest);
         } else {
             result = Collections.emptyList();
-            System.out.println("Not support: " + requestMethod.getName());
+            System.out.print("Not support: " + requestMethod.getName());
         }
+        System.out.println();
         if (httpRequest.getRedirectResponse() != null && !result.isEmpty()) {
             writeResponse(httpFilePath, httpRequest.getRedirectResponse(), result);
         }
@@ -202,6 +209,41 @@ public class HttpxCommand implements Callable<Integer> {
             System.out.println("---------------------------------");
             System.out.println("Failed to write file:" + responseFile);
         }
+    }
+
+    private void printShellCompletion() {
+        String zshCompletion = """
+                #==========zsh completion for index.http=================
+                #compdef index.http
+                #autload
+                                    
+                local subcmds=()
+                                    
+                while read -r line ; do
+                   if [[ ! $line == Available* ]] ;
+                   then
+                      subcmds+=(${line/[[:space:]]*\\#/:})
+                   fi
+                done < <(httpx --summary)
+                                    
+                _describe 'command' subcmds
+                                    
+                #==========zsh completion for httpx======================
+                #compdef httpx
+                #autload
+                                    
+                local subcmds=()
+                                    
+                while read -r line ; do
+                   if [[ ! $line == Available* ]] ;
+                   then
+                      subcmds+=(${line/[[:space:]]*\\#/:})
+                   fi
+                done < <(httpx --summary)
+                                    
+                _describe 'command' subcmds
+                """;
+        System.out.println(zshCompletion);
     }
 
 }
