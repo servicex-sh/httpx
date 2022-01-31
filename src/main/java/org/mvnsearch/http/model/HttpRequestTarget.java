@@ -137,6 +137,11 @@ public class HttpRequestTarget {
                 requestTarget.schema = "https://";
             }
         }
+        if (method.equals("DUBBO")) {
+            if (!requestUri.startsWith("dubbo://")) {
+                requestUri = "dubbo://" + requestUri;
+            }
+        }
         if (!requestUri.contains("://")) { //correct uri without schema
             if (requestUri.contains(":") || requestUri.indexOf('/') > 0) { // uri without schema
                 if (HttpMethod.HTTP_METHODS.contains(method)) {
