@@ -31,7 +31,9 @@ public class DubboExecutor extends HttpBaseExecutor {
         if (methodSignature.contains("(")) {
             methodName = methodSignature.substring(0, methodSignature.indexOf('('));
             final String parts = methodSignature.substring(methodSignature.indexOf('(') + 1, methodSignature.indexOf(')'));
-            paramsTypeArray = parts.split(",");
+            if (!parts.isEmpty()) {
+                paramsTypeArray = parts.split(",");
+            }
         }
         if (paramsTypeArray.length > 0) {
             final byte[] body = httpRequest.getBodyBytes();
