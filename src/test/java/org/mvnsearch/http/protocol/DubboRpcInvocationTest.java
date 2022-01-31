@@ -2,12 +2,10 @@ package org.mvnsearch.http.protocol;
 
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianSerializerOutput;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 
-@Disabled
 public class DubboRpcInvocationTest {
 
     @Test
