@@ -11,9 +11,7 @@ GET {{base-url}}/ip
 POST https://httpbin.org/post
 Content-Type: application/json
 
-[
-  1
-]
+[1]
 
 ### RSocket Request
 // @name request
@@ -25,16 +23,22 @@ Content-Type: application/json
 
 ### grpc call SayHello
 //@name SayHello
-GRPC localhost:50052/org.mvnsearch.service.Greeter/SayHello
+GRPC localhost:50052/Greeter/SayHello
 
 {
   "name": "Jackie"
 }
 
-### graphql query over WS
+### graphql query over WebSocket
 //@name subscription
-GRAPHQL /graphql
-Host: ws://localhost:4000
+GRAPHQL ws://localhost:4000/graphql
 Content-Type: application/graphql
 
 subscription { greetings }
+
+### Dubbo sayHi
+//@name sayHi
+DUBBO 127.0.0.1:20880/GreetingsService?method=sayHi(java.lang.String)
+Content-Type: application/json
+
+"jackie"
