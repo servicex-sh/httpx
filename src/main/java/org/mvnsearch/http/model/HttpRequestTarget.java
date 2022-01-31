@@ -138,7 +138,7 @@ public class HttpRequestTarget {
             }
         }
         if (method.equals("DUBBO")) {
-            if (!requestUri.startsWith("dubbo://")) {
+            if (!requestUri.startsWith("dubbo://") && requestUri.contains(":")) {
                 requestUri = "dubbo://" + requestUri;
             }
         }
