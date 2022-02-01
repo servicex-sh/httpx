@@ -83,20 +83,20 @@ public class DubboExecutor extends HttpBaseExecutor {
             Hessian2Input input = new HessianSerializerInput(new ByteArrayInputStream(data));
             final Integer responseMark = (Integer) input.readObject();
             if (responseMark == 5 || responseMark == 2) { // null return
-                System.out.println("===No return value===");
+                System.out.print("===No return value===");
             } else {
                 final Object result = input.readObject();
                 if (responseMark == 3 || responseMark == 0) { //exception return
-                    System.err.println("=====Exception thrown====");
-                    System.err.println(result.toString());
+                    System.err.print("=====Exception thrown====");
+                    System.err.print(result.toString());
                 } else {
                     if (result instanceof String || result instanceof Number) {
-                        System.out.println(result);
+                        System.out.print(result);
                         return List.of(result.toString().getBytes(StandardCharsets.UTF_8));
                     } else {
                         ObjectMapper objectMapper = new ObjectMapper();
                         String text = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-                        System.out.println(text);
+                        System.out.print(text);
                         return List.of(text.getBytes(StandardCharsets.UTF_8));
                     }
                 }
