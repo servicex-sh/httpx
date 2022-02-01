@@ -69,6 +69,8 @@ public class DubboExecutor extends HttpBaseExecutor {
         if (port <= 0) {
             port = 20880;
         }
+        System.out.println("DUBBO " + dubboUri);
+        System.out.println();
         try (Socket clientSocket = new Socket(dubboUri.getHost(), port)) {
             DubboRpcInvocation invocation = new DubboRpcInvocation(serviceName, methodName, paramsTypeArray, arguments);
             final byte[] contentBytes = invocation.toBytes();
