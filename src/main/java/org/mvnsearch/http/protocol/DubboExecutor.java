@@ -78,6 +78,7 @@ public class DubboExecutor extends HttpBaseExecutor {
             final OutputStream output = clientSocket.getOutputStream();
             output.write(headerBytes);
             output.write(contentBytes);
+            output.flush();
             final InputStream inputStream = clientSocket.getInputStream();
             final byte[] data = extractData(inputStream);
             Hessian2Input input = new HessianSerializerInput(new ByteArrayInputStream(data));
