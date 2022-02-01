@@ -172,6 +172,8 @@ public class HttpxCommand implements Callable<Integer> {
             result = new GraphqlExecutor().execute(httpRequest);
         } else if (requestMethod.isDubboMethod()) {
             result = new DubboExecutor().execute(httpRequest);
+        } else if (requestMethod.isMailMethod()) {
+            result = new MailExecutor().execute(httpRequest);
         } else {
             result = Collections.emptyList();
             System.out.print("Not support: " + requestMethod.getName());
