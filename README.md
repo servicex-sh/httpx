@@ -98,3 +98,4 @@ installed in `~/.m2/jdks`.
 * GraalVM: https://www.graalvm.org/
 * UPX: Ultimate Packer for eXecutables -  https://upx.github.io/
 * type-detecting-hints-for-third-party-libraries: https://github.com/joshlong/type-detecting-hints-for-third-party-libraries
+* IANA Message Headers: https://www.iana.org/assignments/message-headers/message-headers.xhtml
