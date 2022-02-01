@@ -1,11 +1,12 @@
 package org.mvnsearch.http.protocol;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.SmtpRequest;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
@@ -48,19 +49,20 @@ public class MailExecutor extends HttpBaseExecutor {
         System.out.println();
         try {
             Session session = Session.getInstance(prop, authenticator);
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(smtpRequest.getFrom()));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(smtpRequest.getTo()));
+            MimeMessage message = new MimeMessage(session);
+            MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+            helper.setFrom(new InternetAddress(smtpRequest.getFrom()));
+            helper.setTo(InternetAddress.parse(smtpRequest.getTo()));
             if (smtpRequest.getCc() != null) {
-                message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(smtpRequest.getCc()));
+                helper.setCc(InternetAddress.parse(smtpRequest.getCc()));
             }
             if (smtpRequest.getBcc() != null) {
-                message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(smtpRequest.getBcc()));
+                helper.setBcc(InternetAddress.parse(smtpRequest.getBcc()));
             }
-            message.setSubject(smtpRequest.getSubject());
+            helper.setSubject(smtpRequest.getSubject());
             String body = smtpRequest.body();
             if (smtpRequest.getContentType().equals("text/html")) {
-                message.setContent(body, "text/html");
+                helper.setText(body, true);
             } else {
                 message.setText(body);
             }
