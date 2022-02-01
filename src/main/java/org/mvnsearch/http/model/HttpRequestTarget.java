@@ -1,6 +1,7 @@
 package org.mvnsearch.http.model;
 
 import java.net.URI;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 public class HttpRequestTarget {
@@ -93,6 +94,9 @@ public class HttpRequestTarget {
     }
 
     public void setHostHeader(String hostHeader) {
+        if (Objects.equals(method, "MAIL")) { //ignore Host by mail
+            return;
+        }
         if (this.uri == null) {
             if (hostHeader.contains("://")) { // URI
                 final URI uri = URI.create(hostHeader);
@@ -130,6 +134,13 @@ public class HttpRequestTarget {
         final HttpRequestTarget requestTarget = new HttpRequestTarget();
         requestTarget.method = method;
         String requestUri = requestLine;
+        if (Objects.equals(method, "MAIL")) {  //MAIL
+            if (!requestUri.startsWith("mailto:")) {
+                requestUri = "mailto:" + requestUri;
+            }
+            requestTarget.uri = URI.create(requestUri);
+            return requestTarget;
+        }
         if (requestLine.contains(" HTTP/")) {  // request line with protocol `GET /index.html HTTP/1.1`
             requestUri = requestLine.substring(0, requestLine.lastIndexOf(" "));
             final String protocol = requestLine.substring(requestLine.lastIndexOf(" ") + 1);
