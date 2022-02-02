@@ -53,6 +53,9 @@ public class MailExecutor extends HttpBaseExecutor {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
             helper.setFrom(new InternetAddress(smtpRequest.getFrom()));
             helper.setTo(InternetAddress.parse(smtpRequest.getTo()));
+            if (smtpRequest.getReplyTo() != null) {
+                helper.setReplyTo(smtpRequest.getReplyTo());
+            }
             if (smtpRequest.getCc() != null) {
                 helper.setCc(InternetAddress.parse(smtpRequest.getCc()));
             }
