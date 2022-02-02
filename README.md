@@ -106,7 +106,7 @@ _describe 'command' subcmds
 httpx uses [Toolchains Maven Plugin](https://github.com/linux-china/toolchains-maven-plugin) to build project, and you don't need to install GraalVM first, and GraalVM will be
 installed in `~/.m2/jdks`.
 
-```
+```shell
 ./mvnw -Pnative -DskipTests clean package
 ```
 
