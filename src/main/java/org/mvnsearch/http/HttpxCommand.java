@@ -1,6 +1,8 @@
 package org.mvnsearch.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpMethod;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
@@ -22,6 +24,7 @@ import java.util.concurrent.Callable;
 @Component
 @Command(name = "httpx", version = "0.5.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
 public class HttpxCommand implements Callable<Integer> {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpxCommand.class);
     @Option(names = {"--completions"}, description = "Shell Completion, such as zsh, bash")
     private String completions;
     @Option(names = {"-p", "--profile"}, description = "Profile")
@@ -207,8 +210,7 @@ public class HttpxCommand implements Callable<Integer> {
             System.out.println("---------------------------------");
             System.out.println("Write to " + responseFile + " successfully!");
         } catch (Exception e) {
-            System.out.println("---------------------------------");
-            System.out.println("Failed to write file:" + responseFile);
+            log.info("HTX-001-500", responseFile);
         }
     }
 
