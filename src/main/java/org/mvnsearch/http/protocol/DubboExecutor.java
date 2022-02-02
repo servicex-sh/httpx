@@ -26,9 +26,14 @@ public class DubboExecutor extends HttpBaseExecutor {
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI dubboUri = httpRequest.getRequestTarget().getUri();
-        String serviceName = dubboUri.getPath().substring(1);
         final Map<String, String> params = getQueryParamsMap(dubboUri);
         String methodSignature = params.get("method");
+        String serviceName = dubboUri.getPath().substring(1);
+        if (serviceName.contains("/")) {
+            final String[] parts = serviceName.split("/", 2);
+            serviceName = parts[0];
+            methodSignature = parts[1];
+        }
         String methodName = methodSignature;
         String[] paramsTypeArray = new String[]{};
         Object[] arguments = new Object[]{};
