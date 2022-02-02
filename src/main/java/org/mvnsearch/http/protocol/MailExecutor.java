@@ -8,7 +8,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.net.ssl.SSLSocketFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -26,12 +25,11 @@ public class MailExecutor extends HttpBaseExecutor {
         prop.put("mail.smtp.host", smtpRequest.getHost());
         prop.put("mail.smtp.port", smtpRequest.getPort());
         prop.put("mail.smtp.socketFactory.port", smtpRequest.getPort());
+        prop.put("mail.smtp.starttls.enable", "true");
         if (smtpRequest.getSchema() != null) {
             if (Objects.equals(smtpRequest.getSchema(), "ssl")) {
-                SSLSocketFactory.getDefault();
-                prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-            } else if (Objects.equals(smtpRequest.getSchema(), "tls")) {
-                prop.put("mail.smtp.starttls.enable", "true");
+                prop.put("mail.smtp.socketFactory.class", "com.sun.mail.util.MailSSLSocketFactory");
+                prop.put("mail.smtp.socketFactory.fallback", "false");
             }
         }
         final String authorization = smtpRequest.getAuthorization();
