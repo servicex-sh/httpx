@@ -3,6 +3,8 @@ package org.mvnsearch.http.protocol;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import reactor.netty.http.client.HttpClient;
 
@@ -15,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class HttpBaseExecutor implements BaseExecutor {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpBaseExecutor.class);
+
     protected HttpClient httpClient() {
         return HttpClient.create().secure(sslContextSpec -> {
             try {
@@ -43,6 +47,7 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                 }
             }
         } catch (Exception e) {
+            log.error("HTX-100-600", e);
             e.printStackTrace();
         }
         return Collections.emptyList();

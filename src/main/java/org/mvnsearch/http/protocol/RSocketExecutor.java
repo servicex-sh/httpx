@@ -8,6 +8,8 @@ import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import io.rsocket.util.DefaultPayload;
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.RSocketRequest;
 import reactor.core.publisher.Hooks;
@@ -20,6 +22,8 @@ import java.util.List;
 
 
 public class RSocketExecutor implements BaseExecutor {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(RSocketExecutor.class);
+
     static {
         Hooks.onErrorDropped(throwable -> {
 
@@ -51,7 +55,7 @@ public class RSocketExecutor implements BaseExecutor {
             System.out.println(text);
             return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("HTX-105-408", e);
         } finally {
             if (clientRSocket != null) {
                 clientRSocket.dispose();
@@ -68,7 +72,7 @@ public class RSocketExecutor implements BaseExecutor {
             clientRSocket.fireAndForget(rsocketRequest.createPayload()).block();
             System.out.println("[RSocket] payload sent by FNF");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("HTX-105-408", e);
         } finally {
             if (clientRSocket != null) {
                 clientRSocket.dispose();
@@ -85,7 +89,7 @@ public class RSocketExecutor implements BaseExecutor {
             clientRSocket.metadataPush(payload).block();
             System.out.println("[RSocket] payload sent by METADATA_PUSH");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("HTX-105-408", e);
         } finally {
             if (clientRSocket != null) {
                 clientRSocket.dispose();
@@ -107,7 +111,7 @@ public class RSocketExecutor implements BaseExecutor {
                     .buffer()
                     .blockLast();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("HTX-105-408", e);
         } finally {
             if (clientRSocket != null) {
                 clientRSocket.dispose();

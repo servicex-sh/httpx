@@ -1,5 +1,7 @@
 package org.mvnsearch.http.protocol;
 
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.SmtpRequest;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -13,6 +15,8 @@ import java.util.*;
 
 
 public class MailExecutor extends HttpBaseExecutor {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(MailExecutor.class);
+
     public List<byte[]> execute(HttpRequest httpRequest) {
         SmtpRequest smtpRequest = new SmtpRequest(httpRequest);
         if (!smtpRequest.isLegal()) {
@@ -72,8 +76,7 @@ public class MailExecutor extends HttpBaseExecutor {
             mailSender.send(mimeMessage);
             System.out.print("Succeeded to send email!");
         } catch (MessagingException e) {
-            e.printStackTrace();
-            System.err.print("Failed to send email: " + e.getMessage());
+            log.error("HTX-104-500", e);
         }
         return Collections.emptyList();
     }

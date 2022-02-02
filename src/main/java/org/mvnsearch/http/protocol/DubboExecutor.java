@@ -3,15 +3,17 @@ package org.mvnsearch.http.protocol;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.HessianSerializerInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +22,8 @@ import java.util.Map;
 
 
 public class DubboExecutor extends HttpBaseExecutor {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(DubboExecutor.class);
+
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI dubboUri = httpRequest.getRequestTarget().getUri();
         String serviceName = dubboUri.getPath().substring(1);
@@ -60,7 +64,7 @@ public class DubboExecutor extends HttpBaseExecutor {
                             }
                         }
                     } catch (Exception e) {
-
+                        log.error("HTX-103-500", text);
                     }
                 }
             }
@@ -71,16 +75,13 @@ public class DubboExecutor extends HttpBaseExecutor {
         }
         System.out.println("DUBBO " + dubboUri);
         System.out.println();
-        try (Socket clientSocket = new Socket(dubboUri.getHost(), port)) {
+        try (SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress(dubboUri.getHost(), port))) {
             DubboRpcInvocation invocation = new DubboRpcInvocation(serviceName, methodName, paramsTypeArray, arguments);
             final byte[] contentBytes = invocation.toBytes();
             final byte[] headerBytes = invocation.frameHeaderBytes(0L, contentBytes.length);
-            final OutputStream output = clientSocket.getOutputStream();
-            output.write(headerBytes);
-            output.write(contentBytes);
-            output.flush();
-            final InputStream inputStream = clientSocket.getInputStream();
-            final byte[] data = extractData(inputStream);
+            socketChannel.write(ByteBuffer.wrap(headerBytes));
+            socketChannel.write(ByteBuffer.wrap(contentBytes));
+            final byte[] data = extractData(socketChannel);
             Hessian2Input input = new HessianSerializerInput(new ByteArrayInputStream(data));
             final Integer responseMark = (Integer) input.readObject();
             if (responseMark == 5 || responseMark == 2) { // null return
@@ -103,26 +104,27 @@ public class DubboExecutor extends HttpBaseExecutor {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("HTX-103-408", dubboUri);
         }
         return Collections.emptyList();
     }
 
 
-    public byte[] extractData(InputStream inputStream) throws Exception {
+    public byte[] extractData(SocketChannel socketChannel) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
+        //byte[] buf = new byte[1024];
+        ByteBuffer buf = ByteBuffer.allocate(1024);
         int readCount;
         int counter = 0;
         do {
-            readCount = inputStream.read(buf);
+            readCount = socketChannel.read(buf);
             int startOffset = 0;
             int length = readCount;
             if (counter == 0) {
                 startOffset = 16;
                 length = readCount - 16;
             }
-            bos.write(buf, startOffset, length);
+            bos.write(buf.array(), startOffset, length);
             counter++;
         } while (readCount == 1024);
         return bos.toByteArray();
@@ -142,7 +144,7 @@ public class DubboExecutor extends HttpBaseExecutor {
                         URLDecoder.decode(keyValuePair[1], StandardCharsets.UTF_8.name()));
             }
         } catch (Exception ignore) {
-
+            log.error("HTX-103-501", queryPart);
         }
         return queryParams;
     }

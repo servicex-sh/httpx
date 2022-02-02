@@ -1,6 +1,8 @@
 package org.mvnsearch.http.protocol;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public class GrpcExecutor implements BaseExecutor {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(GrpcExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<byte[]> execute(HttpRequest httpRequest) {
@@ -72,7 +75,7 @@ public class GrpcExecutor implements BaseExecutor {
                 return List.of(output.getBytes(StandardCharsets.UTF_8));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("HTX-101-500", e);
         }
         return Collections.emptyList();
     }

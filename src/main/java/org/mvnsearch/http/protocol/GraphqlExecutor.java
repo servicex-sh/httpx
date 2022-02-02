@@ -3,6 +3,8 @@ package org.mvnsearch.http.protocol;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.Unpooled;
 import org.jetbrains.annotations.Nullable;
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
@@ -16,13 +18,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class GraphqlExecutor extends HttpBaseExecutor {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(GraphqlExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         String contentType = httpRequest.getHeader("Content-Type");
-        byte[] requestJsonBody;
+        byte[] requestJsonBody = httpRequest.getBodyBytes();
         try {
-            requestJsonBody = httpRequest.getBodyBytes();
             if (contentType != null) {
                 Map<String, Object> jsonBody;
                 if ("application/graphql".equals(contentType)) {  // convert graphql code into json object
@@ -31,7 +33,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
                 }
             }
         } catch (Exception ignore) {
-            System.err.println("Failed to parse json body");
+            log.error("HTX-102-500", new String(requestJsonBody, StandardCharsets.UTF_8));
             return Collections.emptyList();
         }
         final URI requestUri = httpRequest.getRequestTarget().getUri();

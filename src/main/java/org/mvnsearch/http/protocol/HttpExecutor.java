@@ -1,5 +1,7 @@
 package org.mvnsearch.http.protocol;
 
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
@@ -10,6 +12,8 @@ import java.util.List;
 
 
 public class HttpExecutor extends HttpBaseExecutor {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(DubboExecutor.class);
+
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         HttpClient client = httpClient().headers(httpHeaders -> {
