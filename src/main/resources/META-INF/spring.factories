@@ -1,1 +1,2 @@
 org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.BeanFactoryNativeConfigurationProcessor=org.mvnsearch.http.aot.ThirdLibrariesHints
+org.springframework.nativex.type.NativeConfiguration=org.mvnsearch.http.aot.JavamailHints
