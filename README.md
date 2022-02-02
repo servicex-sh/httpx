@@ -48,6 +48,21 @@ GRAPHQL http://localhost:8080/graphql
 Content-Type: application/graphql
 
 query { hello }
+
+### send an email by Gmail
+//@name mail
+MAIL mailto:demo@example.com
+Host: tls://smtp.gmail.com:587
+Authorization: Basic your_name@gmail.com:google_app_password
+From: your_name@gmail.com
+Subject: e-nice to meet you
+Content-Type: text/plain
+
+Hi Master:
+  this is testing email.
+
+Best regards
+Yours sincerely Zombie
 ```
 
 Then input `httpx myip` or `./index.http myip` to invoke request.
@@ -58,6 +73,13 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 * RSocket Request
 * GRPC Request: you should install [grpcurl](https://github.com/fullstorydev/grpcurl)
 * GraphQL support: Query, Mutation and Subscribe on HTTP and WebSocket(graphql-ws)
+* Email: send email by SMTP
+
+# Email sending
+   
+Email URL format: `mailto:name@email.com?cc=name2@email.com`      
+
+* Gmail: please use App Password from https://support.google.com/accounts/answer/185833?p=InvalidSecondFactor
 
 # oh-my-zsh integration for shell completion
 
