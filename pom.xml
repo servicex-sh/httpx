@@ -187,6 +187,7 @@
                             <imageName>${project.build.finalName}-${os.detected.name}-${os.detected.arch}</imageName>
                             <buildArgs>
                                 --no-fallback
+                                --enable-url-protocols=mailto
                             </buildArgs>
                         </configuration>
                         <executions>
