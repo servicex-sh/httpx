@@ -71,7 +71,7 @@ public class HttpRequestParser {
                 requests.add(httpRequest);
             }
         } catch (Exception e) {
-            log.info("HTX-002-500", e);
+            log.error("HTX-002-500", e);
         }
         return requests;
     }

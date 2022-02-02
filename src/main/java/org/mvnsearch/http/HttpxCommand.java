@@ -210,7 +210,7 @@ public class HttpxCommand implements Callable<Integer> {
             System.out.println("---------------------------------");
             System.out.println("Write to " + responseFile + " successfully!");
         } catch (Exception e) {
-            log.info("HTX-001-500", responseFile);
+            log.error("HTX-001-500", responseFile);
         }
     }
 
