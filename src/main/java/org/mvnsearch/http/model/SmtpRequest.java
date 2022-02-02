@@ -12,7 +12,7 @@ public class SmtpRequest {
     private URL url;
     private String host;
     private int port;
-    private boolean ssl;
+    private String schema;
     private String authorization;
     private String from;
     private String replyTo;
@@ -38,10 +38,10 @@ public class SmtpRequest {
             this.httpRequest = httpRequest;
             String hostHeader = httpRequest.getHeader("Host");
             if (hostHeader != null && !hostHeader.isEmpty()) {
-                if (hostHeader.startsWith("ssl://")) {
+                if (hostHeader.startsWith("ssl://") || hostHeader.startsWith("tls://")) {
                     final URI smtpUri = URI.create(hostHeader);
                     this.host = smtpUri.getHost();
-                    this.ssl = true;
+                    this.schema = smtpUri.getScheme();
                     this.port = smtpUri.getPort();
                     if (this.port <= 0) {
                         this.port = 465;
@@ -56,7 +56,7 @@ public class SmtpRequest {
                 }
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -76,8 +76,8 @@ public class SmtpRequest {
         return port;
     }
 
-    public boolean isSsl() {
-        return ssl;
+    public String getSchema() {
+        return schema;
     }
 
     public String getFrom() {
