@@ -1,10 +1,15 @@
 package org.mvnsearch.http.model;
 
+import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
+import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.*;
 
 public class HttpRequestParser {
+    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpRequestParser.class);
+
     public static List<HttpRequest> parse(String httpFileCode, Map<String, Object> context) {
         List<HttpRequest> requests = new ArrayList<>();
         try {
@@ -65,8 +70,8 @@ public class HttpRequestParser {
             if (httpRequest.isFilled()) {  //add last httpRequest
                 requests.add(httpRequest);
             }
-        } catch (Exception ignore) {
-
+        } catch (Exception e) {
+            log.info("HTX-002-500", e);
         }
         return requests;
     }
