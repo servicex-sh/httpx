@@ -18,9 +18,10 @@ public class DubboExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### dubbo hi
-                DUBBO 127.0.0.1:20880/GreetingsService?method=statistics()
+                DUBBO 127.0.0.1:20880/GreetingsService/sayHi(java.lang.String)
                 Content-Type: application/json
                      
+                "Jackie"     
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
