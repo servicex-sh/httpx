@@ -3,6 +3,7 @@ package org.mvnsearch.http.protocol;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -29,6 +30,8 @@ public class MessagePublishExecutor implements BaseExecutor {
             sendKafka(realURI, httpRequest);
         } else if (Objects.equals(schema, "amqp") || Objects.equals(schema, "amqps")) {
             sendRabbitMQ(realURI, httpRequest);
+        } else if (Objects.equals(schema, "nats")) {
+            sendNatsMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "rocketmq")) {
             sendRocketMessage(realURI, httpRequest);
         } else {
@@ -92,6 +95,17 @@ public class MessagePublishExecutor implements BaseExecutor {
             connection.close();
         } catch (Exception ignore) {
 
+        }
+    }
+
+    public void sendNatsMessage(URI natsURI, HttpRequest httpRequest) {
+        String topic = natsURI.getPath().substring(1);
+        byte[] body = httpRequest.getBodyBytes();
+        try (io.nats.client.Connection nc = Nats.connect(natsURI.toString())) {
+            nc.publish(topic, body);
+            System.out.print("Succeeded to send message to " + topic + "!");
+        } catch (Exception e) {
+            log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         }
     }
 

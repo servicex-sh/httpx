@@ -4,6 +4,9 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
+import io.nats.client.Message;
+import io.nats.client.Nats;
+import io.nats.client.Subscription;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -15,6 +18,7 @@ import org.mvnsearch.http.model.HttpRequest;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 
 
@@ -29,6 +33,8 @@ public class MessageSubscribeExecutor implements BaseExecutor {
             subscribeKafka(realURI, httpRequest);
         } else if (Objects.equals(schema, "amqp") || Objects.equals(schema, "amqps")) {
             subscribeRabbit(realURI, httpRequest);
+        } else if (Objects.equals(schema, "nats")) {
+            subscribeNats(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -112,9 +118,36 @@ public class MessageSubscribeExecutor implements BaseExecutor {
             } catch (Exception e) {
                 log.error("HTX-105-500", connectionUri, e);
             }
-        } catch (Exception ignore) {
-
+        } catch (Exception e) {
+            log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
         }
+    }
 
+    public void subscribeNats(URI natsURI, HttpRequest httpRequest) {
+        String topic = natsURI.getPath().substring(1);
+        try (io.nats.client.Connection nc = Nats.connect(natsURI.toString())) {
+            Subscription sub = nc.subscribe(topic);
+            nc.flush(Duration.ofSeconds(5));
+            for (int i = 0; i < 1000; i++) {
+                Message msg = sub.nextMessage(Duration.ofHours(1));
+                if (i > 0) {
+                    System.out.println("======================================");
+                }
+                System.out.printf("Message Received [%d]\n", (i + 1));
+                if (msg.hasHeaders()) {
+                    System.out.println("  Headers:");
+                    for (String key : msg.getHeaders().keySet()) {
+                        for (String value : msg.getHeaders().get(key)) {
+                            System.out.printf("    %s: %s\n", key, value);
+                        }
+                    }
+                }
+                System.out.printf("  Subject: %s\n  Data: %s\n",
+                        msg.getSubject(),
+                        new String(msg.getData(), StandardCharsets.UTF_8));
+            }
+        } catch (Exception e) {
+            log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
+        }
     }
 }
