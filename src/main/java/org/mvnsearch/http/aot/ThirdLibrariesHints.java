@@ -1,6 +1,7 @@
 package org.mvnsearch.http.aot;
 
 import com.sun.mail.util.MailSSLSocketFactory;
+import io.nats.client.impl.SocketDataPort;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.RangeAssignor;
@@ -47,5 +48,8 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
         registry.resources().add(NativeResourcesEntry.of("kafka/kafka-version.properties"));
         //rabbitmq
         registry.resources().add(NativeResourcesEntry.of("rabbitmq-amqp-client.properties"));
+        //nats
+        registry.reflection().forType(SocketDataPort.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
     }
 }
