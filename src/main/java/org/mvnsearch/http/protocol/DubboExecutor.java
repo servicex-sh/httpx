@@ -11,12 +11,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +24,7 @@ public class DubboExecutor extends HttpBaseExecutor {
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI dubboUri = httpRequest.getRequestTarget().getUri();
-        final Map<String, String> params = getQueryParamsMap(dubboUri);
+        final Map<String, String> params = queryToMap(dubboUri);
         String methodSignature = params.get("method");
         String serviceName = dubboUri.getPath().substring(1);
         if (serviceName.contains("/")) {
@@ -135,22 +133,4 @@ public class DubboExecutor extends HttpBaseExecutor {
         return bos.toByteArray();
     }
 
-    public static Map<String, String> getQueryParamsMap(URI url) {
-        String queryPart = url.getQuery();
-        if (queryPart == null || queryPart.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        Map<String, String> queryParams = new HashMap<>();
-        try {
-            String[] pairs = queryPart.split("&");
-            for (String pair : pairs) {
-                String[] keyValuePair = pair.split("=");
-                queryParams.put(URLDecoder.decode(keyValuePair[0], StandardCharsets.UTF_8.name()),
-                        URLDecoder.decode(keyValuePair[1], StandardCharsets.UTF_8.name()));
-            }
-        } catch (Exception ignore) {
-            log.error("HTX-103-501", queryPart);
-        }
-        return queryParams;
-    }
 }
