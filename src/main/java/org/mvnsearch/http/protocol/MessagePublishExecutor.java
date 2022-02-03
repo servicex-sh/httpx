@@ -1,5 +1,8 @@
 package org.mvnsearch.http.protocol;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -19,10 +22,15 @@ public class MessagePublishExecutor implements BaseExecutor {
 
     @Override
     public List<byte[]> execute(HttpRequest httpRequest) {
-        final URI realURI = URI.create(httpRequest.getRequestTarget().getUri().getSchemeSpecificPart());
+        final URI realURI = httpRequest.getRequestTarget().getUri();
+        String schema = realURI.getScheme();
         System.out.println("PUB " + realURI);
-        if (Objects.equals(realURI.getScheme(), "kafka")) {
+        if (Objects.equals(schema, "kafka")) {
             sendKafka(realURI, httpRequest);
+        } else if (Objects.equals(schema, "amqp") || Objects.equals(schema, "amqps")) {
+            sendRabbitMQ(realURI, httpRequest);
+        } else if (Objects.equals(schema, "rocketmq")) {
+            sendRocketMessage(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -56,5 +64,38 @@ public class MessagePublishExecutor implements BaseExecutor {
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         }
+    }
+
+    public void sendRabbitMQ(URI rabbitURI, HttpRequest httpRequest) {
+        try {
+            ConnectionFactory factory = new ConnectionFactory();
+            URI connectionUri;
+            String queue;
+            final String hostHeader = httpRequest.getHeader("Host");
+            if (hostHeader != null) {
+                connectionUri = URI.create(hostHeader);
+                queue = httpRequest.getRequestTarget().getRequestLine();
+            } else {
+                connectionUri = rabbitURI;
+                queue = queryToMap(rabbitURI).get("queue");
+            }
+            factory.setUri(connectionUri);
+            Connection connection = factory.newConnection();
+            try (Channel channel = connection.createChannel()) {
+                // channel.queueDeclare(queue, false, false, false, null);
+                String message = new String(httpRequest.getBodyBytes(), StandardCharsets.UTF_8);
+                channel.basicPublish("", queue, null, message.getBytes());
+                System.out.print("Succeeded to send message to " + queue + "!");
+            } catch (Exception e) {
+                log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+            }
+            connection.close();
+        } catch (Exception ignore) {
+
+        }
+    }
+
+    public void sendRocketMessage(URI rsocketURI, HttpRequest httpRequest) {
+        System.err.println("Not implemented yet");
     }
 }

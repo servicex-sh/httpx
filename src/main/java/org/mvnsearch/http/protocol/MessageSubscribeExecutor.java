@@ -1,5 +1,9 @@
 package org.mvnsearch.http.protocol;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -10,6 +14,7 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -18,9 +23,12 @@ public class MessageSubscribeExecutor implements BaseExecutor {
 
     @Override
     public List<byte[]> execute(HttpRequest httpRequest) {
-        final URI realURI = URI.create(httpRequest.getRequestTarget().getUri().getSchemeSpecificPart());
+        final URI realURI = httpRequest.getRequestTarget().getUri();
+        String schema = realURI.getScheme();
         if (Objects.equals(realURI.getScheme(), "kafka")) {
             subscribeKafka(realURI, httpRequest);
+        } else if (Objects.equals(schema, "amqp") || Objects.equals(schema, "amqps")) {
+            subscribeRabbit(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -74,5 +82,39 @@ public class MessageSubscribeExecutor implements BaseExecutor {
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
         }
+    }
+
+    public void subscribeRabbit(URI rabbitURI, HttpRequest httpRequest) {
+        try {
+            ConnectionFactory factory = new ConnectionFactory();
+            URI connectionUri;
+            String queue;
+            final String hostHeader = httpRequest.getHeader("Host");
+            if (hostHeader != null) {
+                connectionUri = URI.create(hostHeader);
+                queue = httpRequest.getRequestTarget().getRequestLine();
+            } else {
+                connectionUri = rabbitURI;
+                queue = queryToMap(rabbitURI).get("queue");
+            }
+            factory.setUri(connectionUri);
+            Connection connection = factory.newConnection();
+            try (Channel channel = connection.createChannel()) {
+                //channel.queueDeclare(queue, false, false, false, null);
+                System.out.println("SUB " + connectionUri);
+                System.out.println();
+                DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                    String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+                    System.out.println(" [x] Received '" + message + "'");
+                };
+                channel.basicConsume(queue, true, deliverCallback, consumerTag -> {
+                });
+            } catch (Exception e) {
+                log.error("HTX-105-500", connectionUri, e);
+            }
+        } catch (Exception ignore) {
+
+        }
+
     }
 }
