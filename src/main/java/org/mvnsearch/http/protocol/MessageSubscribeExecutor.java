@@ -128,6 +128,7 @@ public class MessageSubscribeExecutor implements BaseExecutor {
         try (io.nats.client.Connection nc = Nats.connect(natsURI.toString())) {
             Subscription sub = nc.subscribe(topic);
             nc.flush(Duration.ofSeconds(5));
+            System.out.println("Succeeded to subscribe(1000 max): " + topic + "!");
             for (int i = 0; i < 1000; i++) {
                 Message msg = sub.nextMessage(Duration.ofHours(1));
                 if (i > 0) {
