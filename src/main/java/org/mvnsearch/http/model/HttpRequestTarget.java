@@ -6,6 +6,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class HttpRequestTarget {
     private String method;
+    private String requestLine;
     private String fragment;
     private String host;
     private String pathAbsolute;
@@ -13,6 +14,10 @@ public class HttpRequestTarget {
     private String query;
     private String schema;
     private URI uri;
+
+    public String getRequestLine() {
+        return requestLine;
+    }
 
     public String getFragment() {
         return fragment;
@@ -94,9 +99,7 @@ public class HttpRequestTarget {
     }
 
     public void setHostHeader(String hostHeader) {
-        if (Objects.equals(method, "MAIL")
-                || Objects.equals(method, "PUB")
-                || Objects.equals(method, "SUB")) { //ignore Host by mail
+        if (Objects.equals(method, "MAIL")) { //ignore Host by mail
             return;
         }
         if (this.uri == null) {
@@ -135,15 +138,12 @@ public class HttpRequestTarget {
     public static HttpRequestTarget valueOf(String method, String requestLine) {
         final HttpRequestTarget requestTarget = new HttpRequestTarget();
         requestTarget.method = method;
+        requestTarget.requestLine = requestLine;
         String requestUri = requestLine;
         if (Objects.equals(method, "MAIL")) {  //MAIL
             if (!requestUri.startsWith("mailto:")) {
                 requestUri = "mailto:" + requestUri;
             }
-            requestTarget.uri = URI.create(requestUri);
-            return requestTarget;
-        }
-        if (Objects.equals(method, "PUB") || Objects.equals(method, "SUB")) { //topic
             requestTarget.uri = URI.create(requestUri);
             return requestTarget;
         }
