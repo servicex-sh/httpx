@@ -19,7 +19,8 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send kafka message
                 //@name kafka
-                PUB kafka://localhost:9092/topic-1
+                PUB topic-1
+                Host: kafka://localhost:9092/
                 Content-Type: application/json
                                
                 {
