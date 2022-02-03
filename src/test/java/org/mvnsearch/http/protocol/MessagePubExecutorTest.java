@@ -31,4 +31,42 @@ public class MessagePubExecutorTest {
         request.cleanBody();
         new MessagePublishExecutor().execute(request);
     }
+
+    @Test
+    public void testSendRabbitMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send rabbit message
+                PUB queue1
+                Host: amqp://guest:guest@localhost:5672
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
+
+    @Test
+    public void testSendRocketMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send rabbit message
+                PUB queue1
+                Host: rocketmq://localhost:9876
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
 }
