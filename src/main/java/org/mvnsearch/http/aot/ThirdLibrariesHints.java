@@ -45,5 +45,7 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
         registry.resources().add(NativeResourcesEntry.of("kafka/kafka-version.properties"));
+        //rabbitmq
+        registry.resources().add(NativeResourcesEntry.of("rabbitmq-amqp-client.properties"));
     }
 }
