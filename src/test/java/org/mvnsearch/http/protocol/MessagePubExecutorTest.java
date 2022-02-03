@@ -69,4 +69,23 @@ public class MessagePubExecutorTest {
         request.cleanBody();
         new MessagePublishExecutor().execute(request);
     }
+
+    @Test
+    public void testSendNatsMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send rabbit message
+                PUB queue1
+                Host: nats://localhost:4222
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
 }
