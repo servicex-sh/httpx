@@ -94,7 +94,9 @@ public class HttpRequestTarget {
     }
 
     public void setHostHeader(String hostHeader) {
-        if (Objects.equals(method, "MAIL")) { //ignore Host by mail
+        if (Objects.equals(method, "MAIL")
+                || Objects.equals(method, "PUB")
+                || Objects.equals(method, "SUB")) { //ignore Host by mail
             return;
         }
         if (this.uri == null) {
@@ -138,6 +140,10 @@ public class HttpRequestTarget {
             if (!requestUri.startsWith("mailto:")) {
                 requestUri = "mailto:" + requestUri;
             }
+            requestTarget.uri = URI.create(requestUri);
+            return requestTarget;
+        }
+        if (Objects.equals(method, "PUB") || Objects.equals(method, "SUB")) { //topic
             requestTarget.uri = URI.create(requestUri);
             return requestTarget;
         }
