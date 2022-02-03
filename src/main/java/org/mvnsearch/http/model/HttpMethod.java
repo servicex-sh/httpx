@@ -10,6 +10,8 @@ public class HttpMethod {
     public static final List<String> GRAPHQL_METHODS = List.of("GRAPHQL");
     public static final List<String> DUBBO_METHODS = List.of("DUBBO");
     public static final List<String> MAIL_METHODS = List.of("MAIL");
+    public static final List<String> PUB_METHODS = List.of("PUB");
+    public static final List<String> SUB_METHODS = List.of("SUB");
     private String name;
 
     public HttpMethod() {
@@ -40,7 +42,9 @@ public class HttpMethod {
                 || GRPC_METHODS.contains(method)
                 || GRAPHQL_METHODS.contains(method)
                 || DUBBO_METHODS.contains(method)
-                || MAIL_METHODS.contains(method);
+                || MAIL_METHODS.contains(method)
+                || PUB_METHODS.contains(method)
+                || SUB_METHODS.contains(method);
     }
 
     public static HttpMethod valueOf(String methodName) {
@@ -69,5 +73,13 @@ public class HttpMethod {
 
     public boolean isMailMethod() {
         return MAIL_METHODS.contains(name);
+    }
+
+    public boolean isPubMethod() {
+        return PUB_METHODS.contains(name);
+    }
+
+    public boolean isSubMethod() {
+        return SUB_METHODS.contains(name);
     }
 }
