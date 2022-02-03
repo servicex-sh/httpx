@@ -177,6 +177,10 @@ public class HttpxCommand implements Callable<Integer> {
             result = new DubboExecutor().execute(httpRequest);
         } else if (requestMethod.isMailMethod()) {
             result = new MailExecutor().execute(httpRequest);
+        } else if (requestMethod.isPubMethod()) {
+            result = new MessagePublishExecutor().execute(httpRequest);
+        } else if (requestMethod.isSubMethod()) {
+            result = new MessageSubscribeExecutor().execute(httpRequest);
         } else {
             result = Collections.emptyList();
             System.out.print("Not support: " + requestMethod.getName());
