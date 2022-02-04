@@ -9,7 +9,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
-import reactor.core.Disposable;
 import reactor.core.scheduler.Schedulers;
 import reactor.kafka.receiver.KafkaReceiver;
 import reactor.rabbitmq.RabbitFlux;
@@ -20,7 +19,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 
 
 public class MessageSubscribeExecutor implements BaseExecutor {
@@ -65,7 +63,7 @@ public class MessageSubscribeExecutor implements BaseExecutor {
 
         try {
             final KafkaReceiver<String, String> receiver = KafkaReceiver.create(receiverOptions);
-            final Disposable consumer = receiver.receive()
+            receiver.receive()
                     .doOnSubscribe(subscription -> {
                         System.out.println("Succeeded to subscribe: " + topic + "!");
                     })
@@ -74,18 +72,7 @@ public class MessageSubscribeExecutor implements BaseExecutor {
                         System.out.println("Received message: " + (key == null ? "" : key));
                         System.out.println(record.value());
                     })
-                    .subscribe();
-            CountDownLatch latch = new CountDownLatch(1);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Thread.sleep(200);
-                    consumer.dispose();
-                    latch.countDown();
-                    System.out.println("Shutting down ...");
-                } catch (Exception ignore) {
-                }
-            }));
-            latch.await();
+                    .blockLast();
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
         }
@@ -109,14 +96,6 @@ public class MessageSubscribeExecutor implements BaseExecutor {
                     .connectionFactory(connectionFactory)
                     .connectionSubscriptionScheduler(Schedulers.boundedElastic());
             final Receiver receiver = RabbitFlux.createReceiver(receiverOptions);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Thread.sleep(200);
-                    receiver.close();
-                    System.out.println("Shutting down ...");
-                } catch (Exception ignore) {
-                }
-            }));
             receiver.consumeAutoAck(queue)
                     .doOnSubscribe(subscription -> {
                         System.out.println("SUB " + connectionUri);
