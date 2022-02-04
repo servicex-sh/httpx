@@ -85,7 +85,7 @@ public class MessagePublishExecutor implements BaseExecutor {
             factory.setUri(connectionUri);
             Connection connection = factory.newConnection();
             try (Channel channel = connection.createChannel()) {
-                // channel.queueDeclare(queue, false, false, false, null);
+                channel.queueDeclareNoWait(queue, true, false, false, null);
                 String message = new String(httpRequest.getBodyBytes(), StandardCharsets.UTF_8);
                 channel.basicPublish("", queue, null, message.getBytes());
                 System.out.print("Succeeded to send message to " + queue + "!");
