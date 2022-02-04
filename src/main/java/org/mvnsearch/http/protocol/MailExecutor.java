@@ -10,8 +10,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 
 
 public class MailExecutor extends HttpBaseExecutor {
@@ -39,12 +41,8 @@ public class MailExecutor extends HttpBaseExecutor {
         final String authorization = smtpRequest.getAuthorization();
         if (authorization != null) {
             prop.put("mail.smtp.auth", "true");
-            if (authorization.startsWith("Basic ")) {
-                String pair = authorization.substring(authorization.indexOf(' ')).trim();
-                if (!pair.contains(":")) { // base64 decode
-                    pair = new String(Base64.getDecoder().decode(pair), StandardCharsets.UTF_8);
-                }
-                final String[] parts = pair.split(":");
+            String[] parts = httpRequest.getBasicAuthorization();
+            if (parts != null) {
                 mailSender.setUsername(parts[0]);
                 mailSender.setPassword(parts[1]);
             }
