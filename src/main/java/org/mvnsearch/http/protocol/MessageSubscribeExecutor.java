@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 
 public class MessageSubscribeExecutor implements BaseExecutor {
@@ -106,15 +107,27 @@ public class MessageSubscribeExecutor implements BaseExecutor {
             factory.setUri(connectionUri);
             Connection connection = factory.newConnection();
             try (Channel channel = connection.createChannel()) {
-                //channel.queueDeclare(queue, false, false, false, null);
+                CountDownLatch latch = new CountDownLatch(1);
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        Thread.sleep(200);
+                        connection.close();
+                        latch.countDown();
+                        System.out.println("Shutting down ...");
+                    } catch (Exception ignore) {
+                    }
+                }));
+                channel.queueDeclareNoWait(queue, true, false, false, null);
                 System.out.println("SUB " + connectionUri);
                 System.out.println();
+                channel.queueDeclareNoWait(queue, true, false, false, null);
                 DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                     String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                     System.out.println(" [x] Received '" + message + "'");
                 };
                 channel.basicConsume(queue, true, deliverCallback, consumerTag -> {
                 });
+                latch.await();
             } catch (Exception e) {
                 log.error("HTX-105-500", connectionUri, e);
             }
