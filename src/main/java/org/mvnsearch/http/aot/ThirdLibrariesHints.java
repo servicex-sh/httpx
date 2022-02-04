@@ -1,5 +1,16 @@
 package org.mvnsearch.http.aot;
 
+import com.aliyun.eventbridge.models.CloudEvent;
+import com.aliyun.eventbridge.models.PutEventsResponse;
+import com.aliyun.eventbridge.models.PutEventsResponseEntry;
+import com.aliyun.tea.TeaModel;
+import com.aliyun.tea.TeaPair;
+import com.aliyun.tea.TeaRequest;
+import com.aliyun.tea.TeaResponse;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.sun.mail.util.MailSSLSocketFactory;
 import io.nats.client.impl.SocketDataPort;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -53,5 +64,19 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
         //nats
         registry.reflection().forType(SocketDataPort.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                 .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        //aliyun event bridge
+        final Class<?>[] aliyunClassArray = {com.aliyun.credentials.models.Config.class, com.aliyun.eventbridge.models.Config.class,
+                CloudEvent.class, PutEventsResponse.class, PutEventsResponseEntry.class,
+                TeaModel.class, TeaRequest.class, TeaResponse.class, TeaPair.class, };
+        for (Class<?> clazz : aliyunClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //gson
+        final Class<?>[] gsonClassArray = {Gson.class, GsonBuilder.class, TypeToken.class, JsonElement.class};
+        for (Class<?> clazz : gsonClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
     }
 }
