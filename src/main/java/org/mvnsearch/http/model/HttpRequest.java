@@ -154,6 +154,16 @@ public class HttpRequest {
         return this.body != null ? this.body : new byte[]{};
     }
 
+    @Nullable
+    public String[] getBasicAuthorization() {
+        final String header = this.getHeader("Authorization");
+        if (header != null && header.startsWith("Basic ")) {
+            final String base64Text = header.substring(6).trim();
+            return new String(Base64.getDecoder().decode(base64Text), StandardCharsets.UTF_8).split(":");
+        }
+        return null;
+    }
+
     public Mono<ByteBuf> requestBody() {
         return Mono.create(sink -> {
             final byte[] bodyBytes = getBodyBytes();
