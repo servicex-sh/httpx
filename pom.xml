@@ -59,6 +59,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jul-to-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -71,6 +81,16 @@
         <dependency>
             <groupId>io.projectreactor.netty</groupId>
             <artifactId>reactor-netty</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.projectreactor.netty.incubator</groupId>
+                    <artifactId>reactor-netty-incubator-quic</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.projectreactor.netty</groupId>
+                    <artifactId>reactor-netty-http-brave</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.rsocket</groupId>
@@ -95,6 +115,12 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
             <version>3.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.luben</groupId>
+                    <artifactId>zstd-jni</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>
@@ -194,6 +220,22 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.2.4</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
                         <version>0.9.9</version>
@@ -204,6 +246,9 @@
                                 --no-fallback
                                 --enable-url-protocols=mailto
                             </buildArgs>
+                            <classpath>
+                                <param>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</param>
+                            </classpath>
                         </configuration>
                         <executions>
                             <execution>
@@ -220,6 +265,10 @@
                         <artifactId>spring-aot-maven-plugin</artifactId>
                         <version>${spring-native.version}</version>
                         <configuration>
+                            <removeXmlSupport>true</removeXmlSupport>
+                            <removeSpelSupport>true</removeSpelSupport>
+                            <removeJmxSupport>true</removeJmxSupport>
+                            <removeYamlSupport>true</removeYamlSupport>
                             <removeXmlSupport>true</removeXmlSupport>
                         </configuration>
                         <executions>
