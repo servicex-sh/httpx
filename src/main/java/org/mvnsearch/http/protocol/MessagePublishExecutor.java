@@ -1,21 +1,27 @@
 package org.mvnsearch.http.protocol;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import reactor.kafka.sender.KafkaSender;
+import reactor.kafka.sender.SenderOptions;
+import reactor.kafka.sender.SenderRecord;
+import reactor.rabbitmq.OutboundMessage;
+import reactor.rabbitmq.RabbitFlux;
+import reactor.rabbitmq.Sender;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import static reactor.core.publisher.SignalType.ON_COMPLETE;
 
 
 public class MessagePublishExecutor implements BaseExecutor {
@@ -34,6 +40,8 @@ public class MessagePublishExecutor implements BaseExecutor {
             sendNatsMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "rocketmq")) {
             sendRocketMessage(realURI, httpRequest);
+        } else if (Objects.equals(schema, "event")) {
+            putEventsSample();
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -60,18 +68,25 @@ public class MessagePublishExecutor implements BaseExecutor {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaURI.getHost() + ":" + port);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        try (KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
-            producer.send(new ProducerRecord<>(topic, partition, key, body));
-            producer.close();
-            System.out.print("Succeeded to send message to " + topic + "!");
-        } catch (Exception e) {
-            log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
-        }
+        KafkaSender<String, String> sender = KafkaSender.create(SenderOptions.create(props));
+        sender.send(Mono.just(SenderRecord.create(topic, partition, System.currentTimeMillis(),
+                        key, body, null)))
+                .doOnError(e -> {
+                    log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+                })
+                .doFinally(signalType -> {
+                    if (signalType == ON_COMPLETE) {
+                        System.out.print("Succeeded to send message to " + topic + "!");
+                    }
+                    sender.close();
+                })
+                .blockLast();
     }
 
     public void sendRabbitMQ(URI rabbitURI, HttpRequest httpRequest) {
         try {
-            ConnectionFactory factory = new ConnectionFactory();
+            ConnectionFactory connectionFactory = new ConnectionFactory();
+            connectionFactory.useNio();
             URI connectionUri;
             String queue;
             final String hostHeader = httpRequest.getHeader("Host");
@@ -82,19 +97,25 @@ public class MessagePublishExecutor implements BaseExecutor {
                 connectionUri = rabbitURI;
                 queue = queryToMap(rabbitURI).get("queue");
             }
-            factory.setUri(connectionUri);
-            Connection connection = factory.newConnection();
-            try (Channel channel = connection.createChannel()) {
-                channel.queueDeclareNoWait(queue, true, false, false, null);
-                String message = new String(httpRequest.getBodyBytes(), StandardCharsets.UTF_8);
-                channel.basicPublish("", queue, null, message.getBytes());
-                System.out.print("Succeeded to send message to " + queue + "!");
-            } catch (Exception e) {
-                log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
-            }
-            connection.close();
-        } catch (Exception ignore) {
+            connectionFactory.setUri(connectionUri);
+            reactor.rabbitmq.SenderOptions senderOptions = new reactor.rabbitmq.SenderOptions()
+                    .connectionFactory(connectionFactory)
+                    .resourceManagementScheduler(Schedulers.boundedElastic());
 
+            final Sender rabbitSender = RabbitFlux.createSender(senderOptions);
+            rabbitSender
+                    .send(Mono.just(new OutboundMessage("", queue, httpRequest.getBodyBytes())))
+                    .doOnError(e -> {
+                        log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+                    })
+                    .doFinally(signalType -> {
+                        if (signalType == ON_COMPLETE) {
+                            System.out.print("Succeeded to send message to " + queue + "!");
+                        }
+                        rabbitSender.close();
+                    }).block();
+        } catch (Exception ignore) {
+            log.error("HTX-105-401", httpRequest.getRequestTarget().getUri());
         }
     }
 
@@ -112,4 +133,10 @@ public class MessagePublishExecutor implements BaseExecutor {
     public void sendRocketMessage(URI rsocketURI, HttpRequest httpRequest) {
         System.err.println("Not implemented yet");
     }
+
+
+    public void putEventsSample() {
+
+    }
+
 }

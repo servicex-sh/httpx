@@ -1,20 +1,20 @@
 package org.mvnsearch.http.protocol;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DeliverCallback;
 import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.Subscription;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import reactor.core.Disposable;
+import reactor.core.scheduler.Schedulers;
+import reactor.kafka.receiver.KafkaReceiver;
+import reactor.rabbitmq.RabbitFlux;
+import reactor.rabbitmq.Receiver;
+import reactor.rabbitmq.ReceiverOptions;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +50,7 @@ public class MessageSubscribeExecutor implements BaseExecutor {
         }
         String topic = kafkaURI.getPath().substring(1);
         final Map<String, String> params = queryToMap(kafkaURI);
-        String groupId = "httpx-consumer";
+        String groupId = "httpx-" + UUID.randomUUID();
         if (params.containsKey("group")) {
             groupId = params.get("group");
         }
@@ -60,32 +60,32 @@ public class MessageSubscribeExecutor implements BaseExecutor {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
-        try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
-            consumer.subscribe(Collections.singletonList(topic));
-            // shutdown hook to properly close the consumer
+        reactor.kafka.receiver.ReceiverOptions<String, String> receiverOptions =
+                reactor.kafka.receiver.ReceiverOptions.<String, String>create(props).subscription(Collections.singleton(topic));
+
+        try {
+            final KafkaReceiver<String, String> receiver = KafkaReceiver.create(receiverOptions);
+            final Disposable consumer = receiver.receive()
+                    .doOnSubscribe(subscription -> {
+                        System.out.println("Succeeded to subscribe: " + topic + "!");
+                    })
+                    .doOnNext(record -> {
+                        String key = record.key();
+                        System.out.println("Received message: " + (key == null ? "" : key));
+                        System.out.println(record.value());
+                    })
+                    .subscribe();
+            CountDownLatch latch = new CountDownLatch(1);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
-                    consumer.close();
+                    Thread.sleep(200);
+                    consumer.dispose();
+                    latch.countDown();
+                    System.out.println("Shutting down ...");
                 } catch (Exception ignore) {
-
                 }
-                System.out.println("Shutting down ...");
             }));
-            System.out.println("Succeeded to subscribe(1000 max): " + topic + "!");
-            // max message count to process
-            int counter = 0;
-            do {
-                ConsumerRecords<String, String> records = consumer.poll(10000);
-                for (ConsumerRecord<String, String> record : records) {
-                    if (counter > 0) {
-                        System.out.println("==================================");
-                    }
-                    String key = record.key();
-                    System.out.println("Received message: " + (key == null ? "" : key));
-                    System.out.println(record.value());
-                    counter++;
-                }
-            } while (counter <= 1000);
+            latch.await();
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
         }
@@ -93,7 +93,7 @@ public class MessageSubscribeExecutor implements BaseExecutor {
 
     public void subscribeRabbit(URI rabbitURI, HttpRequest httpRequest) {
         try {
-            ConnectionFactory factory = new ConnectionFactory();
+            ConnectionFactory connectionFactory = new ConnectionFactory();
             URI connectionUri;
             String queue;
             final String hostHeader = httpRequest.getHeader("Host");
@@ -104,35 +104,34 @@ public class MessageSubscribeExecutor implements BaseExecutor {
                 connectionUri = rabbitURI;
                 queue = queryToMap(rabbitURI).get("queue");
             }
-            factory.setUri(connectionUri);
-            Connection connection = factory.newConnection();
-            try (Channel channel = connection.createChannel()) {
-                CountDownLatch latch = new CountDownLatch(1);
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    try {
-                        Thread.sleep(200);
-                        connection.close();
-                        latch.countDown();
-                        System.out.println("Shutting down ...");
-                    } catch (Exception ignore) {
-                    }
-                }));
-                channel.queueDeclareNoWait(queue, true, false, false, null);
-                System.out.println("SUB " + connectionUri);
-                System.out.println();
-                channel.queueDeclareNoWait(queue, true, false, false, null);
-                DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                    String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-                    System.out.println(" [x] Received '" + message + "'");
-                };
-                channel.basicConsume(queue, true, deliverCallback, consumerTag -> {
-                });
-                latch.await();
-            } catch (Exception e) {
-                log.error("HTX-105-500", connectionUri, e);
-            }
+            connectionFactory.setUri(connectionUri);
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+                    .connectionFactory(connectionFactory)
+                    .connectionSubscriptionScheduler(Schedulers.boundedElastic());
+            final Receiver receiver = RabbitFlux.createReceiver(receiverOptions);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    Thread.sleep(200);
+                    receiver.close();
+                    System.out.println("Shutting down ...");
+                } catch (Exception ignore) {
+                }
+            }));
+            receiver.consumeAutoAck(queue)
+                    .doOnSubscribe(subscription -> {
+                        System.out.println("SUB " + connectionUri);
+                        System.out.println();
+                    })
+                    .doOnError(e -> {
+                        log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
+                    })
+                    .doOnNext(delivery -> {
+                        String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+                        System.out.println(" [x] Received '" + message + "'");
+                    })
+                    .blockLast();
         } catch (Exception e) {
-            log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
+            log.error("HTX-105-401", httpRequest.getRequestTarget().getUri());
         }
     }
 
