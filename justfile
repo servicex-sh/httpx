@@ -29,3 +29,7 @@ native-build:
    mvn -Pnative -DskipTests clean package
    upx -7 target/httpx-osx-x86_64
    cp target/httpx-osx-x86_64 ~/bin/httpx
+
+# dependency tree
+dependencies:
+  mvn dependency:tree -Dscope=compile > dependencies.txt
