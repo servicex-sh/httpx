@@ -3,6 +3,7 @@ package org.mvnsearch.http.aot;
 import com.sun.mail.util.MailSSLSocketFactory;
 import io.nats.client.impl.SocketDataPort;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.CooperativeStickyAssignor;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.RangeAssignor;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -40,7 +41,8 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
         // kafka
         final Class<?>[] kafkaClassArray = {ConsumerConfig.class, KafkaConsumer.class, RangeAssignor.class,
                 KafkaProducer.class, ProducerConfig.class, ProducerRecord.class, DefaultPartitioner.class,
-                LongDeserializer.class, LongSerializer.class, StringDeserializer.class, StringSerializer.class};
+                LongDeserializer.class, LongSerializer.class, StringDeserializer.class, StringSerializer.class,
+                CooperativeStickyAssignor.class};
         for (Class<?> clazz : kafkaClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
