@@ -115,6 +115,7 @@ installed in `~/.m2/jdks`.
 
 * JetBrains HTTP client: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
 * http-request-in-editor-spec: https://github.com/JetBrains/http-request-in-editor-spec/blob/master/spec.md
+* Awaitility: small Java DSL for synchronizing asynchronous operations https://github.com/awaitility/awaitility
 * RSocket: https://rsocket.io/
 * gRPCurl: https://github.com/fullstorydev/grpcurl
 * picocli: https://picocli.info/
