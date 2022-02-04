@@ -2,7 +2,7 @@
 
 ### get my internet ip
 # @name myip
-GET {{base-url}}/ip
+GET https://httpbin.org/ip
 
 >>! myip.json
 
@@ -42,3 +42,43 @@ DUBBO 127.0.0.1:20880/GreetingsService/sayHi(java.lang.String)
 Content-Type: application/json
 
 "jackie"
+
+### send kafka message
+//@name kafka
+PUB topic-1
+Host: kafka://localhost:9092
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
+### send Nats message
+//@name nats
+PUB subject1
+Host: nats://localhost:4222
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
+### listen Nats message
+//@name nats-sub
+SUB subject1
+Host: nats://localhost:4222
+
+### publish rabit message
+//@name rabbit-pub
+PUB queue3
+Host: amqp://localhost:5672
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
+### listen rabit message
+//@name rabbit-sub
+SUB queue3
+Host: amqp://localhost:5672
