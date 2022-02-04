@@ -38,8 +38,8 @@ public class MessagePubExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### send rabbit message
-                PUB queue1
-                Host: amqp://guest:guest@localhost:5672
+                PUB queue3
+                Host: amqp://localhost:5672
                 Content-Type: application/json
                                
                 {
@@ -76,7 +76,7 @@ public class MessagePubExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### send rabbit message
-                PUB queue1
+                PUB subject1
                 Host: nats://localhost:4222
                 Content-Type: application/json
                                

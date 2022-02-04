@@ -33,8 +33,8 @@ public class MessageSubExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### subscribe rabbitmq
-                SUB queue1
-                Host: amqp://guest:guest@localhost:5672
+                SUB queue3
+                Host: amqp://localhost:5672
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -47,7 +47,7 @@ public class MessageSubExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### subscribe rabbitmq
-                SUB queue1
+                SUB subject1
                 Host: nats://localhost:4222
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
