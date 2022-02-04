@@ -44,14 +44,19 @@ Content-Type: application/json
 "jackie"
 
 ### send kafka message
-//@name kafka
-PUB topic-1
+//@name kafka-pub
+PUB testTopic
 Host: kafka://localhost:9092
 Content-Type: application/json
 
 {
   "name": "Jackie"
 }
+
+###  kafka message
+//@name kafka-sub
+SUB testTopic
+Host: kafka://localhost:9092
 
 ### send Nats message
 //@name nats
@@ -82,3 +87,20 @@ Content-Type: application/json
 //@name rabbit-sub
 SUB queue3
 Host: amqp://localhost:5672
+
+### send aliyun event bridge message
+//@name ali-event
+PUB demo-event-bus
+Host: eventbridge://endpoint_host
+Authorization: Basic your_key_id:your_key_secret
+Content-Type: application/json
+
+{
+  "specversion": "1.0",
+  "source": "demo.event",
+  "type": "com.example.someevent",
+  "datacontenttype": "application/json",
+  "data": {
+    "name": "jackie"
+  }
+}
