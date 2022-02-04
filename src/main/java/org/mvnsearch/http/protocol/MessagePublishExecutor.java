@@ -1,5 +1,13 @@
 package org.mvnsearch.http.protocol;
 
+import com.aliyun.eventbridge.EventBridge;
+import com.aliyun.eventbridge.EventBridgeClient;
+import com.aliyun.eventbridge.models.CloudEvent;
+import com.aliyun.eventbridge.models.Config;
+import com.aliyun.eventbridge.models.PutEventsResponse;
+import com.aliyun.eventbridge.util.EventBuilder;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.ConnectionFactory;
 import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -32,6 +40,7 @@ public class MessagePublishExecutor implements BaseExecutor {
         final URI realURI = httpRequest.getRequestTarget().getUri();
         String schema = realURI.getScheme();
         System.out.println("PUB " + realURI);
+        System.out.println();
         if (Objects.equals(schema, "kafka")) {
             sendKafka(realURI, httpRequest);
         } else if (Objects.equals(schema, "amqp") || Objects.equals(schema, "amqps")) {
@@ -40,8 +49,8 @@ public class MessagePublishExecutor implements BaseExecutor {
             sendNatsMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "rocketmq")) {
             sendRocketMessage(realURI, httpRequest);
-        } else if (Objects.equals(schema, "event")) {
-            putEventsSample();
+        } else if (Objects.equals(schema, "eventbridge") && realURI.getHost().contains("aliyuncs")) {
+            publishAliyunEventBridge(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -135,8 +144,65 @@ public class MessagePublishExecutor implements BaseExecutor {
     }
 
 
-    public void putEventsSample() {
-
+    @SuppressWarnings("unchecked")
+    public void publishAliyunEventBridge(URI eventBridgeURI, HttpRequest httpRequest) {
+        String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
+        if (keyIdAndSecret == null) {
+            System.err.println("Please supply access key Id/Secret in Authorization header as : `Authorization: Basic keyId:secret`");
+            return;
+        }
+        try {
+            String eventBus = eventBridgeURI.getPath().substring(1);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            final Map<String, Object> cloudEvent = objectMapper.readValue(httpRequest.getBodyBytes(), Map.class);
+            //validate cloudEvent
+            String source = (String) cloudEvent.get("source");
+            if (source == null) {
+                System.err.println("Please supply source field in json body!");
+                return;
+            }
+            String datacontenttype = (String) cloudEvent.get("datacontenttype");
+            if (datacontenttype != null && !datacontenttype.startsWith("application/json")) {
+                System.err.println("datacontenttype's value should be 'application/json'!");
+                return;
+            }
+            final Object data = cloudEvent.get("data");
+            if (data == null) {
+                System.err.println("data field should be supplied in json body!");
+                return;
+            }
+            String jsonData;
+            if (data instanceof Map<?, ?> || data instanceof List<?>) {
+                jsonData = objectMapper.writeValueAsString(data);
+            } else {
+                jsonData = data.toString();
+            }
+            String eventId = (String) cloudEvent.get("id");
+            if (eventId == null) {
+                eventId = UUID.randomUUID().toString();
+            }
+            Config authConfig = new Config();
+            authConfig.accessKeyId = keyIdAndSecret[0];
+            authConfig.accessKeySecret = keyIdAndSecret[1];
+            authConfig.endpoint = eventBridgeURI.getHost();
+            EventBridge eventBridgeClient = new EventBridgeClient(authConfig);
+            final CloudEvent event = EventBuilder.builder()
+                    .withId(eventId)
+                    .withSource(URI.create(source))
+                    .withType((String) cloudEvent.get("type"))
+                    .withSubject((String) cloudEvent.get("subject"))
+                    .withTime(new Date())
+                    .withJsonStringData(jsonData)
+                    .withAliyunEventBus(eventBus)
+                    .build();
+            System.out.println("Begin to send message to " + eventBus + " with '" + eventId + "' ID");
+            PutEventsResponse putEventsResponse = eventBridgeClient.putEvents(List.of(event));
+            System.out.println("Succeeded with Aliyun EventBridge Response:");
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(putEventsResponse));
+        } catch (Exception e) {
+            log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+        }
     }
 
 }
