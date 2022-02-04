@@ -19,7 +19,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### send kafka message
                 //@name kafka
-                SUB topic-1
+                SUB testTopic
                 Host: kafka://localhost:9092/
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);

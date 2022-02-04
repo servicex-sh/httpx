@@ -19,12 +19,12 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send kafka message
                 //@name kafka
-                PUB topic-1
+                PUB testTopic
                 Host: kafka://localhost:9092/
                 Content-Type: application/json
                                
                 {
-                  "name": "Jackie"
+                  "name": "Jacki!!!e"
                 }
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
