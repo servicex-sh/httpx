@@ -73,11 +73,12 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 * RSocket Request
 * GRPC Request: you should install [grpcurl](https://github.com/fullstorydev/grpcurl)
 * GraphQL support: Query, Mutation and Subscribe on HTTP and WebSocket(graphql-ws)
-* Email: send email by SMTP
+* EMAIL: send email by SMTP
+* PUB/SUB: pub/sub support for Kafka, RabbitMQ and Nats
 
 # Email sending
-   
-Email URL format: `mailto:name@email.com?cc=name2@email.com`      
+
+Email URL format: `mailto:name@email.com?cc=name2@email.com`
 
 * Gmail: please use App Password from https://support.google.com/accounts/answer/185833?p=InvalidSecondFactor
 
