@@ -91,7 +91,7 @@ Host: amqp://localhost:5672
 ### publish rocketmq message
 //@name rocketmq-pub
 PUB testTopic
-Host: rocketmq://localhost:5672
+Host: rocketmq://localhost:9876
 Content-Type: application/json
 
 {
