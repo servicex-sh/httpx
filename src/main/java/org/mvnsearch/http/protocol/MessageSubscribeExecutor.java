@@ -6,6 +6,10 @@ import io.nats.client.Nats;
 import io.nats.client.Subscription;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
+import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -19,6 +23,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 
 public class MessageSubscribeExecutor implements BaseExecutor {
@@ -34,6 +39,8 @@ public class MessageSubscribeExecutor implements BaseExecutor {
             subscribeRabbit(realURI, httpRequest);
         } else if (Objects.equals(schema, "nats")) {
             subscribeNats(realURI, httpRequest);
+        } else if (Objects.equals(schema, "rocketmq")) {
+            subscribeRocketmq(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -140,6 +147,40 @@ public class MessageSubscribeExecutor implements BaseExecutor {
             }
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
+        }
+    }
+
+    public void subscribeRocketmq(URI rocketURI, HttpRequest httpRequest) {
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("httpx-" + UUID.randomUUID());
+        try {
+            CountDownLatch latch = new CountDownLatch(1);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    Thread.sleep(200);
+                    latch.countDown();
+                    System.out.println("Shutting down ...");
+                } catch (Exception ignore) {
+                }
+            }));
+            String nameServerAddress = rocketURI.getHost() + ":" + rocketURI.getPort();
+            String topic = rocketURI.getPath().substring(1);
+            consumer.setNamesrvAddr(nameServerAddress);
+            consumer.subscribe(topic, "*");
+            // Register callback to execute on arrival of messages fetched from brokers.
+            consumer.registerMessageListener((MessageListenerConcurrently) (msgList, context) -> {
+                for (MessageExt messageExt : msgList) {
+                    System.out.println("msg: " + messageExt.getMsgId());
+                    System.out.println(new String(messageExt.getBody(), StandardCharsets.UTF_8));
+                }
+                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            });
+            consumer.start();
+            System.out.println("Succeeded to subscribe(1000 max): " + topic + "!");
+            latch.await();
+        } catch (Exception e) {
+            log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+        } finally {
+            consumer.shutdown();
         }
     }
 }
