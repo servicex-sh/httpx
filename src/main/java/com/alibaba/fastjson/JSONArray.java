@@ -6,11 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- *
- * @author linux_china
- */
+
 public class JSONArray extends ArrayList<Object> {
     public JSONArray() {
     }
