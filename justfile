@@ -6,7 +6,7 @@ build:
 
 # rebuild the project, and clean first
 rebuild:
-   mvn -DskipTests package
+   mvn -DskipTests clean package
 
 # list targets
 list-targets:
