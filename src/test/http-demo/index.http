@@ -88,6 +88,16 @@ Content-Type: application/json
 SUB queue3
 Host: amqp://localhost:5672
 
+### publish redis message
+//@name redis-pub
+PUB channel1
+Host: redis://localhost:6379
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
 ### publish rocketmq message
 //@name rocketmq-pub
 PUB testTopic
