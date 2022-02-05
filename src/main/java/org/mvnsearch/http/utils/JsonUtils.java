@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
+import java.io.IOException;
+
 
 public class JsonUtils {
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
@@ -33,9 +36,21 @@ public class JsonUtils {
     }
 
 
+    public static <T> T readValue(String jsonText, Class<T> valueType) throws IOException {
+        return OBJECT_MAPPER.readValue(jsonText, valueType);
+    }
+
+    public static <T> T readValue(byte[] jsonBytes, Class<T> valueType) throws IOException {
+        return OBJECT_MAPPER.readValue(jsonBytes, valueType);
+    }
+
+    public static <T> T readValue(File jsonFile, Class<T> valueType) throws IOException {
+        return OBJECT_MAPPER.readValue(jsonFile, valueType);
+    }
+
     public static String writeValueAsPrettyString(Object obj) {
         try {
-            return JsonUtils.writeValueAsPrettyString(obj);
+            return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
         } catch (Exception e) {
             return "";
         }
