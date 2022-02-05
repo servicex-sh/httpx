@@ -1,21 +1,20 @@
 package com.alibaba.fastjson;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.mvnsearch.http.utils.JsonUtils.OBJECT_MAPPER;
+
 
 public class JSON {
-    public static final ObjectMapper objectMapper = new ObjectMapper().configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
     public static String toJSONString(Object obj) {
         try {
-            return objectMapper.writeValueAsString(obj);
+            return OBJECT_MAPPER.writeValueAsString(obj);
         } catch (Exception e) {
             return "{}";
         }
@@ -24,9 +23,9 @@ public class JSON {
     public static String toJSONString(Object obj, boolean prettyFormat) {
         try {
             if (prettyFormat) {
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+                return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
             } else {
-                return objectMapper.writeValueAsString(obj);
+                return OBJECT_MAPPER.writeValueAsString(obj);
             }
         } catch (Exception ignore) {
             return "{}";
@@ -36,9 +35,9 @@ public class JSON {
     public static Object parse(String text) {
         try {
             if (text.startsWith("[")) {
-                return objectMapper.readValue(text, List.class);
+                return OBJECT_MAPPER.readValue(text, List.class);
             } else if (text.startsWith("{")) {
-                return objectMapper.readValue(text, Map.class);
+                return OBJECT_MAPPER.readValue(text, Map.class);
             } else {
                 return text;
             }
@@ -50,7 +49,7 @@ public class JSON {
 
     public static <T> T parseObject(String text, Class<T> clazz) {
         try {
-            return objectMapper.readValue(text, clazz);
+            return OBJECT_MAPPER.readValue(text, clazz);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -59,10 +58,10 @@ public class JSON {
 
     public static <T> List<T> parseArray(String text, Class<T> clazz) {
         try {
-            JsonNode tree = objectMapper.readTree(text);
+            JsonNode tree = OBJECT_MAPPER.readTree(text);
             List<T> list = new ArrayList<T>();
             for (JsonNode jsonNode : tree) {
-                list.add(objectMapper.treeToValue(jsonNode, clazz));
+                list.add(OBJECT_MAPPER.treeToValue(jsonNode, clazz));
             }
             return list;
         } catch (Exception e) {
