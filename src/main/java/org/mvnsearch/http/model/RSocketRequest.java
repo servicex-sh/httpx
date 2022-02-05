@@ -1,6 +1,5 @@
 package org.mvnsearch.http.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
@@ -16,6 +15,7 @@ import io.rsocket.broker.frames.RouteSetupFlyweight;
 import io.rsocket.metadata.TaggingMetadataCodec;
 import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.util.DefaultPayload;
+import org.mvnsearch.http.utils.JsonUtils;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -26,7 +26,6 @@ import static io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata;
 
 @SuppressWarnings("FieldMayBeFinal")
 public class RSocketRequest {
-    public static ObjectMapper objectMapper = new ObjectMapper();
     private URI uri;
     private String requestType;
     private String dataMimeType;
@@ -104,17 +103,13 @@ public class RSocketRequest {
         }
         if (metadata != null) {
             try {
-                var metadataJson = objectMapper.readValue(metadata, Map.class);
+                var metadataJson = JsonUtils.readValue(metadata, Map.class);
                 compositeMetadata.putAll(metadataJson);
             } catch (Exception ignore) {
 
             }
         }
-        try {
-            return objectMapper.writeValueAsString(compositeMetadata);
-        } catch (Exception ignore) {
-            return "{}";
-        }
+        return JsonUtils.writeValueAsString(compositeMetadata);
     }
 
     private void encodeAddressMetadata(Id routeId, CompositeByteBuf metadataHolder) {

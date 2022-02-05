@@ -1,7 +1,7 @@
 package org.mvnsearch.http.protocol;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.utils.JsonUtils;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -28,13 +28,12 @@ public interface BaseExecutor {
 
     default String prettyJsonFormat(String jsonText) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
             if (jsonText.startsWith("{")) {
-                final Map<?, ?> jsonObject = objectMapper.readValue(jsonText, Map.class);
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+                final Map<?, ?> jsonObject = JsonUtils.readValue(jsonText, Map.class);
+                return JsonUtils.writeValueAsPrettyString(jsonObject);
             } else if (jsonText.startsWith("[")) {
-                final List<?> jsonArray = objectMapper.readValue(jsonText, List.class);
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonArray);
+                final List<?> jsonArray = JsonUtils.readValue(jsonText, List.class);
+                return JsonUtils.writeValueAsPrettyString(jsonArray);
             } else {
                 return jsonText;
             }

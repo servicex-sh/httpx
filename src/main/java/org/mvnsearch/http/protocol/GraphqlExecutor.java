@@ -1,6 +1,5 @@
 package org.mvnsearch.http.protocol;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.Unpooled;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
@@ -8,6 +7,7 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.utils.JsonUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
@@ -19,7 +19,6 @@ import java.util.*;
 
 public class GraphqlExecutor extends HttpBaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(GraphqlExecutor.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         String contentType = httpRequest.getHeader("Content-Type");
@@ -29,7 +28,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
                 Map<String, Object> jsonBody;
                 if ("application/graphql".equals(contentType)) {  // convert graphql code into json object
                     jsonBody = Collections.singletonMap("query", new String(requestJsonBody, StandardCharsets.UTF_8));
-                    requestJsonBody = objectMapper.writeValueAsBytes(jsonBody);
+                    requestJsonBody = JsonUtils.writeValueAsBytes(jsonBody);
                 }
             }
         } catch (Exception ignore) {
@@ -75,14 +74,14 @@ public class GraphqlExecutor extends HttpBaseExecutor {
                 .handle((inbound, outbound) -> Flux.<byte[]>create(fluxSink -> {
                     inbound.receive().asString().handle((responseJsonText, sink) -> {
                         try {
-                            final Map<String, ?> response = objectMapper.readValue(responseJsonText, Map.class);
+                            final Map<String, ?> response = JsonUtils.readValue(responseJsonText, Map.class);
                             String type = (String) response.get("type");
                             if ("connection_ack".equals(type)) { //send query
                                 byte[] queryBytes = graphqlWsMessage("subscribe", id, requestJsonBody);
                                 outbound.send(Mono.just(Unpooled.wrappedBuffer(queryBytes))).then().subscribe();
                             } else if ("next".equals(type)) { //result received
                                 final Object payload = response.get("payload");
-                                final String jsonText = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
+                                final String jsonText = JsonUtils.writeValueAsPrettyString(payload);
                                 System.out.println(jsonText);
                                 fluxSink.next(jsonText.getBytes(StandardCharsets.UTF_8));
                             } else if ("complete".equals(type)) {  // query completed
@@ -108,9 +107,9 @@ public class GraphqlExecutor extends HttpBaseExecutor {
                 msg.put("id", id);
             }
             if (payload != null) {
-                msg.put("payload", objectMapper.readValue(payload, Map.class));
+                msg.put("payload", JsonUtils.readValue(payload, Map.class));
             }
-            return objectMapper.writeValueAsBytes(msg);
+            return JsonUtils.writeValueAsBytes(msg);
         } catch (Exception e) {
             return new byte[]{};
         }

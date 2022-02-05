@@ -2,10 +2,10 @@ package org.mvnsearch.http.protocol;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.HessianSerializerInput;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.utils.JsonUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -54,16 +54,15 @@ public class DubboExecutor extends HttpBaseExecutor {
                     }
                     arguments = new Object[]{text};
                 } else { // array
-                    final ObjectMapper objectMapper = new ObjectMapper();
                     try {
-                        final List<?> items = objectMapper.readValue(text, List.class);
+                        final List<?> items = JsonUtils.readValue(text, List.class);
                         arguments = new Object[items.size()];
                         for (int i = 0; i < items.size(); i++) {
                             final Object item = items.get(i);
                             if (item instanceof String) {
                                 arguments[i] = item;
                             } else {
-                                arguments[i] = objectMapper.writeValueAsString(item);
+                                arguments[i] = JsonUtils.writeValueAsString(item);
                             }
                         }
                     } catch (Exception e) {
@@ -99,8 +98,7 @@ public class DubboExecutor extends HttpBaseExecutor {
                         System.out.print(result);
                         return List.of(result.toString().getBytes(StandardCharsets.UTF_8));
                     } else {
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        String text = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+                        String text = JsonUtils.writeValueAsPrettyString(result);
                         System.out.print(text);
                         return List.of(text.getBytes(StandardCharsets.UTF_8));
                     }

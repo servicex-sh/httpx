@@ -1,12 +1,12 @@
 package org.mvnsearch.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpMethod;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
 import org.mvnsearch.http.protocol.*;
+import org.mvnsearch.http.utils.JsonUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -134,13 +134,12 @@ public class HttpxCommand implements Callable<Integer> {
         final Path parentDir = httpFilePath.toAbsolutePath().getParent();
         final File envJsonFile = parentDir.resolve("http-client.env.json").toFile();
         final File envPrivateJsonFile = parentDir.resolve("http-client.private.env.json").toFile();
-        ObjectMapper objectMapper = new ObjectMapper();
         if (envJsonFile.exists()) { // load env.json into context
-            final Map<String, Object> env = objectMapper.readValue(envJsonFile, Map.class);
+            final Map<String, Object> env = JsonUtils.readValue(envJsonFile, Map.class);
             context.putAll(env);
         }
         if (envPrivateJsonFile.exists()) { //load private.env.json
-            final Map<String, Object> privateEnv = objectMapper.readValue(envPrivateJsonFile, Map.class);
+            final Map<String, Object> privateEnv = JsonUtils.readValue(envPrivateJsonFile, Map.class);
             for (Map.Entry<String, Object> entry : privateEnv.entrySet()) {
                 if (entry.getValue() instanceof Map) {
                     Map<String, Object> privateProfileContext = (Map<String, Object>) entry.getValue();

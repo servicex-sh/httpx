@@ -1,10 +1,10 @@
 package org.mvnsearch.http.protocol;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.utils.JsonUtils;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +15,6 @@ import java.util.Map;
 
 public class GrpcExecutor implements BaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(GrpcExecutor.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         try {
@@ -37,8 +36,8 @@ public class GrpcExecutor implements BaseExecutor {
             if (bodyBytes.length > 0) {
                 String jsonText = new String(bodyBytes, StandardCharsets.UTF_8);
                 if (jsonText.startsWith("{")) {
-                    final Map<?, ?> jsonData = objectMapper.readValue(jsonText, Map.class);
-                    final String oneLineJsonText = objectMapper.writeValueAsString(jsonData);
+                    final Map<?, ?> jsonData = JsonUtils.readValue(jsonText, Map.class);
+                    final String oneLineJsonText = JsonUtils.writeValueAsString(jsonData);
                     command.add("-d");
                     command.add(oneLineJsonText);
                 }

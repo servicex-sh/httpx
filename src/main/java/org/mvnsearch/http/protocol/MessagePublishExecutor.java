@@ -6,8 +6,6 @@ import com.aliyun.eventbridge.models.CloudEvent;
 import com.aliyun.eventbridge.models.Config;
 import com.aliyun.eventbridge.models.PutEventsResponse;
 import com.aliyun.eventbridge.util.EventBuilder;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.ConnectionFactory;
 import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -19,6 +17,7 @@ import org.apache.rocketmq.common.message.Message;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.utils.JsonUtils;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.kafka.sender.KafkaSender;
@@ -173,9 +172,7 @@ public class MessagePublishExecutor implements BaseExecutor {
         }
         try {
             String eventBus = eventBridgeURI.getPath().substring(1);
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            final Map<String, Object> cloudEvent = objectMapper.readValue(httpRequest.getBodyBytes(), Map.class);
+            final Map<String, Object> cloudEvent = JsonUtils.readValue(httpRequest.getBodyBytes(), Map.class);
             //validate cloudEvent
             String source = (String) cloudEvent.get("source");
             if (source == null) {
@@ -194,7 +191,7 @@ public class MessagePublishExecutor implements BaseExecutor {
             }
             String jsonData;
             if (data instanceof Map<?, ?> || data instanceof List<?>) {
-                jsonData = objectMapper.writeValueAsString(data);
+                jsonData = JsonUtils.writeValueAsString(data);
             } else {
                 jsonData = data.toString();
             }
@@ -219,7 +216,7 @@ public class MessagePublishExecutor implements BaseExecutor {
             System.out.println("Begin to send message to " + eventBus + " with '" + eventId + "' ID");
             PutEventsResponse putEventsResponse = eventBridgeClient.putEvents(List.of(event));
             System.out.println("Succeeded with Aliyun EventBridge Response:");
-            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(putEventsResponse));
+            System.out.println(JsonUtils.writeValueAsPrettyString(putEventsResponse));
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         }
