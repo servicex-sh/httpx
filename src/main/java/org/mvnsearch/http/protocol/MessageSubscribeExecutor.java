@@ -1,6 +1,9 @@
 package org.mvnsearch.http.protocol;
 
 import com.rabbitmq.client.ConnectionFactory;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
+import io.lettuce.core.pubsub.api.reactive.RedisPubSubReactiveCommands;
 import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.Subscription;
@@ -26,7 +29,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 
-public class MessageSubscribeExecutor implements BaseExecutor {
+public class MessageSubscribeExecutor implements BasePubSubExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(MessageSubscribeExecutor.class);
 
     @Override
@@ -39,6 +42,8 @@ public class MessageSubscribeExecutor implements BaseExecutor {
             subscribeRabbit(realURI, httpRequest);
         } else if (Objects.equals(schema, "nats")) {
             subscribeNats(realURI, httpRequest);
+        } else if (Objects.equals(schema, "redis")) {
+            subscribeRedis(realURI, httpRequest);
         } else if (Objects.equals(schema, "rocketmq")) {
             subscribeRocketmq(realURI, httpRequest);
         } else {
@@ -87,25 +92,16 @@ public class MessageSubscribeExecutor implements BaseExecutor {
 
     public void subscribeRabbit(URI rabbitURI, HttpRequest httpRequest) {
         try {
+            final UriAndSubject rabbitUriAndQueue = getRabbitUriAndQueue(rabbitURI, httpRequest);
             ConnectionFactory connectionFactory = new ConnectionFactory();
-            URI connectionUri;
-            String queue;
-            final String hostHeader = httpRequest.getHeader("Host");
-            if (hostHeader != null) {
-                connectionUri = URI.create(hostHeader);
-                queue = httpRequest.getRequestTarget().getRequestLine();
-            } else {
-                connectionUri = rabbitURI;
-                queue = queryToMap(rabbitURI).get("queue");
-            }
-            connectionFactory.setUri(connectionUri);
+            connectionFactory.setUri(rabbitUriAndQueue.uri());
             ReceiverOptions receiverOptions = new ReceiverOptions()
                     .connectionFactory(connectionFactory)
                     .connectionSubscriptionScheduler(Schedulers.boundedElastic());
             final Receiver receiver = RabbitFlux.createReceiver(receiverOptions);
-            receiver.consumeAutoAck(queue)
+            receiver.consumeAutoAck(rabbitUriAndQueue.subject())
                     .doOnSubscribe(subscription -> {
-                        System.out.println("SUB " + connectionUri);
+                        System.out.println("SUB " + rabbitUriAndQueue.uri());
                         System.out.println();
                     })
                     .doOnError(e -> {
@@ -147,6 +143,22 @@ public class MessageSubscribeExecutor implements BaseExecutor {
             }
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
+        }
+    }
+
+    public void subscribeRedis(URI redisURI, HttpRequest httpRequest) {
+        final UriAndSubject redisUriAndChannel = getRedisUriAndChannel(redisURI, httpRequest);
+        RedisClient client = RedisClient.create(redisUriAndChannel.uri());
+        try (StatefulRedisPubSubConnection<String, String> connection = client.connectPubSub()) {
+            RedisPubSubReactiveCommands<String, String> reactive = connection.reactive();
+            reactive.subscribe(redisUriAndChannel.subject()).subscribe();
+            System.out.println("Succeeded to subscribe: " + redisUriAndChannel.subject() + "!");
+            reactive.observeChannels().doOnNext(patternMessage -> {
+                System.out.println("Message Received:");
+                System.out.println(patternMessage.getMessage());
+            }).blockLast();
+        } catch (Exception e) {
+            log.error("HTX-105-500", redisUriAndChannel.uri(), e);
         }
     }
 
