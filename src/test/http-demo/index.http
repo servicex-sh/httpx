@@ -88,6 +88,16 @@ Content-Type: application/json
 SUB queue3
 Host: amqp://localhost:5672
 
+### publish rocketmq message
+//@name rocketmq-pub
+PUB testTopic
+Host: rocketmq://localhost:5672
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
 ### send aliyun event bridge message
 //@name ali-event
 PUB demo-event-bus
