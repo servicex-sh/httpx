@@ -57,7 +57,7 @@ public class MessagePubExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### send rabbit message
-                PUB queue1
+                PUB testTopic
                 Host: rocketmq://localhost:9876
                 Content-Type: application/json
                                
