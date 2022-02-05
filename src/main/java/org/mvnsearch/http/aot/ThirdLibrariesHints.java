@@ -1,5 +1,7 @@
 package org.mvnsearch.http.aot;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.eventbridge.models.CloudEvent;
 import com.aliyun.eventbridge.models.PutEventsResponse;
 import com.aliyun.eventbridge.models.PutEventsResponseEntry;
@@ -25,6 +27,19 @@ import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.rocketmq.common.protocol.header.SendMessageRequestHeaderV2;
+import org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader;
+import org.apache.rocketmq.common.protocol.header.UnregisterClientRequestHeader;
+import org.apache.rocketmq.common.protocol.header.namesrv.GetRouteInfoRequestHeader;
+import org.apache.rocketmq.common.protocol.route.BrokerData;
+import org.apache.rocketmq.common.protocol.route.QueueData;
+import org.apache.rocketmq.common.protocol.route.TopicRouteData;
+import org.apache.rocketmq.remoting.netty.NettyDecoder;
+import org.apache.rocketmq.remoting.netty.NettyEncoder;
+import org.apache.rocketmq.remoting.protocol.LanguageCode;
+import org.apache.rocketmq.remoting.protocol.RemotingCommand;
+import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
+import org.apache.rocketmq.remoting.protocol.SerializeType;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.BeanFactoryNativeConfigurationProcessor;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeConfigurationRegistry;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeResourcesEntry;
@@ -67,7 +82,7 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
         //aliyun event bridge
         final Class<?>[] aliyunClassArray = {com.aliyun.credentials.models.Config.class, com.aliyun.eventbridge.models.Config.class,
                 CloudEvent.class, PutEventsResponse.class, PutEventsResponseEntry.class,
-                TeaModel.class, TeaRequest.class, TeaResponse.class, TeaPair.class, };
+                TeaModel.class, TeaRequest.class, TeaResponse.class, TeaPair.class,};
         for (Class<?> clazz : aliyunClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
@@ -75,6 +90,21 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
         //gson
         final Class<?>[] gsonClassArray = {Gson.class, GsonBuilder.class, TypeToken.class, JsonElement.class};
         for (Class<?> clazz : gsonClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //fastjson
+        final Class<?>[] fastjsonClassArray = {JSONArray.class, JSONObject.class};
+        for (Class<?> clazz : fastjsonClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //rocketmq
+        final Class<?>[] rocketmqClassArray = {SendMessageRequestHeaderV2.class, SendMessageResponseHeader.class,
+                UnregisterClientRequestHeader.class, GetRouteInfoRequestHeader.class, BrokerData.class, QueueData.class,
+                TopicRouteData.class, NettyDecoder.class, NettyEncoder.class,
+                LanguageCode.class, RemotingCommand.class, RemotingSerializable.class, SerializeType.class};
+        for (Class<?> clazz : rocketmqClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
