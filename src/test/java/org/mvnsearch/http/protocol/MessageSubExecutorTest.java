@@ -56,6 +56,20 @@ public class MessageSubExecutorTest {
     }
 
     @Test
+    public void testSubscribeRedis() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### subscribe rabbitmq
+                SUB channel1
+                Host: redis://localhost:6379
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessageSubscribeExecutor().execute(request);
+    }
+
+    @Test
     public void testSubscribeRocketmq() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")

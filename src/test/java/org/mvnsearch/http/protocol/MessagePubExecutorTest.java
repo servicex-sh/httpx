@@ -90,6 +90,25 @@ public class MessagePubExecutorTest {
     }
 
     @Test
+    public void testSendRedisMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send redis message
+                PUB channel1
+                Host: redis://localhost:6379
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
+
+    @Test
     public void testSendAliyunEventBridgeMessage() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
@@ -100,7 +119,7 @@ public class MessagePubExecutorTest {
                 Host: eventbridge://endpoint_host
                 Authorization: Basic your_key_id:your_key_secret
                 Content-Type: application/json
-                
+                                
                 {
                   "specversion": "1.0",
                   "source": "demo.event",
