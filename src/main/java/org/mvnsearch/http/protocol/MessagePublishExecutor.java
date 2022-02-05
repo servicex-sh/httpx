@@ -13,6 +13,9 @@ import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.common.message.Message;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -139,8 +142,25 @@ public class MessagePublishExecutor implements BaseExecutor {
         }
     }
 
-    public void sendRocketMessage(URI rsocketURI, HttpRequest httpRequest) {
-        System.err.println("Not implemented yet");
+    public void sendRocketMessage(URI rocketURI, HttpRequest httpRequest) {
+        DefaultMQProducer producer = new DefaultMQProducer("httpx-cli");
+        try {
+            // Specify name server addresses.
+            String nameServerAddress = rocketURI.getHost() + ":" + rocketURI.getPort();
+            String topic = rocketURI.getPath().substring(1);
+            producer.setNamesrvAddr(nameServerAddress);
+            //Launch the instance.
+            producer.start();
+            Message msg = new Message(topic, httpRequest.getBodyBytes());
+            //Call send message to deliver message to one of brokers.
+            SendResult sendResult = producer.send(msg);
+            System.out.println("Succeeded to send message to " + topic + "!");
+            System.out.print(sendResult.toString());
+        } catch (Exception e) {
+            log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+        } finally {
+            producer.shutdown();
+        }
     }
 
 
