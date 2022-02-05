@@ -10,6 +10,7 @@ import java.util.Map;
 import static org.mvnsearch.http.utils.JsonUtils.OBJECT_MAPPER;
 
 
+@SuppressWarnings("unused")
 public class JSON {
 
     public static String toJSONString(Object obj) {
