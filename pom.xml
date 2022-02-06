@@ -12,8 +12,8 @@
     <artifactId>httpx</artifactId>
     <version>0.7.0</version>
     <name>httpx</name>
-    <description>CLI to run http file</description>
-    <url>https://github.com/linux-china/httpx</url>
+    <description>CLI to run HTTP file</description>
+    <url>https://httpx.sh</url>
 
     <properties>
         <java.version>17</java.version>
@@ -141,9 +141,15 @@
             <version>2.13.2</version>
         </dependency>
         <dependency>
-            <groupId>io.lettuce</groupId>
-            <artifactId>lettuce-core</artifactId>
-            <version>6.1.6.RELEASE</version>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.1.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-pool2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
