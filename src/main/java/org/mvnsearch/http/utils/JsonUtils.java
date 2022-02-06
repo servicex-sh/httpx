@@ -3,10 +3,14 @@ package org.mvnsearch.http.utils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class JsonUtils {
@@ -47,6 +51,20 @@ public class JsonUtils {
     public static <T> T readValue(File jsonFile, Class<T> valueType) throws IOException {
         return OBJECT_MAPPER.readValue(jsonFile, valueType);
     }
+
+    public static <T> List<T> readArray(String text, Class<T> clazz) {
+        try {
+            JsonNode tree = OBJECT_MAPPER.readTree(text);
+            List<T> list = new ArrayList<T>();
+            for (JsonNode jsonNode : tree) {
+                list.add(OBJECT_MAPPER.treeToValue(jsonNode, clazz));
+            }
+            return list;
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
 
     public static String writeValueAsPrettyString(Object obj) {
         try {
