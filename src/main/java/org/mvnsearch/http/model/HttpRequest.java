@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings({"unused", "DuplicatedCode"})
 public class HttpRequest {
@@ -254,5 +255,9 @@ public class HttpRequest {
                 }
             }
         }
+    }
+
+    public boolean match(String targetName) {
+        return Objects.equals(targetName, this.name) || Objects.equals(targetName, this.index.toString());
     }
 }
