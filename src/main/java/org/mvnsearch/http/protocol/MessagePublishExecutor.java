@@ -7,9 +7,6 @@ import com.aliyun.eventbridge.models.Config;
 import com.aliyun.eventbridge.models.PutEventsResponse;
 import com.aliyun.eventbridge.util.EventBuilder;
 import com.rabbitmq.client.ConnectionFactory;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
-import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -29,6 +26,7 @@ import reactor.kafka.sender.SenderRecord;
 import reactor.rabbitmq.OutboundMessage;
 import reactor.rabbitmq.RabbitFlux;
 import reactor.rabbitmq.Sender;
+import redis.clients.jedis.Jedis;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +35,7 @@ import java.util.*;
 import static reactor.core.publisher.SignalType.ON_COMPLETE;
 
 
-public class MessagePublishExecutor implements  BasePubSubExecutor {
+public class MessagePublishExecutor implements BasePubSubExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(MessagePublishExecutor.class);
 
     @Override
@@ -220,11 +218,9 @@ public class MessagePublishExecutor implements  BasePubSubExecutor {
 
     public void sendRedisMessage(URI redisURI, HttpRequest httpRequest) {
         final UriAndSubject redisUriAndChannel = getRedisUriAndChannel(redisURI, httpRequest);
-        RedisClient client = RedisClient.create(redisUriAndChannel.uri());
-        try (StatefulRedisPubSubConnection<String, String> connection = client.connectPubSub()) {
-            RedisPubSubCommands<String, String> reactive = connection.sync();
-            reactive.publish(redisUriAndChannel.subject(), new String(httpRequest.getBodyBytes(), StandardCharsets.UTF_8));
-            System.out.println("Succeeded to send message to " + redisUriAndChannel.subject() + "!");
+        try (Jedis jedis = new Jedis(redisUriAndChannel.uri())) {
+            jedis.publish(redisUriAndChannel.subject().getBytes(), httpRequest.getBodyBytes());
+            System.out.print("Succeeded to send message to " + redisUriAndChannel.subject() + "!");
         } catch (Exception e) {
             log.error("HTX-105-500", redisUriAndChannel.uri(), e);
         }

@@ -1,9 +1,6 @@
 package org.mvnsearch.http.protocol;
 
 import com.rabbitmq.client.ConnectionFactory;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
-import io.lettuce.core.pubsub.api.reactive.RedisPubSubReactiveCommands;
 import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.Subscription;
@@ -21,9 +18,12 @@ import reactor.kafka.receiver.KafkaReceiver;
 import reactor.rabbitmq.RabbitFlux;
 import reactor.rabbitmq.Receiver;
 import reactor.rabbitmq.ReceiverOptions;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -75,13 +75,14 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
 
         try {
             final KafkaReceiver<String, String> receiver = KafkaReceiver.create(receiverOptions);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             receiver.receive()
                     .doOnSubscribe(subscription -> {
                         System.out.println("Succeeded to subscribe: " + topic + "!");
                     })
                     .doOnNext(record -> {
                         String key = record.key();
-                        System.out.println("Received message: " + (key == null ? "" : key));
+                        System.out.println(dateFormat.format(new Date()) + " message received: " + (key == null ? "" : key));
                         System.out.println(record.value());
                     })
                     .blockLast();
@@ -99,6 +100,7 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                     .connectionFactory(connectionFactory)
                     .connectionSubscriptionScheduler(Schedulers.boundedElastic());
             final Receiver receiver = RabbitFlux.createReceiver(receiverOptions);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             receiver.consumeAutoAck(rabbitUriAndQueue.subject())
                     .doOnSubscribe(subscription -> {
                         System.out.println("SUB " + rabbitUriAndQueue.uri());
@@ -108,8 +110,8 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                         log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
                     })
                     .doOnNext(delivery -> {
-                        String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-                        System.out.println(" [x] Received '" + message + "'");
+                        System.out.println(dateFormat.format(new Date()) + " message received: ");
+                        System.out.println(new String(delivery.getBody(), StandardCharsets.UTF_8));
                     })
                     .blockLast();
         } catch (Exception e) {
@@ -122,13 +124,14 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
         try (io.nats.client.Connection nc = Nats.connect(natsURI.toString())) {
             Subscription sub = nc.subscribe(topic);
             nc.flush(Duration.ofSeconds(5));
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             System.out.println("Succeeded to subscribe(1000 max): " + topic + "!");
             for (int i = 0; i < 1000; i++) {
                 Message msg = sub.nextMessage(Duration.ofHours(1));
                 if (i > 0) {
                     System.out.println("======================================");
                 }
-                System.out.printf("Message Received [%d]\n", (i + 1));
+                System.out.printf(dateFormat.format(new Date()) + " message received: [%d]\n", (i + 1));
                 if (msg.hasHeaders()) {
                     System.out.println("  Headers:");
                     for (String key : msg.getHeaders().keySet()) {
@@ -148,17 +151,16 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
 
     public void subscribeRedis(URI redisURI, HttpRequest httpRequest) {
         final UriAndSubject redisUriAndChannel = getRedisUriAndChannel(redisURI, httpRequest);
-        RedisClient client = RedisClient.create(redisUriAndChannel.uri());
-        try (StatefulRedisPubSubConnection<String, String> connection = client.connectPubSub()) {
-            RedisPubSubReactiveCommands<String, String> reactive = connection.reactive();
-            reactive.subscribe(redisUriAndChannel.subject()).subscribe();
+        try (Jedis jedis = new Jedis(redisUriAndChannel.uri())) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             System.out.println("Succeeded to subscribe: " + redisUriAndChannel.subject() + "!");
-            reactive.observeChannels().doOnNext(patternMessage -> {
-                System.out.println("Message Received:");
-                System.out.println(patternMessage.getMessage());
-            }).blockLast();
-        } catch (Exception e) {
-            log.error("HTX-105-500", redisUriAndChannel.uri(), e);
+            jedis.subscribe(new JedisPubSub() {
+                @Override
+                public void onMessage(String channel, String message) {
+                    System.out.println(dateFormat.format(new Date()) + " message received: ");
+                    System.out.println(message);
+                }
+            }, redisUriAndChannel.subject());
         }
     }
 
@@ -178,10 +180,11 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             String topic = rocketURI.getPath().substring(1);
             consumer.setNamesrvAddr(nameServerAddress);
             consumer.subscribe(topic, "*");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             // Register callback to execute on arrival of messages fetched from brokers.
             consumer.registerMessageListener((MessageListenerConcurrently) (msgList, context) -> {
                 for (MessageExt messageExt : msgList) {
-                    System.out.println("msg: " + messageExt.getMsgId());
+                    System.out.println(dateFormat.format(new Date()) + " message received: " + messageExt.getMsgId());
                     System.out.println(new String(messageExt.getBody(), StandardCharsets.UTF_8));
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
