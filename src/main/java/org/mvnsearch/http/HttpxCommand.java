@@ -31,6 +31,8 @@ public class HttpxCommand implements Callable<Integer> {
     private String[] profile;
     @Option(names = {"-f", "--httpfile"}, description = "Http file", defaultValue = "index.http")
     private String httpFile;
+    @Option(names = {"-t", "--target"}, description = "Targets to run")
+    private String target;
     @Option(names = {"-l", "--list"}, description = "Display list")
     private boolean listRequests;
     @Option(names = {"-s", "--summary"}, description = "Display summary")
@@ -95,6 +97,10 @@ public class HttpxCommand implements Callable<Integer> {
                 }
                 return 0;
             }
+            //set targets from --target option if targets empty
+            if ((targets == null || targets.isEmpty()) && target != null) {
+                targets = List.of(target.split(","));
+            }
             if (targets != null && !targets.isEmpty()) {
                 boolean targetFound = false;
                 for (String target : targets) {
@@ -113,7 +119,7 @@ public class HttpxCommand implements Callable<Integer> {
                     System.err.println("Target not found in http file: " + String.join(",", targets));
                 }
             } else {
-                System.out.println("Please supply HTTP target!");
+                System.out.println("Please supply targets to run!");
             }
         } catch (Exception e) {
             e.printStackTrace();
