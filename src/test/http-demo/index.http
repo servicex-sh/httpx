@@ -98,6 +98,11 @@ Content-Type: application/json
   "name": "Jackie"
 }
 
+### subscribe redis
+//@name redis-sub
+SUB channel1
+Host: redis://localhost:6379
+
 ### publish rocketmq message
 //@name rocketmq-pub
 PUB testTopic
