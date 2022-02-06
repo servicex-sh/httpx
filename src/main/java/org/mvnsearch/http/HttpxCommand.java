@@ -105,7 +105,7 @@ public class HttpxCommand implements Callable<Integer> {
                 boolean targetFound = false;
                 for (String target : targets) {
                     for (HttpRequest request : requests) {
-                        if (request.getName().equals(target)) {
+                        if (request.match(target)) {
                             if (targetFound) {
                                 System.out.println("=========================================");
                             }
