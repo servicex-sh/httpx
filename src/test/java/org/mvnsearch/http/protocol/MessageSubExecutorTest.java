@@ -60,7 +60,7 @@ public class MessageSubExecutorTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
-                ### subscribe rabbitmq
+                ### subscribe redis
                 SUB channel1
                 Host: redis://localhost:6379
                 """;
