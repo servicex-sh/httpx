@@ -1,5 +1,6 @@
 package org.mvnsearch.http;
 
+import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpMethod;
@@ -39,6 +40,7 @@ public class HttpxCommand implements Callable<Integer> {
     private boolean summary;
     @Parameters(description = "positional params")
     private List<String> targets;
+    private boolean fromStdin = false;
 
     @Override
     public Integer call() {
@@ -46,13 +48,22 @@ public class HttpxCommand implements Callable<Integer> {
             printShellCompletion();
             return 0;
         }
-        final Path httpFilePath = Path.of(httpFile);
-        if (!httpFilePath.toFile().exists()) {
-            System.out.println("http file not found: " + httpFile);
-            return -1;
+        String httpCode = readHttpCodeFromStdin();
+        if (httpCode == null) {
+            final Path httpFilePath = Path.of(httpFile);
+            if (!httpFilePath.toFile().exists()) {
+                System.out.println("http file not found: " + httpFile);
+                return -1;
+            } else {
+                try {
+                    httpCode = Files.readString(httpFilePath, StandardCharsets.UTF_8);
+                } catch (Exception ignore) {
+                    log.error("HTX-001-501", httpFile);
+                }
+            }
         }
         try {
-            Map<String, Object> context = constructHttpClientContext(httpFilePath);
+            Map<String, Object> context = fromStdin ? new HashMap<>() : constructHttpClientContext(Path.of(httpFile));
             if (!context.isEmpty()) {
                 String activeProfile;
                 if (profile != null && profile.length > 0) { // get profile from command line
@@ -64,7 +75,7 @@ public class HttpxCommand implements Callable<Integer> {
                 //noinspection unchecked
                 context = (Map<String, Object>) context.get(activeProfile);
             }
-            final List<HttpRequest> requests = parseHttpFile(context);
+            final List<HttpRequest> requests = HttpRequestParser.parse(httpCode, context);
             if (summary) {
                 for (HttpRequest request : requests) {
                     String comment = request.getComment();
@@ -101,37 +112,31 @@ public class HttpxCommand implements Callable<Integer> {
             if ((targets == null || targets.isEmpty()) && target != null) {
                 targets = List.of(target.split(","));
             }
-            if (targets != null && !targets.isEmpty()) {
-                boolean targetFound = false;
-                for (String target : targets) {
-                    for (HttpRequest request : requests) {
-                        if (request.match(target)) {
-                            if (targetFound) {
-                                System.out.println("=========================================");
-                            }
-                            targetFound = true;
-                            request.cleanBody();
-                            execute(httpFilePath, request);
+            // set default target to first if empty
+            if (targets == null || targets.isEmpty()) {
+                targets = List.of("1");
+            }
+            boolean targetFound = false;
+            for (String target : targets) {
+                for (HttpRequest request : requests) {
+                    if (request.match(target)) {
+                        if (targetFound) {
+                            System.out.println("=========================================");
                         }
+                        targetFound = true;
+                        request.cleanBody();
+                        execute(request);
                     }
                 }
-                if (!targetFound) {
-                    System.err.println("Target not found in http file: " + String.join(",", targets));
-                }
-            } else {
-                System.out.println("Please supply targets to run!");
+            }
+            if (!targetFound) {
+                System.err.println("Target not found in http file: " + String.join(",", targets));
             }
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
         return 0;
-    }
-
-    public List<HttpRequest> parseHttpFile(Map<String, Object> context) throws Exception {
-        final Path httpFilePath = Path.of(httpFile);
-        final String fileContent = Files.readString(httpFilePath, StandardCharsets.UTF_8);
-        return HttpRequestParser.parse(fileContent, context);
     }
 
     @SuppressWarnings("unchecked")
@@ -167,7 +172,7 @@ public class HttpxCommand implements Callable<Integer> {
         return context;
     }
 
-    public void execute(Path httpFilePath, HttpRequest httpRequest) {
+    public void execute(HttpRequest httpRequest) {
         final HttpMethod requestMethod = httpRequest.getMethod();
         List<byte[]> result;
         if (requestMethod.isHttpMethod()) {
@@ -191,15 +196,18 @@ public class HttpxCommand implements Callable<Integer> {
             System.out.print("Not support: " + requestMethod.getName());
         }
         System.out.println();
-        if (httpRequest.getRedirectResponse() != null && !result.isEmpty()) {
-            writeResponse(httpFilePath, httpRequest.getRedirectResponse(), result);
+        if (!fromStdin) {
+            if (httpRequest.getRedirectResponse() != null && !result.isEmpty()) {
+                writeResponse(httpRequest.getRedirectResponse(), result);
+            }
         }
     }
 
-    void writeResponse(Path httpFilePath, String redirectResponse, List<byte[]> content) {
+    void writeResponse(String redirectResponse, List<byte[]> content) {
         String[] parts = redirectResponse.split("\\s+", 2);
         String responseFile = parts[1];
         try {
+            final Path httpFilePath = Path.of(httpFile);
             Path responseFilePath;
             if (responseFile.startsWith("/") || responseFile.contains(":\\")) {
                 responseFilePath = Path.of(responseFile);
@@ -240,6 +248,22 @@ public class HttpxCommand implements Callable<Integer> {
                 _describe 'command' subcmds
                 """;
         System.out.println(zshCompletion);
+    }
+
+    @Nullable
+    private String readHttpCodeFromStdin() {
+        try {
+            if (System.in.available() > 0) {
+                fromStdin = true;
+                byte[] bytes = System.in.readAllBytes();
+                if (bytes != null && bytes.length > 0) {
+                    return new String(bytes, StandardCharsets.UTF_8);
+                }
+            }
+        } catch (Exception ignore) {
+
+        }
+        return null;
     }
 
 }
