@@ -50,12 +50,21 @@ public class HttpxCommand implements Callable<Integer> {
         }
         String httpCode = readHttpCodeFromStdin();
         if (httpCode == null) {
-            final Path httpFilePath = Path.of(httpFile);
-            if (!httpFilePath.toFile().exists()) {
+            Path httpFilePath;
+            if (Objects.equals(httpFile, "index.http")) {  //resolve index.http with parent directory support
+                httpFilePath = resolveIndexHttpFile(Path.of(httpFile).toAbsolutePath());
+            } else { //resolve normal http file
+                httpFilePath = Path.of(httpFile);
+                if (!httpFilePath.toFile().exists()) {
+                    httpFilePath = null;
+                }
+            }
+            if (httpFilePath == null) {
                 System.out.println("http file not found: " + httpFile);
                 return -1;
             } else {
                 try {
+                    this.httpFile = httpFilePath.toAbsolutePath().toString();
                     httpCode = Files.readString(httpFilePath, StandardCharsets.UTF_8);
                 } catch (Exception ignore) {
                     log.error("HTX-001-501", httpFile);
@@ -264,6 +273,18 @@ public class HttpxCommand implements Callable<Integer> {
 
         }
         return null;
+    }
+
+    private Path resolveIndexHttpFile(Path httpFilePath) {
+        if (!httpFilePath.toFile().exists()) {
+            final Path currentDir = httpFilePath.getParent();
+            final Path parentDir = currentDir.getParent();
+            if (parentDir == null) {
+                return null;
+            }
+            return resolveIndexHttpFile(parentDir.resolve("index.http"));
+        }
+        return httpFilePath;
     }
 
 }
