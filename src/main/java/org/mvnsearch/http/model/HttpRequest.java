@@ -73,6 +73,17 @@ public class HttpRequest {
         this.tags.add(tag);
     }
 
+    public boolean containsTag(String name) {
+        if (this.tags != null && !this.tags.isEmpty()) {
+            for (String tag : tags) {
+                if (tag.equalsIgnoreCase(name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
