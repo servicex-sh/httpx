@@ -23,6 +23,9 @@ public class HttpExecutor extends HttpBaseExecutor {
                 }
             }
         });
+        if (httpRequest.containsTag("no-redirect")) {
+            client.followRedirect(false);
+        }
         for (HttpCookie cookie : cookies(requestUri.getHost())) {
             client.cookie(cookie.toNettyCookie());
         }
