@@ -1,10 +1,12 @@
 package org.mvnsearch.http;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 public class HttpFileRunnerTest extends SpringBootBaseTest {
     @Autowired
     private HttpFileRunner runner;
