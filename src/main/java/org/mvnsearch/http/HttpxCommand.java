@@ -9,7 +9,6 @@ import org.mvnsearch.http.model.HttpRequestParser;
 import org.mvnsearch.http.protocol.*;
 import org.mvnsearch.http.utils.JsonUtils;
 import org.springframework.stereotype.Component;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -31,6 +30,8 @@ public class HttpxCommand implements Callable<Integer> {
     private String completions;
     @Option(names = {"-p", "--profile"}, description = "Profile")
     private String[] profile;
+    @Option(names = {"-e", "--env"}, description = "Environment variables")
+    private String[] variables;
     @Option(names = {"-f", "--httpfile"}, description = "Http file", defaultValue = "index.http")
     private String httpFile;
     @Option(names = {"-t", "--target"}, description = "Targets to run")
@@ -39,8 +40,6 @@ public class HttpxCommand implements Callable<Integer> {
     private boolean listRequests;
     @Option(names = {"-s", "--summary"}, description = "Display summary")
     private boolean summary;
-    @CommandLine.Unmatched
-    private List<String> definitions;
     @Parameters(description = "positional params")
     private List<String> targets;
     private boolean fromStdin = false;
@@ -87,16 +86,14 @@ public class HttpxCommand implements Callable<Integer> {
                 //noinspection unchecked
                 context = (Map<String, Object>) context.get(activeProfile);
             }
-            // profile variables overwrite by definition: `-Duser=xxx`
-            if (definitions != null && !definitions.isEmpty()) {
-                for (String definition : definitions) {
-                    if (definition.startsWith("-D")) {
-                        final String[] parts = definition.substring(2).split("=", 2);
-                        if (parts.length == 2) {
-                            context.put(parts[0], parts[1]);
-                        } else {
-                            context.put(parts[0], "true");
-                        }
+            // profile variables overwrite by definition: `-e user=xxx`
+            if (variables != null && variables.length > 0) {
+                for (String variable : variables) {
+                    final String[] parts = variable.split("=", 2);
+                    if (parts.length == 2) {
+                        context.put(parts[0], parts[1]);
+                    } else {
+                        context.put(parts[0], "true");
                     }
                 }
             }
