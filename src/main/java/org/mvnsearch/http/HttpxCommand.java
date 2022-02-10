@@ -9,6 +9,7 @@ import org.mvnsearch.http.model.HttpRequestParser;
 import org.mvnsearch.http.protocol.*;
 import org.mvnsearch.http.utils.JsonUtils;
 import org.springframework.stereotype.Component;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -38,6 +39,8 @@ public class HttpxCommand implements Callable<Integer> {
     private boolean listRequests;
     @Option(names = {"-s", "--summary"}, description = "Display summary")
     private boolean summary;
+    @CommandLine.Unmatched
+    private List<String> definitions;
     @Parameters(description = "positional params")
     private List<String> targets;
     private boolean fromStdin = false;
@@ -83,6 +86,19 @@ public class HttpxCommand implements Callable<Integer> {
                 }
                 //noinspection unchecked
                 context = (Map<String, Object>) context.get(activeProfile);
+            }
+            // profile variables overwrite by definition: `-Duser=xxx`
+            if (definitions != null && !definitions.isEmpty()) {
+                for (String definition : definitions) {
+                    if (definition.startsWith("-D")) {
+                        final String[] parts = definition.substring(2).split("=", 2);
+                        if (parts.length == 2) {
+                            context.put(parts[0], parts[1]);
+                        } else {
+                            context.put(parts[0], "true");
+                        }
+                    }
+                }
             }
             final List<HttpRequest> requests = HttpRequestParser.parse(httpCode, context);
             if (summary) {
@@ -133,7 +149,6 @@ public class HttpxCommand implements Callable<Integer> {
                             System.out.println("=========================================");
                         }
                         targetFound = true;
-                        request.cleanBody();
                         execute(request);
                     }
                 }
@@ -181,7 +196,8 @@ public class HttpxCommand implements Callable<Integer> {
         return context;
     }
 
-    public void execute(HttpRequest httpRequest) {
+    public void execute(HttpRequest httpRequest) throws Exception {
+        httpRequest.cleanBody();
         final HttpMethod requestMethod = httpRequest.getMethod();
         List<byte[]> result;
         if (requestMethod.isHttpMethod()) {
