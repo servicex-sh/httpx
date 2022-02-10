@@ -279,7 +279,12 @@ public class HttpxCommand implements Callable<Integer> {
         if (!httpFilePath.toFile().exists()) {
             final Path currentDir = httpFilePath.getParent();
             final Path parentDir = currentDir.getParent();
-            if (parentDir == null) {
+            if (parentDir == null) { // can not find index.http in parent chain
+                // find default index.http ~/.httpx/index.http
+                final Path defaultIndexHttp = Path.of(System.getProperty("user.home")).resolve(".httpx").resolve("index.http").toAbsolutePath();
+                if (defaultIndexHttp.toFile().exists()) {
+                    return defaultIndexHttp;
+                }
                 return null;
             }
             return resolveIndexHttpFile(parentDir.resolve("index.http"));
