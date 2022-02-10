@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "unused"})
 @Component
-@Command(name = "httpx", version = "0.8.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
+@Command(name = "httpx", version = "0.9.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
 public class HttpxCommand implements Callable<Integer> {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpxCommand.class);
     @Option(names = {"--completions"}, description = "Shell Completion, such as zsh, bash")
