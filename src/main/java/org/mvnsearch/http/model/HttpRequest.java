@@ -269,6 +269,6 @@ public class HttpRequest {
     }
 
     public boolean match(String targetName) {
-        return Objects.equals(targetName, this.name) || Objects.equals(targetName, this.index.toString());
+        return targetName.equalsIgnoreCase(this.name) || Objects.equals(targetName, this.index.toString());
     }
 }
