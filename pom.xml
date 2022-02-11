@@ -133,7 +133,7 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.14.1</version>
+            <version>5.14.2</version>
         </dependency>
         <dependency>
             <groupId>io.nats</groupId>
