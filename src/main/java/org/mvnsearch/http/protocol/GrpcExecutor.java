@@ -70,7 +70,7 @@ public class GrpcExecutor implements BaseExecutor {
                 }
             } else {
                 String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-                System.out.println(output);
+                System.out.println(prettyJsonFormat(output));
                 return List.of(output.getBytes(StandardCharsets.UTF_8));
             }
         } catch (Exception e) {

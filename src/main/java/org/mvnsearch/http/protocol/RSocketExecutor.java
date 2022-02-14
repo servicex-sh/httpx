@@ -139,7 +139,11 @@ public class RSocketExecutor implements BaseExecutor {
 
     private String convertPayloadText(String dataMimeType, Payload payload) {
         if (isPrintable(dataMimeType)) {
-            return payload.getDataUtf8();
+            final String dataUtf8 = payload.getDataUtf8();
+            if (dataMimeType.contains("json") && (dataUtf8.startsWith("{") || dataUtf8.startsWith("["))) {
+                return prettyJsonFormat(dataUtf8);
+            }
+            return dataUtf8;
         } else {
             return Base64.getEncoder().encodeToString(payload.getData().array());
         }

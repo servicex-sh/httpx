@@ -99,7 +99,7 @@ public class DubboExecutor extends HttpBaseExecutor {
                         return List.of(result.toString().getBytes(StandardCharsets.UTF_8));
                     } else {
                         String text = JsonUtils.writeValueAsPrettyString(result);
-                        System.out.print(text);
+                        System.out.print(prettyJsonFormat(text));
                         return List.of(text.getBytes(StandardCharsets.UTF_8));
                     }
                 }

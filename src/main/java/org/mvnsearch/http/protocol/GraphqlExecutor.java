@@ -26,7 +26,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
         try {
             if (contentType != null) {
                 Map<String, Object> jsonBody;
-                if ("application/graphql".equals(contentType)) {  // convert graphql code into json object
+                if ("application/graphql" .equals(contentType)) {  // convert graphql code into json object
                     jsonBody = Collections.singletonMap("query", new String(requestJsonBody, StandardCharsets.UTF_8));
                     requestJsonBody = JsonUtils.writeValueAsBytes(jsonBody);
                 }
@@ -76,15 +76,15 @@ public class GraphqlExecutor extends HttpBaseExecutor {
                         try {
                             final Map<String, ?> response = JsonUtils.readValue(responseJsonText, Map.class);
                             String type = (String) response.get("type");
-                            if ("connection_ack".equals(type)) { //send query
+                            if ("connection_ack" .equals(type)) { //send query
                                 byte[] queryBytes = graphqlWsMessage("subscribe", id, requestJsonBody);
                                 outbound.send(Mono.just(Unpooled.wrappedBuffer(queryBytes))).then().subscribe();
-                            } else if ("next".equals(type)) { //result received
+                            } else if ("next" .equals(type)) { //result received
                                 final Object payload = response.get("payload");
                                 final String jsonText = JsonUtils.writeValueAsPrettyString(payload);
-                                System.out.println(jsonText);
+                                System.out.println(prettyJsonFormat(jsonText));
                                 fluxSink.next(jsonText.getBytes(StandardCharsets.UTF_8));
-                            } else if ("complete".equals(type)) {  // query completed
+                            } else if ("complete" .equals(type)) {  // query completed
                                 outbound.sendClose().subscribe();
                                 sink.complete();
                                 fluxSink.complete();
