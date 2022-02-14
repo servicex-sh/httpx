@@ -1,6 +1,7 @@
 package org.mvnsearch.http.protocol;
 
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
@@ -57,14 +58,22 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
         return responseReceiver
                 .uri(requestUri)
                 .response((response, byteBufFlux) -> {
-                    System.out.println("Status: " + response.status());
+                    final HttpResponseStatus httpStatus = response.status();
+                    if (httpStatus == HttpResponseStatus.OK) {
+                        System.out.println(colorOutput("green", "Status: " + httpStatus));
+                    } else {
+                        System.out.println(colorOutput("bold,red", "Status: " + httpStatus));
+                    }
                     final HttpHeaders responseHeaders = response.responseHeaders();
-                    responseHeaders.forEach(header -> System.out.println(header.getKey() + ": " + header.getValue()));
+                    //color header
+                    responseHeaders.forEach(header -> System.out.println(colorOutput("green", header.getKey()) + ": " + header.getValue()));
+                    System.out.println();
                     String contentType = responseHeaders.get("Content-Type");
                     return byteBufFlux.asByteArray().doOnNext(bytes -> {
                         if (contentType != null && isPrintable(contentType)) {
                             if (contentType.contains("json")) {
-                                System.out.print(prettyJsonFormat(new String(bytes, StandardCharsets.UTF_8)));
+                                final String body = prettyJsonFormat(new String(bytes, StandardCharsets.UTF_8));
+                                System.out.print(body);
                             } else {
                                 System.out.print(new String(bytes));
                             }
