@@ -62,7 +62,8 @@ public interface BaseExecutor {
         return queryParams;
     }
 
-    default String greenOutput(String text) {
-        return CommandLine.Help.Ansi.AUTO.string("@|green " + text + "|@");
+    default String colorOutput(String color, String text) {
+        return CommandLine.Help.Ansi.AUTO.string("@|" + color + " " + text + " | @ ");
     }
+
 }
