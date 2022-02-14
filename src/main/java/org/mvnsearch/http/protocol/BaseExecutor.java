@@ -63,7 +63,7 @@ public interface BaseExecutor {
     }
 
     default String colorOutput(String color, String text) {
-        return CommandLine.Help.Ansi.AUTO.string("@|" + color + " " + text + " | @ ");
+        return CommandLine.Help.Ansi.AUTO.string("@|" + color + " " + text + " |@");
     }
 
 }
