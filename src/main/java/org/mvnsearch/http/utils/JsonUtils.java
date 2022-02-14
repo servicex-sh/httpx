@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +70,18 @@ public class JsonUtils {
     public static String writeValueAsPrettyString(Object obj) {
         try {
             return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static String writeValueAsPrettyColorString(Object obj) {
+        if (!CommandLine.Help.Ansi.AUTO.enabled()) {
+            return writeValueAsPrettyString(obj);
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper(new JsonColorFactory());
+            return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
             return "";
         }
