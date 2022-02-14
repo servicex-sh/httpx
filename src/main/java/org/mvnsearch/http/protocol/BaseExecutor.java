@@ -2,6 +2,7 @@ package org.mvnsearch.http.protocol;
 
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
+import picocli.CommandLine;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -30,10 +31,10 @@ public interface BaseExecutor {
         try {
             if (jsonText.startsWith("{")) {
                 final Map<?, ?> jsonObject = JsonUtils.readValue(jsonText, Map.class);
-                return JsonUtils.writeValueAsPrettyString(jsonObject);
+                return JsonUtils.writeValueAsPrettyColorString(jsonObject);
             } else if (jsonText.startsWith("[")) {
                 final List<?> jsonArray = JsonUtils.readValue(jsonText, List.class);
-                return JsonUtils.writeValueAsPrettyString(jsonArray);
+                return JsonUtils.writeValueAsPrettyColorString(jsonArray);
             } else {
                 return jsonText;
             }
@@ -59,5 +60,9 @@ public interface BaseExecutor {
 
         }
         return queryParams;
+    }
+
+    default String greenOutput(String text) {
+        return CommandLine.Help.Ansi.AUTO.string("@|green " + text + "|@");
     }
 }
