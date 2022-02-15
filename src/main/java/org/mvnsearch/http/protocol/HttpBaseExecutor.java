@@ -60,7 +60,7 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                 .response((response, byteBufFlux) -> {
                     final HttpResponseStatus httpStatus = response.status();
                     if (httpStatus == HttpResponseStatus.OK) {
-                        System.out.println(colorOutput("green", "Status: " + httpStatus));
+                        System.out.println(colorOutput("bold,green", "Status: " + httpStatus));
                     } else {
                         System.out.println(colorOutput("bold,red", "Status: " + httpStatus));
                     }
