@@ -116,7 +116,11 @@ public class HttpRequestTarget {
                     if (pathAbsolute == null) {
                         this.pathAbsolute = rawPath;
                     } else {
-                        this.pathAbsolute = rawPath + this.pathAbsolute;
+                        if (!(rawPath.endsWith("/") || this.pathAbsolute.startsWith("/"))) {
+                            this.pathAbsolute = rawPath + "/" + this.pathAbsolute;
+                        } else {
+                            this.pathAbsolute = rawPath + this.pathAbsolute;
+                        }
                     }
                 }
             } else if (hostHeader.contains(":")) { // host and port
