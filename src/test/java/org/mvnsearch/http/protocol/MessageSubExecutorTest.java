@@ -42,6 +42,20 @@ public class MessageSubExecutorTest {
     }
 
     @Test
+    public void testSubscribeMqtt() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### subscribe mqtt
+                SUB topic1
+                Host: mqtt://localhost:1883
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessageSubscribeExecutor().execute(request);
+    }
+
+    @Test
     public void testSubscribeNats() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
