@@ -90,6 +90,25 @@ public class MessagePubExecutorTest {
     }
 
     @Test
+    public void testSendMqttMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send mqtt message
+                PUB topic1
+                Host: mqtt://localhost:1883
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
+
+    @Test
     public void testSendRedisMessage() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
