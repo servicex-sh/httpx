@@ -14,6 +14,11 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
+import org.eclipse.paho.mqttv5.client.MqttClient;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -54,6 +59,8 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             sendRocketMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "redis")) {
             sendRedisMessage(realURI, httpRequest);
+        } else if (schema != null && schema.startsWith("mqtt")) {
+            sendMqttMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "eventbridge") && realURI.getHost().contains("aliyuncs")) {
             publishAliyunEventBridge(realURI, httpRequest);
         } else {
@@ -223,6 +230,28 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             System.out.print("Succeeded to send message to " + redisUriAndChannel.subject() + "!");
         } catch (Exception e) {
             log.error("HTX-105-500", redisUriAndChannel.uri(), e);
+        }
+    }
+
+    public void sendMqttMessage(URI mqttURI, HttpRequest httpRequest) {
+        MqttClient sampleClient = null;
+        try {
+            UriAndSubject uriAndTopic = getMqttUriAndTopic(mqttURI, httpRequest);
+            sampleClient = new MqttClient(uriAndTopic.uri(), "httpx-cli", new MemoryPersistence());
+            MqttConnectionOptions connOpts = new MqttConnectionOptions();
+            connOpts.setCleanStart(true);
+            sampleClient.connect(connOpts);
+            sampleClient.publish(uriAndTopic.subject(), new MqttMessage(httpRequest.getBodyBytes()));
+            System.out.print("Succeeded to send message to " + uriAndTopic.subject() + "!");
+        } catch (Exception e) {
+            log.error("HTX-105-500", mqttURI, e);
+        } finally {
+            if (sampleClient != null) {
+                try {
+                    sampleClient.disconnect();
+                } catch (MqttException ignore) {
+                }
+            }
         }
     }
 }
