@@ -39,4 +39,17 @@ public interface BasePubSubExecutor extends BaseExecutor {
         }
         return new UriAndSubject(connectionUri, queue);
     }
+
+    default UriAndSubject getMqttUriAndTopic(URI mqttURI, HttpRequest httpRequest) {
+        String topic = mqttURI.getPath().substring(1);
+        String schema = mqttURI.getScheme();
+        String brokerUrl = mqttURI.toString();
+        if (schema.contains("+")) {
+            brokerUrl = brokerUrl.substring(brokerUrl.indexOf("+") + 1);
+        } else {
+            brokerUrl = brokerUrl.replace("mqtt://", "tcp://");
+        }
+        brokerUrl = brokerUrl.substring(0, brokerUrl.lastIndexOf("/"));
+        return new UriAndSubject(brokerUrl, topic);
+    }
 }
