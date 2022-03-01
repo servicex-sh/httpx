@@ -10,6 +10,11 @@ import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.eclipse.paho.mqttv5.client.MqttClient;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -46,6 +51,8 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             subscribeRedis(realURI, httpRequest);
         } else if (Objects.equals(schema, "rocketmq")) {
             subscribeRocketmq(realURI, httpRequest);
+        } else if (schema != null && schema.startsWith("mqtt")) {
+            subscribeMqtt(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -161,6 +168,53 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                     System.out.println(message);
                 }
             }, redisUriAndChannel.subject());
+        }
+    }
+
+    public void subscribeMqtt(URI mqttURI, HttpRequest httpRequest) {
+        MqttClient mqttClient = null;
+        try {
+            UriAndSubject uriAndTopic = getMqttUriAndTopic(mqttURI, httpRequest);
+            final String clientId = "httpx-" + UUID.randomUUID();
+            mqttClient = new MqttClient(uriAndTopic.uri(), clientId, new MemoryPersistence());
+            MqttConnectionOptions connOpts = new MqttConnectionOptions();
+            connOpts.setCleanStart(true);
+            mqttClient.setCallback(new AbstractMqttCallback() {
+                private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
+                    final String content = new String(message.getPayload(), StandardCharsets.UTF_8);
+                    if (content.startsWith("{")) { //pretty json output
+                        System.out.println(prettyJsonFormat(content));
+                    } else {
+                        System.out.println(content);
+                    }
+                }
+            });
+            mqttClient.connect(connOpts);
+            mqttClient.subscribe(uriAndTopic.subject(), 1);
+            System.out.println("Succeeded to subscribe: " + uriAndTopic.subject() + "!");
+            CountDownLatch latch = new CountDownLatch(1);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    Thread.sleep(200);
+                    latch.countDown();
+                    System.out.println("Shutting down ...");
+                } catch (Exception ignore) {
+                }
+            }));
+            latch.await();
+        } catch (Exception e) {
+            log.error("HTX-105-500", mqttURI, e);
+        } finally {
+            if (mqttClient != null) {
+                try {
+                    mqttClient.disconnect();
+                } catch (MqttException ignore) {
+                }
+            }
         }
     }
 
