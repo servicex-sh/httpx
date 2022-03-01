@@ -40,6 +40,14 @@ import org.apache.rocketmq.remoting.protocol.LanguageCode;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 import org.apache.rocketmq.remoting.protocol.SerializeType;
+import org.eclipse.paho.mqttv5.client.internal.SSLNetworkModuleFactory;
+import org.eclipse.paho.mqttv5.client.internal.TCPNetworkModuleFactory;
+import org.eclipse.paho.mqttv5.client.logging.JSR47Logger;
+import org.eclipse.paho.mqttv5.client.logging.Logger;
+import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
+import org.eclipse.paho.mqttv5.client.spi.NetworkModuleFactory;
+import org.eclipse.paho.mqttv5.client.websocket.WebSocketNetworkModuleFactory;
+import org.eclipse.paho.mqttv5.client.websocket.WebSocketSecureNetworkModuleFactory;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.BeanFactoryNativeConfigurationProcessor;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeConfigurationRegistry;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeResourcesEntry;
@@ -105,6 +113,19 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 TopicRouteData.class, NettyDecoder.class, NettyEncoder.class,
                 LanguageCode.class, RemotingCommand.class, RemotingSerializable.class, SerializeType.class};
         for (Class<?> clazz : rocketmqClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //eclipse paho mqtt client
+        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/logging/JSR47Logger.class"));
+        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/client/internal/nls/logcat.properties"));
+        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/common/nls/logcat.properties"));
+        registry.resources().add(NativeResourcesEntry.ofBundle("org/eclipse/paho/mqttv5/common/nls/messages"));
+        final Class<?>[] mqttClassArray = {Logger.class, JSR47Logger.class, LoggerFactory.class,
+                NetworkModuleFactory.class, WebSocketNetworkModuleFactory.class,
+                WebSocketSecureNetworkModuleFactory.class, SSLNetworkModuleFactory.class,
+                TCPNetworkModuleFactory.class};
+        for (Class<?> clazz : mqttClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
