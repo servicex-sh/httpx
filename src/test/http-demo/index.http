@@ -11,7 +11,9 @@ GET https://httpbin.org/ip
 POST https://httpbin.org/post
 Content-Type: application/json
 
-[1]
+[
+  1
+]
 
 ### RSocket Request
 // @name request
@@ -102,6 +104,22 @@ Content-Type: application/json
 //@name redis-sub
 SUB channel1
 Host: redis://localhost:6379
+
+### publish mqtt message
+//@name mqtt-pub
+PUB topic1
+Host: mqtt://localhost:1883
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
+### subscribe mqtt
+//@name mqtt-sub
+SUB topic1
+Host: mqtt://localhost:1883
+
 
 ### publish rocketmq message
 //@name rocketmq-pub
