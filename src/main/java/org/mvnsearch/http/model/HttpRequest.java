@@ -2,6 +2,7 @@ package org.mvnsearch.http.model;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -118,6 +119,18 @@ public class HttpRequest {
             }
         }
         return null;
+    }
+
+    @NotNull
+    public String getHeader(String name, @NotNull String defaultValue) {
+        if (this.headers != null) {
+            for (HttpHeader header : headers) {
+                if (header.getName().equals(name)) {
+                    return header.getValue();
+                }
+            }
+        }
+        return defaultValue;
     }
 
     public void addHttpHeader(String name, String value) {
