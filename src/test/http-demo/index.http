@@ -131,6 +131,21 @@ Content-Type: application/json
   "name": "Jackie"
 }
 
+### send pulsar message
+//@name pulsar-pub
+PUB test-topic
+Host: pulsar://localhost:6650
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
+### subscribe pulsar
+//@name pulsar-sub
+SUB test-topic
+Host: pulsar://localhost:6650
+
 ### send aliyun event bridge message
 //@name ali-event
 PUB demo-event-bus
