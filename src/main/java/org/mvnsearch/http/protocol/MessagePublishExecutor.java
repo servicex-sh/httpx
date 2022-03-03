@@ -11,6 +11,9 @@ import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.pulsar.client.api.MessageId;
+import org.apache.pulsar.client.api.Producer;
+import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
@@ -59,6 +62,8 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             sendRocketMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "redis")) {
             sendRedisMessage(realURI, httpRequest);
+        } else if (Objects.equals(schema, "pulsar")) {
+            sendPulsarMessage(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("mqtt")) {
             sendMqttMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "eventbridge") && realURI.getHost().contains("aliyuncs")) {
@@ -139,6 +144,17 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             System.out.print("Succeeded to send message to " + topic + "!");
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+        }
+    }
+
+    public void sendPulsarMessage(URI pulsarURI, HttpRequest httpRequest) {
+        String topic = pulsarURI.getPath().substring(1);
+        try (PulsarClient client = PulsarClient.builder().serviceUrl(pulsarURI.toString()).build();
+             Producer<byte[]> producer = client.newProducer().topic(topic).create()) {
+            final MessageId msgId = producer.send(httpRequest.getBodyBytes());
+            System.out.print("Succeeded to send message to " + topic + " with id " + msgId);
+        } catch (Exception e) {
+            log.error("HTX-105-500", pulsarURI.toString(), e);
         }
     }
 
