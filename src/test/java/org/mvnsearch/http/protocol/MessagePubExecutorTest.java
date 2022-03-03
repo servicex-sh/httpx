@@ -90,6 +90,25 @@ public class MessagePubExecutorTest {
     }
 
     @Test
+    public void testSendPulsarMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send pulsar message
+                PUB test-topic
+                Host: pulsar://localhost:6650
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
+
+    @Test
     public void testSendMqttMessage() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
