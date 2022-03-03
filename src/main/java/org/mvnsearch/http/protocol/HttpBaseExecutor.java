@@ -55,9 +55,9 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
     }
 
     public List<byte[]> request(HttpClient.ResponseReceiver<?> responseReceiver, URI requestUri) {
-        return responseReceiver
+        final byte[] bytes = responseReceiver
                 .uri(requestUri)
-                .response((response, byteBufFlux) -> {
+                .responseSingle((response, byteBufMono) -> {
                     final HttpResponseStatus httpStatus = response.status();
                     if (httpStatus == HttpResponseStatus.OK) {
                         System.out.println(colorOutput("bold,green", "Status: " + httpStatus));
@@ -69,16 +69,18 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                     responseHeaders.forEach(header -> System.out.println(colorOutput("green", header.getKey()) + ": " + header.getValue()));
                     System.out.println();
                     String contentType = responseHeaders.get("Content-Type");
-                    return byteBufFlux.asByteArray().doOnNext(bytes -> {
+                    return byteBufMono.asByteArray().doOnNext(content -> {
                         if (contentType != null && isPrintable(contentType)) {
                             if (contentType.contains("json")) {
-                                final String body = prettyJsonFormat(new String(bytes, StandardCharsets.UTF_8));
+                                final String body = prettyJsonFormat(new String(content, StandardCharsets.UTF_8));
                                 System.out.print(body);
                             } else {
-                                System.out.print(new String(bytes));
+                                System.out.print(new String(content));
                             }
                         }
                     });
-                }).buffer().blockLast();
+                }).block();
+        //noinspection ConstantConditions
+        return List.of(bytes);
     }
 }
