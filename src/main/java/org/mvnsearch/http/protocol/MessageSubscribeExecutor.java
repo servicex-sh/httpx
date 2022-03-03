@@ -6,6 +6,8 @@ import io.nats.client.Nats;
 import io.nats.client.Subscription;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.pulsar.client.api.Consumer;
+import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
@@ -49,6 +51,8 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             subscribeNats(realURI, httpRequest);
         } else if (Objects.equals(schema, "redis")) {
             subscribeRedis(realURI, httpRequest);
+        } else if (Objects.equals(schema, "pulsar")) {
+            subscribePulsar(realURI, httpRequest);
         } else if (Objects.equals(schema, "rocketmq")) {
             subscribeRocketmq(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("mqtt")) {
@@ -89,8 +93,8 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                     })
                     .doOnNext(record -> {
                         String key = record.key();
-                        System.out.println(dateFormat.format(new Date()) + " message received: " + (key == null ? "" : key));
-                        System.out.println(record.value());
+                        System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: " + (key == null ? "" : key)));
+                        System.out.println(prettyJsonFormat(record.value()));
                     })
                     .blockLast();
         } catch (Exception e) {
@@ -117,8 +121,8 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                         log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
                     })
                     .doOnNext(delivery -> {
-                        System.out.println(dateFormat.format(new Date()) + " message received: ");
-                        System.out.println(new String(delivery.getBody(), StandardCharsets.UTF_8));
+                        System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
+                        System.out.println(prettyJsonFormat(new String(delivery.getBody(), StandardCharsets.UTF_8)));
                     })
                     .blockLast();
         } catch (Exception e) {
@@ -138,7 +142,7 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                 if (i > 0) {
                     System.out.println("======================================");
                 }
-                System.out.printf(dateFormat.format(new Date()) + " message received: [%d]\n", (i + 1));
+                System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: " + (i + 1)));
                 if (msg.hasHeaders()) {
                     System.out.println("  Headers:");
                     for (String key : msg.getHeaders().keySet()) {
@@ -147,9 +151,10 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                         }
                     }
                 }
+
                 System.out.printf("  Subject: %s\n  Data: %s\n",
                         msg.getSubject(),
-                        new String(msg.getData(), StandardCharsets.UTF_8));
+                        prettyJsonFormat(new String(msg.getData(), StandardCharsets.UTF_8)));
             }
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
@@ -164,10 +169,35 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             jedis.subscribe(new JedisPubSub() {
                 @Override
                 public void onMessage(String channel, String message) {
-                    System.out.println(dateFormat.format(new Date()) + " message received: ");
-                    System.out.println(message);
+                    System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
+                    System.out.println(prettyJsonFormat(message));
                 }
             }, redisUriAndChannel.subject());
+        }
+    }
+
+    public void subscribePulsar(URI pulsarURI, HttpRequest httpRequest) {
+        String topic = pulsarURI.getPath().substring(1);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        try (PulsarClient client = PulsarClient.builder().serviceUrl(pulsarURI.toString()).build();
+             Consumer<byte[]> ignore = client.newConsumer()
+                     .topic(topic)
+                     .subscriptionName("httpx-cli-" + UUID.randomUUID())
+                     .messageListener((consumer, msg) -> {
+                         try {
+                             System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
+                             System.out.println(prettyJsonFormat(new String(msg.getData(), StandardCharsets.UTF_8)));
+                             consumer.acknowledge(msg);
+                         } catch (Exception e) {
+                             consumer.negativeAcknowledge(msg);
+                         }
+                     })
+                     .subscribe()
+        ) {
+            System.out.println("Succeeded to subscribe: " + topic + "!");
+            latch();
+        } catch (Exception e) {
+            log.error("HTX-105-500", pulsarURI.toString(), e);
         }
     }
 
@@ -196,16 +226,7 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             mqttClient.connect(connOpts);
             mqttClient.subscribe(uriAndTopic.subject(), 1);
             System.out.println("Succeeded to subscribe: " + uriAndTopic.subject() + "!");
-            CountDownLatch latch = new CountDownLatch(1);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Thread.sleep(200);
-                    latch.countDown();
-                    System.out.println("Shutting down ...");
-                } catch (Exception ignore) {
-                }
-            }));
-            latch.await();
+            latch();
         } catch (Exception e) {
             log.error("HTX-105-500", mqttURI, e);
         } finally {
@@ -221,15 +242,6 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
     public void subscribeRocketmq(URI rocketURI, HttpRequest httpRequest) {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("httpx-" + UUID.randomUUID());
         try {
-            CountDownLatch latch = new CountDownLatch(1);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Thread.sleep(200);
-                    latch.countDown();
-                    System.out.println("Shutting down ...");
-                } catch (Exception ignore) {
-                }
-            }));
             String nameServerAddress = rocketURI.getHost() + ":" + rocketURI.getPort();
             String topic = rocketURI.getPath().substring(1);
             consumer.setNamesrvAddr(nameServerAddress);
@@ -238,18 +250,32 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             // Register callback to execute on arrival of messages fetched from brokers.
             consumer.registerMessageListener((MessageListenerConcurrently) (msgList, context) -> {
                 for (MessageExt messageExt : msgList) {
-                    System.out.println(dateFormat.format(new Date()) + " message received: " + messageExt.getMsgId());
-                    System.out.println(new String(messageExt.getBody(), StandardCharsets.UTF_8));
+                    System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: " + messageExt.getMsgId()));
+                    System.out.println(prettyJsonFormat(new String(messageExt.getBody(), StandardCharsets.UTF_8)));
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             });
             consumer.start();
             System.out.println("Succeeded to subscribe(1000 max): " + topic + "!");
-            latch.await();
+            latch();
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         } finally {
             consumer.shutdown();
         }
     }
+
+    private void latch() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Thread.sleep(200);
+                latch.countDown();
+                System.out.println("Shutting down ...");
+            } catch (Exception ignore) {
+            }
+        }));
+        latch.await();
+    }
+
 }
