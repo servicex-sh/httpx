@@ -27,6 +27,7 @@ import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.pulsar.common.protocol.ByteBufPair;
 import org.apache.rocketmq.common.protocol.header.SendMessageRequestHeaderV2;
 import org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader;
 import org.apache.rocketmq.common.protocol.header.UnregisterClientRequestHeader;
@@ -126,6 +127,35 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 WebSocketSecureNetworkModuleFactory.class, SSLNetworkModuleFactory.class,
                 TCPNetworkModuleFactory.class};
         for (Class<?> clazz : mqttClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //apache pulsar
+        final Class<?>[] pulsarClassArray = {
+                org.apache.pulsar.client.api.ConsumerCryptoFailureAction.class,
+                org.apache.pulsar.client.api.CompressionType.class,
+                org.apache.pulsar.client.api.HashingScheme.class,
+                org.apache.pulsar.client.api.MessageRoutingMode.class,
+                org.apache.pulsar.client.api.ProducerAccessMode.class,
+                org.apache.pulsar.client.api.ProducerCryptoFailureAction.class,
+                org.apache.pulsar.client.api.ProxyProtocol.class,
+                org.apache.pulsar.client.api.RegexSubscriptionMode.class,
+                org.apache.pulsar.client.api.SubscriptionInitialPosition.class,
+                org.apache.pulsar.client.api.SubscriptionMode.class,
+                org.apache.pulsar.client.api.SubscriptionType.class,
+                org.apache.pulsar.client.impl.ClientCnx.class,
+                org.apache.pulsar.client.impl.PulsarChannelInitializer.class,
+                org.apache.pulsar.client.impl.PulsarClientImplementationBindingImpl.class,
+                org.apache.pulsar.client.impl.conf.ClientConfigurationData.class,
+                org.apache.pulsar.client.impl.conf.ConsumerConfigurationData.class,
+                org.apache.pulsar.client.impl.conf.ProducerConfigurationData.class,
+                org.apache.pulsar.client.util.SecretsSerializer.class,
+                ByteBufPair.Encoder.class,
+                org.apache.pulsar.common.protocol.PulsarDecoder.class,
+                io.netty.channel.socket.nio.NioDatagramChannel.class,
+                io.netty.channel.socket.nio.NioSocketChannel.class
+        };
+        for (Class<?> clazz : pulsarClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
