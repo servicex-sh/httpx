@@ -48,6 +48,7 @@ public class CodeGenerator {
         } else if (gen.contains("fetch")) {
             @Language("JavaScript")
             String fetchCodeWithBody = """
+                    // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
                     async function doHttp() {
                         const headers = %s;
                         const body = `
@@ -66,6 +67,7 @@ public class CodeGenerator {
                     """;
             @Language("JavaScript")
             String fetchCodeWithoutBody = """
+                    // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
                     async function doHttp() {
                         const headers = %s;
                         const response = await fetch("%s", {
