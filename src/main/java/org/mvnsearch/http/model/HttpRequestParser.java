@@ -1,6 +1,5 @@
 package org.mvnsearch.http.model;
 
-import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 
@@ -101,7 +100,7 @@ public class HttpRequestParser {
                 case "$randomInt" -> new Random().nextInt(1000);
                 case "$projectRoot" -> ".idea";
                 case "$historyFolder" -> ".idea/httpRequests";
-                default -> getValueFromContextAndEnv(context, name);
+                default -> context.get(name);
             };
             //append value from context
             builder.append(value == null ? "" : value);
@@ -117,13 +116,6 @@ public class HttpRequestParser {
             }
         }
         return builder.toString();
-    }
-
-    @Nullable
-    public static Object getValueFromContextAndEnv(Map<String, Object> context, String name) {
-        String envName = "HTTPX_" + name.toUpperCase().replaceAll("[.-]", "_");
-        String value = System.getenv(envName);
-        return value == null ? context.get(name) : value;
     }
 
 }
