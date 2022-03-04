@@ -1,9 +1,8 @@
 package org.mvnsearch.http.protocol;
 
 import com.rabbitmq.client.ConnectionFactory;
-import io.nats.client.Message;
+import io.nats.client.Dispatcher;
 import io.nats.client.Nats;
-import io.nats.client.Subscription;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.pulsar.client.api.Consumer;
@@ -31,7 +30,6 @@ import redis.clients.jedis.JedisPubSub;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
@@ -132,30 +130,15 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
 
     public void subscribeNats(URI natsURI, HttpRequest httpRequest) {
         String topic = natsURI.getPath().substring(1);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         try (io.nats.client.Connection nc = Nats.connect(natsURI.toString())) {
-            Subscription sub = nc.subscribe(topic);
-            nc.flush(Duration.ofSeconds(5));
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-            System.out.println("Succeeded to subscribe(1000 max): " + topic + "!");
-            for (int i = 0; i < 1000; i++) {
-                Message msg = sub.nextMessage(Duration.ofHours(1));
-                if (i > 0) {
-                    System.out.println("======================================");
-                }
-                System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: " + (i + 1)));
-                if (msg.hasHeaders()) {
-                    System.out.println("  Headers:");
-                    for (String key : msg.getHeaders().keySet()) {
-                        for (String value : msg.getHeaders().get(key)) {
-                            System.out.printf("    %s: %s\n", key, value);
-                        }
-                    }
-                }
-
-                System.out.printf("  Subject: %s\n  Data: %s\n",
-                        msg.getSubject(),
-                        prettyJsonFormat(new String(msg.getData(), StandardCharsets.UTF_8)));
-            }
+            Dispatcher dispatcher = nc.createDispatcher((msg) -> {
+                System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received from " + msg.getSubject()));
+                System.out.println(prettyJsonFormat(new String(msg.getData(), StandardCharsets.UTF_8)));
+            });
+            dispatcher.subscribe(topic);
+            System.out.println("Succeeded to subscribe: " + topic + "!");
+            latch();
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
         }
