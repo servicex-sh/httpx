@@ -36,13 +36,11 @@ public class GraphqlExecutor extends HttpBaseExecutor {
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         //construct http client
         HttpClient client = httpClient().headers(httpHeaders -> {
-            if (httpRequest.getHeaders() != null) {
-                for (HttpHeader header : httpRequest.getHeaders()) {
-                    if (header.getName().equalsIgnoreCase("Content-Type") && !header.getValue().contains("json")) {
-                        httpHeaders.add(header.getName(), "application/json; charset=utf-8"); // convert application/graphql to application/json
-                    } else {
-                        httpHeaders.add(header.getName(), header.getValue());
-                    }
+            for (HttpHeader header : httpRequest.getHeaders()) {
+                if (header.getName().equalsIgnoreCase("Content-Type") && !header.getValue().contains("json")) {
+                    httpHeaders.add(header.getName(), "application/json; charset=utf-8"); // convert application/graphql to application/json
+                } else {
+                    httpHeaders.add(header.getName(), header.getValue());
                 }
             }
         });

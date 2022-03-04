@@ -26,11 +26,9 @@ public class GrpcExecutor implements BaseExecutor {
             } else {
                 command.add("-insecure");
             }
-            if (httpRequest.getHeaders() != null) {
-                for (HttpHeader header : httpRequest.getHeaders()) {
-                    command.add("-H");
-                    command.add(header.getName() + ": " + header.getValue());
-                }
+            for (HttpHeader header : httpRequest.getHeaders()) {
+                command.add("-H");
+                command.add(header.getName() + ": " + header.getValue());
             }
             final byte[] bodyBytes = httpRequest.getBodyBytes();
             if (bodyBytes.length > 0) {

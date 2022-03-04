@@ -17,10 +17,8 @@ public class HttpExecutor extends HttpBaseExecutor {
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         HttpClient client = httpClient().headers(httpHeaders -> {
-            if (httpRequest.getHeaders() != null) {
-                for (HttpHeader header : httpRequest.getHeaders()) {
-                    httpHeaders.add(header.getName(), header.getValue());
-                }
+            for (HttpHeader header : httpRequest.getHeaders()) {
+                httpHeaders.add(header.getName(), header.getValue());
             }
         });
         if (httpRequest.containsTag("no-redirect")) {
