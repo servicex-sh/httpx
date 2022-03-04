@@ -32,8 +32,8 @@ public class CodeGenerator {
             return "";
         }
         String httpMethod = httpRequest.getMethod().getName();
+        String url = httpRequest.getRequestTarget().getUri().toString();
         if (gen.contains("curl")) {
-            String url = httpRequest.getRequestTarget().getUri().toString();
             String headers = httpRequest.getHeaders().stream()
                     .map(httpHeader -> "--header '" + httpHeader.getName() + ": " + httpHeader.getValue() + "'")
                     .collect(Collectors.joining(" "));
@@ -78,7 +78,6 @@ public class CodeGenerator {
                     const result = await doHttp();
                     console.log(result)
                     """;
-            String url = httpRequest.getRequestTarget().getUri().toString();
             String headersJson = JsonUtils.writeValueAsString(httpRequest.getHeadersMap());
             if (Objects.equals(httpMethod, "PUT") || Objects.equals(httpMethod, "POST")) {
                 String body = new String(httpRequest.getBodyBytes(), StandardCharsets.UTF_8);
@@ -87,28 +86,39 @@ public class CodeGenerator {
                 return fetchCodeWithoutBody.formatted(headersJson, url, httpMethod);
             }
         } else if (gen.contains("okhttp")) {
+            String headers = httpRequest.getHeaders().stream()
+                    .map(httpHeader -> ".set(\"" + httpHeader.getName() + "\",\"" + httpHeader.getValue() + "\")")
+                    .collect(Collectors.joining());
+            String headerBuilder = "new Headers.Builder()" + headers + ".build();";
             @Language("JAVA")
-            String okhttp3Code = """
+            String okhttp3CodeWithBody = """
                     ///usr/bin/env jbang "$0" "$@" ; exit $?
+                    //JAVA 17
                     //DEPS com.squareup.okhttp3:okhttp:3.14.9
-                                    
+                                       
+                    package http;
+                                       
                     import okhttp3.*;
-                                    
+                                       
                     public class HelloOkHttp3 {
                         public static void main(String... args) throws Exception {
-                            httpPost();
+                            doHttp();
                         }
-                                    
+                                       
                         /**
                          * For more please visit https://square.github.io/okhttp/recipes/
                          */
-                        public static void httpPost() throws Exception {
+                        public static void doHttp() throws Exception {
                             OkHttpClient httpClient = new OkHttpClient();
-                            RequestBody body = RequestBody.create(MediaType.get("application/json; charset=utf-8"), "{}");
+                            Headers headers = %s;
+                            String body = ""\"
+                                    %s
+                                    ""\";
+                            RequestBody requestBody = RequestBody.create(MediaType.get("application/json; charset=utf-8"), body);
                             Request request = new Request.Builder()
-                                    .url("https://httpbin.org/post")
-                                    .header("demo", "xxx")
-                                    .post(body)
+                                    .url("%s")
+                                    .headers(headers)
+                                    .%s(requestBody)
                                     .build();
                             try (Response response = httpClient.newCall(request).execute()) {
                                 System.out.println(response.body().string());
@@ -116,7 +126,48 @@ public class CodeGenerator {
                         }
                     }
                     """;
-            return okhttp3Code;
+            @Language("JAVA")
+            String okhttp3CodeWithoutBody = """
+                    ///usr/bin/env jbang "$0" "$@" ; exit $?
+                    //JAVA 17
+                    //DEPS com.squareup.okhttp3:okhttp:3.14.9
+                                       
+                    package http;
+                                       
+                    import okhttp3.*;
+                                       
+                    public class HelloOkHttp3 {
+                        public static void main(String... args) throws Exception {
+                            doHttp();
+                        }
+                                       
+                        /**
+                         * For more please visit https://square.github.io/okhttp/recipes/
+                         */
+                        public static void doHttp() throws Exception {
+                            OkHttpClient httpClient = new OkHttpClient();
+                            Headers headers = %s;
+                            Request request = new Request.Builder()
+                                    .url("%s")
+                                    .headers(headers)
+                                    .%s()
+                                    .build();
+                            try (Response response = httpClient.newCall(request).execute()) {
+                                System.out.println(response.body().string());
+                            }
+                        }
+                    }
+                    """;
+            if (Objects.equals(httpMethod, "PUT") || Objects.equals(httpMethod, "POST")) {
+                String body = new String(httpRequest.getBodyBytes(), StandardCharsets.UTF_8);
+                return okhttp3CodeWithBody.formatted(headerBuilder, body, url, httpMethod.toLowerCase());
+            } else {
+                return okhttp3CodeWithoutBody.formatted(headerBuilder, url, httpMethod.toLowerCase());
+            }
+        } else if (gen.contains("apache")) {
+            return "https://hc.apache.org/httpcomponents-client-5.1.x/quickstart.html";
+        } else if (gen.contains("webclient")) {
+            return "https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-client";
         }
         return "";
     }
