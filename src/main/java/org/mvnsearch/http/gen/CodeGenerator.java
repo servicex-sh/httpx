@@ -21,7 +21,7 @@ public class CodeGenerator {
             result = generateHttp(httpRequest, gen);
         } else {
             result = "";
-            System.out.print("Not support: " + requestMethod.getName());
+            System.out.print("Not support now: " + requestMethod.getName());
         }
         return result;
     }
