@@ -1,6 +1,7 @@
 package org.mvnsearch.http;
 
 import org.jetbrains.annotations.Nullable;
+import org.mvnsearch.http.gen.CodeGenerator;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpMethod;
@@ -28,6 +29,8 @@ public class HttpxCommand implements Callable<Integer> {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpxCommand.class);
     @Option(names = {"--completions"}, description = "Shell Completion, such as zsh, bash")
     private String completions;
+    @Option(names = {"--gen"}, description = "Generate code for target", arity = "0..1")
+    private String gen;
     @Option(names = {"-p", "--profile"}, description = "Profile")
     private String[] profile;
     @Option(names = {"-e", "--env"}, description = "Environment variables")
@@ -146,7 +149,11 @@ public class HttpxCommand implements Callable<Integer> {
                             System.out.println("=========================================");
                         }
                         targetFound = true;
-                        execute(request);
+                        if (gen == null) {
+                            execute(request);
+                        } else {
+                            generateCode(request);
+                        }
                     }
                 }
             }
@@ -222,6 +229,14 @@ public class HttpxCommand implements Callable<Integer> {
             if (httpRequest.getRedirectResponse() != null && !result.isEmpty()) {
                 writeResponse(httpRequest.getRedirectResponse(), result);
             }
+        }
+    }
+
+    public void generateCode(HttpRequest httpRequest) throws Exception {
+        httpRequest.cleanBody();
+        String result = new CodeGenerator().generate(httpRequest, gen);
+        if (!result.isEmpty()) {
+            System.out.println(result);
         }
     }
 
