@@ -103,9 +103,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         KafkaSender<String, String> sender = KafkaSender.create(SenderOptions.create(props));
         sender.send(Mono.just(SenderRecord.create(topic, partition, System.currentTimeMillis(),
                         key, body, null)))
-                .doOnError(e -> {
-                    log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
-                })
+                .doOnError(e -> log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e))
                 .doFinally(signalType -> {
                     if (signalType == ON_COMPLETE) {
                         System.out.print("Succeeded to send message to " + topic + "!");
@@ -124,19 +122,18 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             reactor.rabbitmq.SenderOptions senderOptions = new reactor.rabbitmq.SenderOptions()
                     .connectionFactory(connectionFactory)
                     .resourceManagementScheduler(Schedulers.boundedElastic());
-
-            final Sender rabbitSender = RabbitFlux.createSender(senderOptions);
-            rabbitSender
-                    .send(Mono.just(new OutboundMessage("", rabbitUriAndQueue.subject(), httpRequest.getBodyBytes())))
-                    .doOnError(e -> {
-                        log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
-                    })
-                    .doFinally(signalType -> {
-                        if (signalType == ON_COMPLETE) {
-                            System.out.print("Succeeded to send message to " + rabbitUriAndQueue.subject() + "!");
-                        }
-                        rabbitSender.close();
-                    }).block();
+            try (Sender rabbitSender = RabbitFlux.createSender(senderOptions)) {
+                rabbitSender
+                        .send(Mono.just(new OutboundMessage("", rabbitUriAndQueue.subject(), httpRequest.getBodyBytes())))
+                        .doOnError(e -> log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e))
+                        .doFinally(signalType -> {
+                            if (signalType == ON_COMPLETE) {
+                                System.out.print("Succeeded to send message to " + rabbitUriAndQueue.subject() + "!");
+                            }
+                        }).block();
+            } catch (Exception ignore) {
+                log.error("HTX-105-401", httpRequest.getRequestTarget().getUri());
+            }
         } catch (Exception ignore) {
             log.error("HTX-105-401", httpRequest.getRequestTarget().getUri());
         }
@@ -204,7 +201,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             }
             String datacontenttype = (String) cloudEvent.get("datacontenttype");
             if (datacontenttype != null && !datacontenttype.startsWith("application/json")) {
-                System.err.println("datacontenttype's value should be 'application/json'!");
+                System.err.println("datacontenttype value should be 'application/json'!");
                 return;
             }
             final Object data = cloudEvent.get("data");
@@ -256,7 +253,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             final MNSClient mnsClient = new CloudAccount(keyIdAndSecret[0], keyIdAndSecret[1], "https://" + mnsURI.getHost()).getMNSClient();
             final CloudQueue queueRef = mnsClient.getQueueRef(topic);
             final com.aliyun.mns.model.Message message = queueRef.putMessage(new com.aliyun.mns.model.Message(httpRequest.getBodyBytes()));
-            System.out.println("Begin to send message to " + topic + " with ID: " + message.getMessageId());
+            System.out.println("Succeeded to send message to " + topic + " with ID: " + message.getMessageId());
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         }
