@@ -9,10 +9,8 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "DuplicatedCode"})
 public class HttpRequest {
@@ -101,12 +99,21 @@ public class HttpRequest {
         this.requestTarget = requestTarget;
     }
 
+    @NotNull
     public List<HttpHeader> getHeaders() {
-        return headers;
+        return headers == null ? Collections.emptyList() : headers;
     }
 
     public void setHeaders(List<HttpHeader> headers) {
         this.headers = headers;
+    }
+
+    public Map<String, String> getHeadersMap() {
+        if (headers == null || headers.isEmpty()) {
+            return Map.of();
+        } else {
+            return headers.stream().collect(Collectors.toMap(HttpHeader::getName, HttpHeader::getValue));
+        }
     }
 
     @Nullable
