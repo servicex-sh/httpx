@@ -6,6 +6,9 @@ import com.aliyun.eventbridge.models.CloudEvent;
 import com.aliyun.eventbridge.models.Config;
 import com.aliyun.eventbridge.models.PutEventsResponse;
 import com.aliyun.eventbridge.util.EventBuilder;
+import com.aliyun.mns.client.CloudAccount;
+import com.aliyun.mns.client.CloudQueue;
+import com.aliyun.mns.client.MNSClient;
 import com.rabbitmq.client.ConnectionFactory;
 import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -50,6 +53,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI realURI = httpRequest.getRequestTarget().getUri();
         String schema = realURI.getScheme();
+        String host = realURI.getHost();
         System.out.println("PUB " + realURI);
         System.out.println();
         if (Objects.equals(schema, "kafka")) {
@@ -66,8 +70,10 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             sendPulsarMessage(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("mqtt")) {
             sendMqttMessage(realURI, httpRequest);
-        } else if (Objects.equals(schema, "eventbridge") && realURI.getHost().contains("aliyuncs")) {
+        } else if (Objects.equals(schema, "eventbridge") && host.contains(".eventbridge.")) {
             publishAliyunEventBridge(realURI, httpRequest);
+        } else if (Objects.equals(schema, "mns") || (host.contains(".mns.") && host.endsWith(".aliyuncs.com"))) {
+            sendMnsMessage(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -234,6 +240,23 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             PutEventsResponse putEventsResponse = eventBridgeClient.putEvents(List.of(event));
             System.out.println("Succeeded with Aliyun EventBridge Response:");
             System.out.println(JsonUtils.writeValueAsPrettyString(putEventsResponse));
+        } catch (Exception e) {
+            log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
+        }
+    }
+
+    public void sendMnsMessage(URI mnsURI, HttpRequest httpRequest) {
+        String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
+        if (keyIdAndSecret == null) {
+            System.err.println("Please supply access key Id/Secret in Authorization header as : `Authorization: Basic keyId:secret`");
+            return;
+        }
+        try {
+            String topic = mnsURI.getPath().substring(1);
+            final MNSClient mnsClient = new CloudAccount(keyIdAndSecret[0], keyIdAndSecret[1], "https://" + mnsURI.getHost()).getMNSClient();
+            final CloudQueue queueRef = mnsClient.getQueueRef(topic);
+            final com.aliyun.mns.model.Message message = queueRef.putMessage(new com.aliyun.mns.model.Message(httpRequest.getBodyBytes()));
+            System.out.println("Begin to send message to " + topic + " with ID: " + message.getMessageId());
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         }
