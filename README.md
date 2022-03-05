@@ -74,7 +74,7 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 * GRPC Request: you should install [grpcurl](https://github.com/fullstorydev/grpcurl)
 * GraphQL support: Query, Mutation and Subscribe on HTTP and WebSocket(graphql-ws)
 * EMAIL: send email by SMTP
-* PUB/SUB: pub/sub support for Kafka, RabbitMQ, Nats, Redis and MQTT
+* PUB/SUB: pub/sub support for Kafka, RabbitMQ/ActiveMQ, Nats, Redis, MQTT and Aliyun MNS/EventBridge.
 
 # Email sending
 
