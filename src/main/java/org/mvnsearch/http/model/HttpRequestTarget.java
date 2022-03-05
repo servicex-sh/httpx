@@ -163,6 +163,16 @@ public class HttpRequestTarget {
                 requestUri = "dubbo://" + requestUri;
             }
         }
+        if (method.equals("GRAPHQLWS")) {
+            if (!requestUri.startsWith("ws://")) {
+                requestUri = "ws://" + requestUri;
+            }
+        }
+        if (method.equals("GRAPHQLWSS")) {
+            if (!requestUri.startsWith("wss://")) {
+                requestUri = "wss://" + requestUri;
+            }
+        }
         if (!requestUri.contains("://")) { //correct uri without schema
             if (requestUri.contains(":") || requestUri.indexOf('/') > 0) { // uri without schema
                 if (HttpMethod.HTTP_METHODS.contains(method)) {
