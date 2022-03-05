@@ -146,30 +146,4 @@ public class MessagePubExecutorTest {
         new MessagePublishExecutor().execute(request);
     }
 
-    @Test
-    public void testSendAliyunEventBridgeMessage() throws Exception {
-        Map<String, Object> context = new HashMap<>();
-        @Language("HTTP Request")
-        String httpFile = """
-                ### send aliyun event bridge message
-                //@name ali-event
-                PUB demo-event-bus
-                Host: eventbridge://endpoint_host
-                Authorization: Basic your_key_id:your_key_secret
-                Content-Type: application/json
-                                
-                {
-                  "specversion": "1.0",
-                  "source": "demo.event",
-                  "type": "com.example.someevent",
-                  "datacontenttype": "application/json",
-                  "data": {
-                    "name": "jackie"
-                  }
-                }
-                """;
-        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
-        request.cleanBody();
-        new MessagePublishExecutor().execute(request);
-    }
 }
