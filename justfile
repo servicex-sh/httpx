@@ -33,3 +33,7 @@ native-build:
 # dependency tree
 dependencies:
   mvn dependency:tree -Dscope=compile > dependencies.txt
+
+# dependencies updates
+updates:
+   mvn versions:display-dependency-updates > updates.txt
