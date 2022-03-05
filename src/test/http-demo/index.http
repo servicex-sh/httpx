@@ -75,8 +75,8 @@ Content-Type: application/json
 SUB subject1
 Host: nats://localhost:4222
 
-### publish rabit message
-//@name rabbit-pub
+### publish rabbitmq message
+//@name rabbitmq-pub
 PUB queue3
 Host: amqp://localhost:5672
 Content-Type: application/json
@@ -86,7 +86,7 @@ Content-Type: application/json
 }
 
 ### listen rabit message
-//@name rabbit-sub
+//@name rabbitmq-sub
 SUB queue3
 Host: amqp://localhost:5672
 
@@ -145,20 +145,3 @@ Content-Type: application/json
 //@name pulsar-sub
 SUB test-topic
 Host: pulsar://localhost:6650
-
-### send aliyun event bridge message
-//@name ali-event
-PUB demo-event-bus
-Host: eventbridge://endpoint_host
-Authorization: Basic your_key_id:your_key_secret
-Content-Type: application/json
-
-{
-  "specversion": "1.0",
-  "source": "demo.event",
-  "type": "com.example.someevent",
-  "datacontenttype": "application/json",
-  "data": {
-    "name": "jackie"
-  }
-}
