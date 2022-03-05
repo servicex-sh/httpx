@@ -2,13 +2,21 @@ package org.mvnsearch.http.aot;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.aliyun.credentials.models.Config;
 import com.aliyun.eventbridge.models.CloudEvent;
 import com.aliyun.eventbridge.models.PutEventsResponse;
 import com.aliyun.eventbridge.models.PutEventsResponseEntry;
+import com.aliyun.mns.client.DefaultMNSClient;
+import com.aliyun.mns.client.MNSClient;
 import com.aliyun.tea.TeaModel;
 import com.aliyun.tea.TeaPair;
 import com.aliyun.tea.TeaRequest;
 import com.aliyun.tea.TeaResponse;
+import com.aliyuncs.AcsRequest;
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.http.UserAgentConfig;
+import com.aliyuncs.http.clients.ApacheHttpClient;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -96,6 +104,30 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
+        // aliyun core sdk
+        final Class<?>[] aliyunSdkCoreClassArray = {
+                Config.class,
+                AcsRequest.class,
+                DefaultAcsClient.class,
+                IAcsClient.class,
+                UserAgentConfig.class,
+                ApacheHttpClient.class,
+        };
+        for (Class<?> clazz : aliyunSdkCoreClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        registry.resources().add(NativeResourcesEntry.of("project.properties"));
+        registry.resources().add(NativeResourcesEntry.of("endpoints.json"));
+        registry.resources().add(NativeResourcesEntry.of("regions.txt"));
+        // aliyun MNS
+        final Class<?>[] mnsClassArray = {MNSClient.class, DefaultMNSClient.class};
+        for (Class<?> clazz : mnsClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        registry.resources().add(NativeResourcesEntry.of("versioninfo.properties"));
+        registry.resources().add(NativeResourcesEntry.ofBundle("common"));
         //gson
         final Class<?>[] gsonClassArray = {Gson.class, GsonBuilder.class, TypeToken.class, JsonElement.class};
         for (Class<?> clazz : gsonClassArray) {
