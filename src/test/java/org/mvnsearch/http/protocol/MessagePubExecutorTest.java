@@ -56,7 +56,7 @@ public class MessagePubExecutorTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
-                ### send rabbit message
+                ### send rocketmq message
                 PUB testTopic
                 Host: rocketmq://localhost:9876
                 Content-Type: application/json
