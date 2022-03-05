@@ -192,6 +192,11 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             mqttClient = new MqttClient(uriAndTopic.uri(), clientId, new MemoryPersistence());
             MqttConnectionOptions connOpts = new MqttConnectionOptions();
             connOpts.setCleanStart(true);
+            String[] usernameAndPassword = httpRequest.getBasicAuthorization();
+            if (usernameAndPassword != null) {
+                connOpts.setUserName(usernameAndPassword[0]);
+                connOpts.setPassword(usernameAndPassword[1].getBytes(StandardCharsets.UTF_8));
+            }
             mqttClient.setCallback(new AbstractMqttCallback() {
                 private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 

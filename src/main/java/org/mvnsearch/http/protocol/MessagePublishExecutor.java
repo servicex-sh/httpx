@@ -270,21 +270,26 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
     }
 
     public void sendMqttMessage(URI mqttURI, HttpRequest httpRequest) {
-        MqttClient sampleClient = null;
+        MqttClient mqttClient = null;
         try {
             UriAndSubject uriAndTopic = getMqttUriAndTopic(mqttURI, httpRequest);
-            sampleClient = new MqttClient(uriAndTopic.uri(), "httpx-cli", new MemoryPersistence());
+            mqttClient = new MqttClient(uriAndTopic.uri(), "httpx-cli", new MemoryPersistence());
             MqttConnectionOptions connOpts = new MqttConnectionOptions();
             connOpts.setCleanStart(true);
-            sampleClient.connect(connOpts);
-            sampleClient.publish(uriAndTopic.subject(), new MqttMessage(httpRequest.getBodyBytes()));
+            String[] usernameAndPassword = httpRequest.getBasicAuthorization();
+            if (usernameAndPassword != null) {
+                connOpts.setUserName(usernameAndPassword[0]);
+                connOpts.setPassword(usernameAndPassword[1].getBytes(StandardCharsets.UTF_8));
+            }
+            mqttClient.connect(connOpts);
+            mqttClient.publish(uriAndTopic.subject(), new MqttMessage(httpRequest.getBodyBytes()));
             System.out.print("Succeeded to send message to " + uriAndTopic.subject() + "!");
         } catch (Exception e) {
             log.error("HTX-105-500", mqttURI, e);
         } finally {
-            if (sampleClient != null) {
+            if (mqttClient != null) {
                 try {
-                    sampleClient.disconnect();
+                    mqttClient.disconnect();
                 } catch (MqttException ignore) {
                 }
             }
