@@ -52,6 +52,25 @@ public class MessagePubExecutorTest {
     }
 
     @Test
+    public void testSendStompMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send stomp message
+                PUB queue3
+                Host: stomp://localhost:61613
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
+
+    @Test
     public void testSendRocketMessage() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
