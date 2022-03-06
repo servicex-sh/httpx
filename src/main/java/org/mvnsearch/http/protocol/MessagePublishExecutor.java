@@ -29,6 +29,9 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
+import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.kafka.sender.KafkaSender;
@@ -70,6 +73,8 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             sendPulsarMessage(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("mqtt")) {
             sendMqttMessage(realURI, httpRequest);
+        } else if (schema != null && schema.startsWith("stomp")) {
+            sendStompMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "eventbridge") && host.contains(".eventbridge.")) {
             publishAliyunEventBridge(realURI, httpRequest);
         } else if (Objects.equals(schema, "mns") || (host.contains(".mns.") && host.endsWith(".aliyuncs.com"))) {
@@ -136,6 +141,33 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             }
         } catch (Exception ignore) {
             log.error("HTX-105-401", httpRequest.getRequestTarget().getUri());
+        }
+    }
+
+    public void sendStompMessage(URI stompURI, HttpRequest httpRequest) {
+        ReactorNettyTcpStompClient stompClient = null;
+        StompSession stompSession = null;
+        try {
+            String topic = stompURI.getPath().substring(1);
+            int port = stompURI.getPort();
+            if (port <= 0) {
+                port = 61613;
+            }
+            stompClient = new ReactorNettyTcpStompClient(stompURI.getHost(), port);
+            stompSession = stompClient.connect(constructStompHeaders(stompURI, httpRequest), new StompSessionHandlerAdapter() {
+            }).get();
+            stompSession.send(topic, httpRequest.getBodyBytes());
+            System.out.print("Succeeded to send message to " + topic + "!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("HTX-105-401", httpRequest.getRequestTarget().getUri());
+        } finally {
+            if (stompSession != null) {
+                stompSession.disconnect();
+            }
+            if (stompClient != null) {
+                stompClient.shutdown();
+            }
         }
     }
 
