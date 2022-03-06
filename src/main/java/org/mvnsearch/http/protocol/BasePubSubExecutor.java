@@ -1,6 +1,7 @@
 package org.mvnsearch.http.protocol;
 
 import org.mvnsearch.http.model.HttpRequest;
+import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import java.net.URI;
 
@@ -52,4 +53,24 @@ public interface BasePubSubExecutor extends BaseExecutor {
         brokerUrl = brokerUrl.substring(0, brokerUrl.lastIndexOf("/"));
         return new UriAndSubject(brokerUrl, topic);
     }
+
+    default StompHeaders constructStompHeaders(URI stompURI, HttpRequest httpRequest) {
+        StompHeaders headers = new StompHeaders();
+        final String userInfo = stompURI.getUserInfo();
+        if (userInfo != null) {
+            final String[] parts = userInfo.split(":", 2);
+            headers.add(StompHeaders.LOGIN, parts[0]);
+            if (parts.length > 1) {
+                headers.add(StompHeaders.PASSCODE, parts[1]);
+            }
+        } else {
+            String[] loginAndPasscode = httpRequest.getBasicAuthorization();
+            if (loginAndPasscode != null) {
+                headers.add(StompHeaders.LOGIN, loginAndPasscode[0]);
+                headers.add(StompHeaders.PASSCODE, loginAndPasscode[1]);
+            }
+        }
+        return headers;
+    }
+
 }
