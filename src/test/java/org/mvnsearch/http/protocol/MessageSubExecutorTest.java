@@ -42,6 +42,20 @@ public class MessageSubExecutorTest {
     }
 
     @Test
+    public void testSubscribeStomp() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### subscribe rabbitmq
+                SUB queue3
+                Host: stomp://localhost:61613
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessageSubscribeExecutor().execute(request);
+    }
+
+    @Test
     public void testSubscribeMqtt() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
