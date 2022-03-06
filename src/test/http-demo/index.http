@@ -120,6 +120,20 @@ Content-Type: application/json
 SUB topic1
 Host: mqtt://localhost:1883
 
+### send stomp message
+//@name stomp-pub
+PUB queue3
+Host: stomp://localhost:61613
+Content-Type: application/json
+
+{
+  "name": "Jackie"
+}
+
+### subscribe stomp
+//@name stomp-sub
+SUB queue3
+Host: stomp://localhost:61613
 
 ### publish rocketmq message
 //@name rocketmq-pub
