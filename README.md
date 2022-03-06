@@ -74,7 +74,7 @@ Then input `httpx myip` or `./index.http myip` to invoke request.
 * GRPC Request: you should install [grpcurl](https://github.com/fullstorydev/grpcurl)
 * GraphQL support: Query, Mutation and Subscribe on HTTP and WebSocket(graphql-ws)
 * EMAIL: send email by SMTP
-* PUB/SUB: pub/sub support for Kafka, RabbitMQ/ActiveMQ, Nats, Redis, MQTT and Aliyun MNS/EventBridge.
+* PUB/SUB: pub/sub support for Kafka, RabbitMQ/ActiveMQ, Nats, Redis, MQTT, Stomp and Aliyun MNS/EventBridge.
 
 # Email sending
 
@@ -111,6 +111,10 @@ installed in `~/.m2/jdks`.
 ./mvnw -Pnative -DskipTests clean package
 ```
 
+# Development setup
+
+* docker-compose.yml:  MQTT/1883, Stomp/61613, RabbitMQ/5672, SMTP/1025
+
 # References
 
 * JetBrains HTTP client: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
@@ -123,3 +127,4 @@ installed in `~/.m2/jdks`.
 * UPX: Ultimate Packer for eXecutables -  https://upx.github.io/
 * type-detecting-hints-for-third-party-libraries: https://github.com/joshlong/type-detecting-hints-for-third-party-libraries
 * IANA Message Headers: https://www.iana.org/assignments/message-headers/message-headers.xhtml
+* MailCatcher: https://github.com/sj26/mailcatcher/
