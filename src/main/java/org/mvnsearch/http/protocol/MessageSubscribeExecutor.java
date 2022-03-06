@@ -16,9 +16,11 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.jetbrains.annotations.NotNull;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import org.springframework.messaging.simp.stomp.*;
 import reactor.core.scheduler.Schedulers;
 import reactor.kafka.receiver.KafkaReceiver;
 import reactor.rabbitmq.RabbitFlux;
@@ -27,6 +29,7 @@ import reactor.rabbitmq.ReceiverOptions;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -55,6 +58,8 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             subscribeRocketmq(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("mqtt")) {
             subscribeMqtt(realURI, httpRequest);
+        } else if (Objects.equals(schema, "stomp")) {
+            subscribeStomp(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -227,6 +232,56 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
         }
     }
 
+    public void subscribeStomp(URI stompURI, HttpRequest httpRequest) {
+        ReactorNettyTcpStompClient stompClient = null;
+        StompSession stompSession = null;
+        try {
+            String topic = stompURI.getPath().substring(1);
+            int port = stompURI.getPort();
+            if (port <= 0) {
+                port = 61613;
+            }
+            stompClient = new ReactorNettyTcpStompClient(stompURI.getHost(), port);
+            stompSession = stompClient.connect(constructStompHeaders(stompURI, httpRequest), new StompSessionHandlerAdapter() {
+            }).get();
+            stompSession.subscribe(topic, new StompFrameHandler() {
+                private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+                @Override
+                public @NotNull Type getPayloadType(@NotNull StompHeaders headers) {
+                    return Object.class;
+                }
+
+                @Override
+                public void handleFrame(@NotNull StompHeaders headers, Object payload) {
+                    System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
+                    String content;
+                    if (payload instanceof byte[]) {
+                        content = new String((byte[]) payload, StandardCharsets.UTF_8);
+                    } else {
+                        content = payload.toString();
+                    }
+                    if (content.startsWith("{")) { //pretty json output
+                        System.out.println(prettyJsonFormat(content));
+                    } else {
+                        System.out.println(content);
+                    }
+                }
+            });
+            System.out.println("Succeeded to subscribe " + topic + "!");
+            latch();
+        } catch (Exception e) {
+            log.error("HTX-105-401", httpRequest.getRequestTarget().getUri(), e);
+        } finally {
+            if (stompSession != null) {
+                stompSession.disconnect();
+            }
+            if (stompClient != null) {
+                stompClient.shutdown();
+            }
+        }
+    }
+
     public void subscribeRocketmq(URI rocketURI, HttpRequest httpRequest) {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("httpx-" + UUID.randomUUID());
         try {
@@ -244,7 +299,7 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             });
             consumer.start();
-            System.out.println("Succeeded to subscribe(1000 max): " + topic + "!");
+            System.out.println("Succeeded to subscribe " + topic + "!");
             latch();
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
