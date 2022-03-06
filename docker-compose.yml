@@ -1,0 +1,16 @@
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:3.9.13-management
+    volumes:
+      - ./src/test/etc/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    ports:
+      - "1883:1883"
+      - "61613:61613"
+      - "5672:5672"
+      - "15672:15672"
+  mailcatcher:
+    image: sj26/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
