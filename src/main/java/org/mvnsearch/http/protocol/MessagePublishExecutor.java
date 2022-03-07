@@ -29,6 +29,7 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
+import org.mvnsearch.http.vendor.Aliyun;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
@@ -217,7 +218,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
 
     @SuppressWarnings("unchecked")
     public void publishAliyunEventBridge(URI eventBridgeURI, HttpRequest httpRequest) {
-        String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
+        String[] keyIdAndSecret = readAliyunAccessToken(httpRequest);
         if (keyIdAndSecret == null) {
             System.err.println("Please supply access key Id/Secret in Authorization header as : `Authorization: Basic keyId:secret`");
             return;
@@ -275,7 +276,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
     }
 
     public void sendMnsMessage(URI mnsURI, HttpRequest httpRequest) {
-        String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
+        String[] keyIdAndSecret = readAliyunAccessToken(httpRequest);
         if (keyIdAndSecret == null) {
             System.err.println("Please supply access key Id/Secret in Authorization header as : `Authorization: Basic keyId:secret`");
             return;
@@ -326,5 +327,13 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
                 }
             }
         }
+    }
+
+    private String[] readAliyunAccessToken(HttpRequest httpRequest) {
+        String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
+        if (keyIdAndSecret == null) {
+            keyIdAndSecret = Aliyun.readAccessFromAliyunCli();
+        }
+        return keyIdAndSecret;
     }
 }
