@@ -13,10 +13,11 @@ public class Aliyun {
     /**
      * you need to run `aliyun configure` first, then read `~/.aliyun/config.json`
      *
+     * @param partOfId part of ACCESS ID
      * @return AK with ID and key
      */
     @Nullable
-    public static String[] readAccessFromAliyunCli() {
+    public static String[] readAccessFromAliyunCli(@Nullable String partOfId) {
         final File aliyunConfigJsonFile = Path.of(System.getProperty("user.home")).resolve(".aliyun").resolve("config.json").toAbsolutePath().toFile();
         if (aliyunConfigJsonFile.exists()) {
             try {
@@ -25,8 +26,14 @@ public class Aliyun {
                 List<Map<String, Object>> profiles = (List<Map<String, Object>>) config.get("profiles");
                 if (profileName != null && profiles != null) {
                     return profiles.stream()
-                            .filter(profile -> profileName.equals(profile.get("name")) && "AK".equals(profile.get("mode")))
-                            .filter(profile -> profile.containsKey("access_key_id") && profile.containsKey("access_key_secret"))
+                            .filter(profile -> "AK".equals(profile.get("mode")) && profile.containsKey("access_key_id") && profile.containsKey("access_key_secret"))
+                            .filter(profile -> {
+                                if (partOfId != null) {
+                                    return ((String) profile.get("access_key_id")).contains(partOfId);
+                                } else {
+                                    return profileName.equals(profile.get("name"));
+                                }
+                            })
                             .findFirst()
                             .map(profile -> new String[]{(String) profile.get("access_key_id"), (String) profile.get("access_key_secret")})
                             .orElse(null);
