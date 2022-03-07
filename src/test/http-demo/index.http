@@ -39,11 +39,18 @@ Content-Type: application/graphql
 subscription { greetings }
 
 ### Dubbo sayHi
-//@name sayHi
+//@name dubbo-hi
 DUBBO 127.0.0.1:20880/GreetingsService/sayHi(java.lang.String)
 Content-Type: application/json
 
 "jackie"
+
+### sofa findById
+//@name sofa-byid
+SOFA 127.0.0.1:12201/org.mvnsearch.HelloService/findById(java.lang.Integer)
+Content-Type: application/json
+
+1
 
 ### send kafka message
 //@name kafka-pub
