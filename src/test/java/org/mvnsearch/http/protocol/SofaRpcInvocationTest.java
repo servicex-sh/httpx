@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 
-public class SofaRequestTest {
+public class SofaRpcInvocationTest {
 
     @Test
     public void testBytesOutput() throws Exception {
-        SofaRequest invocation = new SofaRequest("org.mvnsearch.HelloService", "sayHello",
+        SofaRpcInvocation invocation = new SofaRpcInvocation("org.mvnsearch.HelloService", "sayHello",
                 new String[]{"java.lang.String"}, new Object[]{"world"});
         final byte[] contentBytes = invocation.content();
-        final byte[] headerBytes = invocation.frameHeaderBytes(contentBytes.length);
+        final byte[] headerBytes = invocation.frameBytes(contentBytes);
         for (int i = 0; i < headerBytes.length; i++) {
             if (i % 16 == 0) {
                 System.out.println();
@@ -22,12 +22,6 @@ public class SofaRequestTest {
                 System.out.print("- ");
             }
             System.out.printf("%02X ", headerBytes[i]);
-        }
-        for (int i = 0; i < contentBytes.length; i++) {
-            if (i % 16 == 0) {
-                System.out.println();
-            }
-            System.out.printf("%02X ", contentBytes[i]);
         }
     }
 
