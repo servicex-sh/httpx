@@ -2,6 +2,17 @@ httpx: CLI for run http file
 ==========================
 
 httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html).
+                     
+# Request types supported by httpx
+           
+* HTTP REST
+* PUB/SUB - Apache Kafka, Apache Pulsar, RabbitMQ, NATS, Redis, MQTT, AMQP, Stomp, ZeroMQ
+* gRPC
+* RSocket
+* Apache Dubbo
+* Sofa RPC
+* Email sending by SMTP
+* GraphQL with HTTP and WebSocket
 
 # How to install?
 
