@@ -3,6 +3,7 @@ package org.mvnsearch.http.protocol;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.HessianSerializerInput;
+import com.caucho.hessian.io.SerializerFactory;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -18,10 +19,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class SofaRpcExecutor extends HttpBaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(SofaRpcExecutor.class);
+
+    public SofaRpcExecutor() {
+        //Adjust hessian logging
+        Logger.getLogger(SerializerFactory.class.getName()).setLevel(Level.OFF);
+    }
 
     @SuppressWarnings("unused")
     public List<byte[]> execute(HttpRequest httpRequest) {
