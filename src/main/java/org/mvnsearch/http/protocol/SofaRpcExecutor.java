@@ -25,6 +25,7 @@ import java.util.Map;
 public class SofaRpcExecutor extends HttpBaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(SofaRpcExecutor.class);
 
+    @SuppressWarnings("unused")
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI sofaUri = httpRequest.getRequestTarget().getUri();
         final Map<String, String> params = queryToMap(sofaUri);
@@ -51,26 +52,18 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
                 arguments = new Object[]{null};
             } else {
                 String text = new String(body, StandardCharsets.UTF_8);
-                if (!text.startsWith("[")) { // one object
-                    if (text.startsWith("\"") && text.endsWith("\"")) { //remove double quota
-                        text = text.substring(1, text.length() - 1);
+                if (!text.startsWith("[")) { // one object  and convert to array
+                    text = "[" + text + "]";
+                }
+                try {
+                    final List<?> items = JsonUtils.readValue(text, List.class);
+                    arguments = new Object[items.size()];
+                    for (int i = 0; i < items.size(); i++) {
+                        final Object item = items.get(i);
+                        arguments[i] = item;
                     }
-                    arguments = new Object[]{text};
-                } else { // array
-                    try {
-                        final List<?> items = JsonUtils.readValue(text, List.class);
-                        arguments = new Object[items.size()];
-                        for (int i = 0; i < items.size(); i++) {
-                            final Object item = items.get(i);
-                            if (item instanceof String) {
-                                arguments[i] = item;
-                            } else {
-                                arguments[i] = JsonUtils.writeValueAsString(item);
-                            }
-                        }
-                    } catch (Exception e) {
-                        log.error("HTX-103-500", text);
-                    }
+                } catch (Exception e) {
+                    log.error("HTX-103-500", text);
                 }
             }
         }
@@ -88,7 +81,7 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
             final byte[] receivedBytes = extractData(socketChannel);
             final ByteBuf in = Unpooled.wrappedBuffer(receivedBytes);
             final byte protocol = in.readByte();
-            byte type = in.readByte(); //type
+            byte type = in.readByte();
             short cmdCode = in.readShort();
             byte ver2 = in.readByte();
             int requestId = in.readInt();
