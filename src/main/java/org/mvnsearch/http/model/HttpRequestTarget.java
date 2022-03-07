@@ -162,20 +162,21 @@ public class HttpRequestTarget {
             if (!requestUri.startsWith("dubbo://") && requestUri.contains(":")) {
                 requestUri = "dubbo://" + requestUri;
             }
-        }
-        if (method.equals("SOFA")) {
+        } else if (method.equals("SOFA")) {
             if (!requestUri.startsWith("bolt://") && requestUri.contains(":")) {
                 requestUri = "bolt://" + requestUri;
             }
-        }
-        if (method.equals("GRAPHQLWS")) {
+        } else if (method.equals("GRAPHQLWS")) {
             if (!requestUri.startsWith("ws://")) {
                 requestUri = "ws://" + requestUri;
             }
-        }
-        if (method.equals("GRAPHQLWSS")) {
+        } else if (method.equals("GRAPHQLWSS")) {
             if (!requestUri.startsWith("wss://")) {
                 requestUri = "wss://" + requestUri;
+            }
+        } else if (method.startsWith("ZERO")) {
+            if (!requestUri.startsWith("tcp://") && requestUri.contains(":")) {
+                requestUri = "tcp://" + requestUri;
             }
         }
         if (!requestUri.contains("://")) { //correct uri without schema
