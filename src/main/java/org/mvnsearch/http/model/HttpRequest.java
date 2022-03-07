@@ -186,6 +186,10 @@ public class HttpRequest {
         return this.body != null ? this.body : new byte[]{};
     }
 
+    public void setBodyBytes(byte[] body) {
+        this.body = body;
+    }
+
     @Nullable
     public String[] getBasicAuthorization() {
         final String header = this.getHeader("Authorization");
