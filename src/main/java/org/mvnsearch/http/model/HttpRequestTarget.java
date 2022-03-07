@@ -163,6 +163,11 @@ public class HttpRequestTarget {
                 requestUri = "dubbo://" + requestUri;
             }
         }
+        if (method.equals("SOFA")) {
+            if (!requestUri.startsWith("bolt://") && requestUri.contains(":")) {
+                requestUri = "bolt://" + requestUri;
+            }
+        }
         if (method.equals("GRAPHQLWS")) {
             if (!requestUri.startsWith("ws://")) {
                 requestUri = "ws://" + requestUri;
