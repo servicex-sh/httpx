@@ -21,6 +21,9 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.springframework.messaging.simp.stomp.*;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 import reactor.core.scheduler.Schedulers;
 import reactor.kafka.receiver.KafkaReceiver;
 import reactor.rabbitmq.RabbitFlux;
@@ -50,6 +53,8 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             subscribeRabbit(realURI, httpRequest);
         } else if (Objects.equals(schema, "nats")) {
             subscribeNats(realURI, httpRequest);
+        } else if (Objects.equals(schema, "zeromq")) {
+            subscribeZeroMQ(realURI, httpRequest);
         } else if (Objects.equals(schema, "redis")) {
             subscribeRedis(realURI, httpRequest);
         } else if (Objects.equals(schema, "pulsar")) {
@@ -144,6 +149,29 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             dispatcher.subscribe(topic);
             System.out.println("Succeeded to subscribe: " + topic + "!");
             latch();
+        } catch (Exception e) {
+            log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
+        }
+    }
+
+    public void subscribeZeroMQ(URI zeromqURI, HttpRequest httpRequest) {
+        String topic = zeromqURI.getPath().substring(1);
+        String zeromqTopic = topic.equals("*") ? "" : topic;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        try (ZContext context = new ZContext()) {
+            ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+            String connectUri = "tcp://" + zeromqURI.getHost() + ":" + zeromqURI.getPort();
+            subscriber.connect(connectUri);
+            subscriber.subscribe(topic.equals("*") ? "" : topic);
+            System.out.println("Succeeded to subscribe: " + topic + "!");
+            while (!Thread.currentThread().isInterrupted()) {
+                System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
+                String content = subscriber.recvStr();
+                if (!zeromqTopic.isEmpty() && content.length() > zeromqTopic.length() + 1) {
+                    content = content.substring(zeromqTopic.length()).trim();
+                }
+                System.out.println(prettyJsonFormat(content));
+            }
         } catch (Exception e) {
             log.error("HTX-106-500", httpRequest.getRequestTarget().getUri(), e);
         }
