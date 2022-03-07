@@ -331,8 +331,10 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
 
     private String[] readAliyunAccessToken(HttpRequest httpRequest) {
         String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
-        if (keyIdAndSecret == null) {
-            keyIdAndSecret = Aliyun.readAccessFromAliyunCli();
+        if (keyIdAndSecret == null) { // read default profile
+            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(null);
+        } else if (keyIdAndSecret.length == 2 && keyIdAndSecret[1].length() <= 4) { // id match
+            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(keyIdAndSecret[0]);
         }
         return keyIdAndSecret;
     }
