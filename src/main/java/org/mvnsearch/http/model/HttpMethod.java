@@ -9,7 +9,7 @@ public class HttpMethod {
     public static final List<String> GRPC_METHODS = List.of("GRPC");
     public static final List<String> GRAPHQL_METHODS = List.of("GRAPHQL", "GRAPHQLWS", "GRAPHQLWSS");
     public static final List<String> DUBBO_METHODS = List.of("DUBBO");
-    public static final List<String> SOFA_METHODS = List.of("SOFA");
+    public static final List<String> SOFA_METHODS = List.of("SOFA","BOLT");
     public static final List<String> MAIL_METHODS = List.of("MAIL");
     public static final List<String> PUB_METHODS = List.of("PUB");
     public static final List<String> SUB_METHODS = List.of("SUB");
