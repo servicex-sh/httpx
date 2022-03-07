@@ -1,5 +1,6 @@
 package org.mvnsearch.http.protocol;
 
+import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianSerializerOutput;
 import org.jetbrains.annotations.NotNull;
@@ -13,14 +14,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SofaRequest implements Serializable {
+public class SofaRpcInvocation implements Serializable {
+    private static final long serialVersionUID = 7329530374415722876L;
     private String targetServiceUniqueName;
     private String methodName;
     private String[] methodArgSigs;
     private Map<String, Object> requestProps;
     private transient Object[] stubArguments;
 
-    public SofaRequest(String serviceName, String methodName, @NotNull String[] methodArgSigs, @NotNull Object[] arguments) {
+    public SofaRpcInvocation(String serviceName, String methodName, @NotNull String[] methodArgSigs, @NotNull Object[] arguments) {
         this.targetServiceUniqueName = serviceName + ":1.0";
         this.methodName = methodName;
         this.methodArgSigs = methodArgSigs;
@@ -32,42 +34,14 @@ public class SofaRequest implements Serializable {
         this.stubArguments = arguments;
     }
 
-    public String getTargetServiceUniqueName() {
-        return targetServiceUniqueName;
-    }
-
-    public void setTargetServiceUniqueName(String targetServiceUniqueName) {
-        this.targetServiceUniqueName = targetServiceUniqueName;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public String[] getMethodArgSigs() {
-        return methodArgSigs;
-    }
-
-    public void setMethodArgSigs(String[] methodArgSigs) {
-        this.methodArgSigs = methodArgSigs;
-    }
-
-    public Map<String, Object> getRequestProps() {
-        return requestProps;
-    }
-
-    public void setRequestProps(Map<String, Object> requestProps) {
-        this.requestProps = requestProps;
-    }
-
     public byte[] content() throws Exception {
+        SofaRequest request = new SofaRequest();
+        request.setTargetServiceUniqueName(this.targetServiceUniqueName);
+        request.setMethodName(this.methodName);
+        request.setMethodArgSigs(this.methodArgSigs);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         Hessian2Output out = new HessianSerializerOutput(bos);
-        out.writeObject(this);
+        out.writeObject(request);
         if (stubArguments != null) {
             for (Object argument : stubArguments) {
                 out.writeObject(argument);
@@ -77,7 +51,7 @@ public class SofaRequest implements Serializable {
         return bos.toByteArray();
     }
 
-    public byte[] frameHeaderBytes(int contentLength) {
+    public byte[] frameBytes(byte[] content) {
         /*
          * ver: version for protocol
          * type: request/response/request oneway
@@ -96,7 +70,7 @@ public class SofaRequest implements Serializable {
          */
         byte[] clazz = "com.alipay.sofa.rpc.core.request.SofaRequest".getBytes(StandardCharsets.UTF_8);
         byte[] headers = encode(sofaRpcHeaders());
-        ByteBuffer bb = ByteBuffer.allocate(22 + clazz.length + headers.length);
+        ByteBuffer bb = ByteBuffer.allocate(22 + clazz.length + headers.length + content.length);
         bb.put((byte) 0x01); //protocol
         bb.put((byte) 0x01); //type - req/resp
         bb.putShort((short) 0x0001); //cmd code - RPC_REQUEST:1
@@ -106,9 +80,10 @@ public class SofaRequest implements Serializable {
         bb.putInt(0x00000BB8);  //request timeout
         bb.putShort((short) clazz.length);  //class Len
         bb.putShort((short) headers.length);  //header Len
-        bb.putInt(contentLength);  //content Len
+        bb.putInt(content.length);  //content Len
         bb.put(clazz); // className
         bb.put(headers); // headers
+        bb.put(content); // headers
         return bb.array();
     }
 
@@ -140,6 +115,8 @@ public class SofaRequest implements Serializable {
         headers.put("type", "sync");
         headers.put("generic.revise", "true");
         headers.put("sofa_head_generic_type", "0");
+        headers.put("rpc_trace_context.sofaRpcId", "0");
+        headers.put("rpc_trace_context.sofaTraceId", "11111111111111111111111");
         return headers;
     }
 

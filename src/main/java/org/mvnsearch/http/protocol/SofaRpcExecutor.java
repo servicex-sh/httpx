@@ -1,7 +1,10 @@
 package org.mvnsearch.http.protocol;
 
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.HessianSerializerInput;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -78,34 +81,44 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
         System.out.println("SOFA " + sofaUri);
         System.out.println();
         try (SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress(sofaUri.getHost(), port))) {
-            SofaRequest invocation = new SofaRequest(serviceName, methodName, paramsTypeArray, arguments);
+            SofaRpcInvocation invocation = new SofaRpcInvocation(serviceName, methodName, paramsTypeArray, arguments);
             final byte[] contentBytes = invocation.content();
-            final byte[] headerBytes = invocation.frameHeaderBytes(contentBytes.length);
-            socketChannel.write(ByteBuffer.wrap(headerBytes));
-            socketChannel.write(ByteBuffer.wrap(contentBytes));
-            final byte[] data = extractData(socketChannel);
-            Hessian2Input input = new HessianSerializerInput(new ByteArrayInputStream(data));
-            final Integer responseMark = (Integer) input.readObject();
-            if (responseMark == 5 || responseMark == 2) { // null return
-                System.out.print("===No return value===");
-            } else {
-                final Object result = input.readObject();
-                if (responseMark == 3 || responseMark == 0) { //exception return
-                    System.err.print("=====Exception thrown====");
-                    System.err.print(result.toString());
+            final byte[] frameBytes = invocation.frameBytes(contentBytes);
+            socketChannel.write(ByteBuffer.wrap(frameBytes));
+            final byte[] receivedBytes = extractData(socketChannel);
+            final ByteBuf in = Unpooled.wrappedBuffer(receivedBytes);
+            final byte protocol = in.readByte();
+            byte type = in.readByte(); //type
+            short cmdCode = in.readShort();
+            byte ver2 = in.readByte();
+            int requestId = in.readInt();
+            byte serializer = in.readByte();
+            short status = in.readShort();
+            short classLen = in.readShort();
+            short headerLen = in.readShort();
+            int contentLen = in.readInt();
+            byte[] clazz = new byte[classLen];
+            byte[] header = new byte[headerLen];
+            byte[] content = new byte[contentLen];
+            in.readBytes(clazz);
+            in.readBytes(header);
+            in.readBytes(content);
+            Hessian2Input input = new HessianSerializerInput(new ByteArrayInputStream(content));
+            final SofaResponse response = (SofaResponse) input.readObject();
+            if (!response.isError()) {
+                final Object appResponse = response.getAppResponse();
+                if (appResponse == null) {
+                    System.out.print("===No return value===");
                 } else {
-                    if (result instanceof String || result instanceof Number) {
-                        System.out.print(result);
-                        return List.of(result.toString().getBytes(StandardCharsets.UTF_8));
-                    } else {
-                        String text = JsonUtils.writeValueAsPrettyString(result);
-                        System.out.print(prettyJsonFormat(text));
-                        return List.of(text.getBytes(StandardCharsets.UTF_8));
-                    }
+                    String text = JsonUtils.writeValueAsPrettyString(appResponse);
+                    System.out.print(prettyJsonFormat(text));
+                    return List.of(text.getBytes(StandardCharsets.UTF_8));
                 }
+            } else {
+                System.out.println("Error:" + response.getErrorMsg());
             }
         } catch (Exception e) {
-            log.error("HTX-103-408", sofaUri);
+            log.error("HTX-103-408", sofaUri, e);
         }
         return Collections.emptyList();
     }
@@ -113,20 +126,11 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
 
     public byte[] extractData(SocketChannel socketChannel) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        //byte[] buf = new byte[1024];
         ByteBuffer buf = ByteBuffer.allocate(1024);
         int readCount;
-        int counter = 0;
         do {
             readCount = socketChannel.read(buf);
-            int startOffset = 0;
-            int length = readCount;
-            if (counter == 0) {
-                startOffset = 16;
-                length = readCount - 16;
-            }
-            bos.write(buf.array(), startOffset, length);
-            counter++;
+            bos.write(buf.array(), 0, readCount);
         } while (readCount == 1024);
         return bos.toByteArray();
     }
