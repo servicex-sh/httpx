@@ -1,8 +1,6 @@
 package com.alipay.sofa.rpc.core.request;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Based on RequestBase, add some extensional properties, such as requestProps
@@ -11,238 +9,116 @@ import java.util.Map;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
-public class SofaRequest extends RequestBase {
+public class SofaRequest implements Serializable {
 
-    private static final long serialVersionUID = 7329530374415722876L;
+    private static final long serialVersionUID = -7323141575870688636L;
 
     /**
-     * Target app name. If progress of 'AppA' want to call the progress which contains two apps('AppB1' and 'AppB2'),
-     * You need specified the target app name here. such as 'AppB2'
+     * Method name
      */
-    private String targetAppName;
+    private String methodName;
 
     /**
-     * Extensional properties of request
+     * Argument type strings of method
      */
-    private Map<String, Object> requestProps;
+    private String[] methodArgSigs;
 
     /**
-     * Gets request prop.
+     * Argument values of method
+     */
+    private transient Object[] methodArgs;
+
+    /**
+     * Target service unique name, contains interfaceName, uniqueId and etc.
+     */
+    private String targetServiceUniqueName;
+
+    /**
+     * Gets method name.
      *
-     * @param key the key
-     * @return request prop
+     * @return the method name
      */
-    public Object getRequestProp(String key) {
-        return requestProps != null ? requestProps.get(key) : null;
+    public String getMethodName() {
+        return methodName;
     }
 
     /**
-     * Add request prop.
+     * Get method args object [ ].
      *
-     * @param key   the key
-     * @param value the value
+     * @return the object [ ]
      */
-    public void addRequestProp(String key, Object value) {
-        if (key == null || value == null) {
-            return;
+    public Object[] getMethodArgs() {
+        return methodArgs;
+    }
+
+    /**
+     * Get method arg sigs string [ ].
+     *
+     * @return the string [ ]
+     */
+    public String[] getMethodArgSigs() {
+        return methodArgSigs;
+    }
+
+    /**
+     * Gets target service unique name.
+     *
+     * @return the target service unique name
+     */
+    public String getTargetServiceUniqueName() {
+        return targetServiceUniqueName;
+    }
+
+    /**
+     * Sets method name.
+     *
+     * @param methodName the method name
+     */
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    /**
+     * Sets method args.
+     *
+     * @param methodArgs the method args
+     */
+    public void setMethodArgs(Object[] methodArgs) {
+        this.methodArgs = methodArgs;
+    }
+
+    /**
+     * Sets method arg sigs.
+     *
+     * @param methodArgSigs the method arg sigs
+     */
+    public void setMethodArgSigs(String[] methodArgSigs) {
+        this.methodArgSigs = methodArgSigs;
+    }
+
+    /**
+     * Sets target service unique name.
+     *
+     * @param targetServiceUniqueName the target service unique name
+     */
+    public void setTargetServiceUniqueName(String targetServiceUniqueName) {
+        this.targetServiceUniqueName = targetServiceUniqueName;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("RequestBase[");
+        sb.append("Service=").append(targetServiceUniqueName).append(", ");
+        sb.append("Method=").append(methodName).append(", ");
+        sb.append("Parameters=[");
+        if (null != methodArgs) {
+            for (Object arg : methodArgs) {
+                sb.append(arg).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
         }
-        if (requestProps == null) {
-            requestProps = new HashMap<String, Object>(16);
-        }
-        requestProps.put(key, value);
-    }
-
-    /**
-     * Remove request prop.
-     *
-     * @param key the key
-     */
-    public void removeRequestProp(String key) {
-        if (key == null) {
-            return;
-        }
-        if (requestProps != null) {
-            requestProps.remove(key);
-        }
-    }
-
-    /**
-     * Add request props.
-     *
-     * @param map the map
-     */
-    public void addRequestProps(Map<String, Object> map) {
-        if (map == null || map.isEmpty()) {
-            return;
-        }
-        if (requestProps == null) {
-            requestProps = new HashMap<String, Object>(16);
-        }
-        requestProps.putAll(map);
-    }
-
-    /**
-     * Gets request props.
-     *
-     * @return the request props
-     */
-    public Map<String, Object> getRequestProps() {
-        return requestProps;
-    }
-
-    /**
-     * Gets target app name.
-     *
-     * @return the target app name
-     */
-    public String getTargetAppName() {
-        return targetAppName;
-    }
-
-    /**
-     * Sets target app name.
-     *
-     * @param targetAppName the target app name
-     */
-    public void setTargetAppName(String targetAppName) {
-        this.targetAppName = targetAppName;
-    }
-
-    //====================== 下面是非传递属性 ===============
-    /**
-     * 方法对象(为了减少反射缓存）
-     */
-    private transient Method method;
-
-    /**
-     * 接口名
-     */
-    private transient String interfaceName;
-
-    /**
-     * 序列化类型
-     */
-    private transient byte serializeType;
-
-
-    /**
-     * 调用类型（客户端使用）
-     */
-    private transient String invokeType;
-
-    /**
-     * 用户层请求超时，调用级别（客户端使用）
-     */
-    private transient Integer timeout;
-
-    /**
-     * Gets method.
-     *
-     * @return the method
-     */
-    public Method getMethod() {
-        return method;
-    }
-
-    /**
-     * Sets method.
-     *
-     * @param method the method
-     */
-    public void setMethod(Method method) {
-        this.method = method;
-    }
-
-    /**
-     * Gets serialize type.
-     *
-     * @return the serialize type
-     */
-    public byte getSerializeType() {
-        return serializeType;
-    }
-
-    /**
-     * Sets serialize type.
-     *
-     * @param serializeType the serialize type
-     * @return the serialize type
-     */
-    public SofaRequest setSerializeType(byte serializeType) {
-        this.serializeType = serializeType;
-        return this;
-    }
-
-    /**
-     * Gets invoke type.
-     *
-     * @return the invoke type
-     */
-    public String getInvokeType() {
-        return invokeType;
-    }
-
-    /**
-     * Sets invoke type.
-     *
-     * @param invokeType the invoke type
-     * @return the invoke type
-     */
-    public SofaRequest setInvokeType(String invokeType) {
-        this.invokeType = invokeType;
-        return this;
-    }
-
-    /**
-     * Gets interface name.
-     *
-     * @return the interface name
-     */
-    public String getInterfaceName() {
-        return interfaceName;
-    }
-
-    /**
-     * Sets interface name.
-     *
-     * @param interfaceName the interface name
-     */
-    public void setInterfaceName(String interfaceName) {
-        this.interfaceName = interfaceName;
-    }
-
-    /**
-     * Gets sofa response callback.
-     *
-     * @return the sofa response callback
-     */
-    /**
-     * Gets timeout.
-     *
-     * @return the timeout
-     */
-    public Integer getTimeout() {
-        return timeout;
-    }
-
-    /**
-     * Sets timeout.
-     *
-     * @param timeout the timeout
-     * @return the timeout
-     */
-    public SofaRequest setTimeout(Integer timeout) {
-        this.timeout = timeout;
-        return this;
-    }
-
-
-    /**
-     * 是否异步请求
-     *
-     * @return 如果是Future和Callback，是异步请求
-     */
-    public boolean isAsync() {
-        return false;
+        sb.append("]]");
+        return sb.toString();
     }
 }
