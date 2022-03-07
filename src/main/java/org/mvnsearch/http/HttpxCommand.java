@@ -45,7 +45,8 @@ public class HttpxCommand implements Callable<Integer> {
     private boolean summary;
     @Parameters(description = "positional params")
     private List<String> targets;
-    private boolean fromStdin = false;
+    private boolean requestFromStdin = false;
+    private String bodyFromStdin = null;
 
     @Override
     public Integer call() {
@@ -53,7 +54,17 @@ public class HttpxCommand implements Callable<Integer> {
             printShellCompletion();
             return 0;
         }
-        String httpCode = readHttpCodeFromStdin();
+        String httpCode = null;
+        //read input from stdin
+        String httpCodeOrBody = readHttpCodeOrBodyFromStdin();
+        if (httpCodeOrBody != null) {
+            if (HttpMethod.isRequestLine(httpCodeOrBody)) {
+                httpCode = httpCodeOrBody;
+                requestFromStdin = true;
+            } else {
+                bodyFromStdin = httpCodeOrBody.trim(); //trim end line
+            }
+        }
         if (httpCode == null) {
             Path httpFilePath;
             if (Objects.equals(httpFile, "index.http")) {  //resolve index.http with parent directory support
@@ -77,7 +88,7 @@ public class HttpxCommand implements Callable<Integer> {
             }
         }
         try {
-            Map<String, Object> context = fromStdin ? new HashMap<>() : constructHttpClientContext(Path.of(httpFile));
+            Map<String, Object> context = requestFromStdin ? new HashMap<>() : constructHttpClientContext(Path.of(httpFile));
             if (!context.isEmpty()) {
                 String activeProfile;
                 if (profile != null && profile.length > 0) { // get profile from command line
@@ -145,14 +156,14 @@ public class HttpxCommand implements Callable<Integer> {
             for (String target : targets) {
                 for (HttpRequest request : requests) {
                     if (request.match(target)) {
-                        if (targetFound) {
+                        if (targetFound) { // seperate line for multi targets
                             System.out.println("=========================================");
                         }
                         targetFound = true;
-                        if (gen == null) {
-                            execute(request);
-                        } else {
+                        if (gen != null) {  // generate Language SDK example code
                             generateCode(request);
+                        } else { //execute request
+                            execute(request);
                         }
                     }
                 }
@@ -202,6 +213,10 @@ public class HttpxCommand implements Callable<Integer> {
 
     public void execute(HttpRequest httpRequest) throws Exception {
         httpRequest.cleanBody();
+        //reset body from stdin
+        if (bodyFromStdin != null) {
+            httpRequest.setBodyBytes(bodyFromStdin.getBytes(StandardCharsets.UTF_8));
+        }
         final HttpMethod requestMethod = httpRequest.getMethod();
         List<byte[]> result;
         if (requestMethod.isHttpMethod()) {
@@ -227,7 +242,7 @@ public class HttpxCommand implements Callable<Integer> {
             System.out.print("Not support: " + requestMethod.getName());
         }
         System.out.println();
-        if (!fromStdin) {
+        if (!requestFromStdin) { // if request from stdin, ignore to write response to file
             if (httpRequest.getRedirectResponse() != null && !result.isEmpty()) {
                 writeResponse(httpRequest.getRedirectResponse(), result);
             }
@@ -290,10 +305,9 @@ public class HttpxCommand implements Callable<Integer> {
     }
 
     @Nullable
-    private String readHttpCodeFromStdin() {
+    private String readHttpCodeOrBodyFromStdin() {
         try {
             if (System.in.available() > 0) {
-                fromStdin = true;
                 byte[] bytes = System.in.readAllBytes();
                 if (bytes != null && bytes.length > 0) {
                     return new String(bytes, StandardCharsets.UTF_8);
