@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.mvnsearch</groupId>
     <artifactId>httpx</artifactId>
-    <version>0.12.0</version>
+    <version>0.13.0</version>
     <name>httpx</name>
     <description>CLI to run HTTP file</description>
     <url>https://httpx.sh</url>
