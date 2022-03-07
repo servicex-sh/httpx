@@ -2,6 +2,8 @@ package org.mvnsearch.http.aot;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.aliyun.credentials.models.Config;
 import com.aliyun.eventbridge.models.CloudEvent;
 import com.aliyun.eventbridge.models.PutEventsResponse;
@@ -188,6 +190,12 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 io.netty.channel.socket.nio.NioSocketChannel.class
         };
         for (Class<?> clazz : pulsarClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //sofa RPC
+        final Class<?>[] sofaClassArray = {SofaRequest.class, SofaResponse.class};
+        for (Class<?> clazz : sofaClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
