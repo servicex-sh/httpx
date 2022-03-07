@@ -18,10 +18,10 @@ public class SofaExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### dubbo hi
-                SOFA 127.0.0.1:12201/org.mvnsearch.HelloService/sayHello(java.lang.String)
+                SOFA 127.0.0.1:12201/org.mvnsearch.HelloService/findById(java.lang.Integer)
                 Content-Type: application/json
                      
-                "Jackie"   
+                1  
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
