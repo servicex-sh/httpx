@@ -231,6 +231,8 @@ public class HttpxCommand implements Callable<Integer> {
             result = new DubboExecutor().execute(httpRequest);
         } else if (requestMethod.isSofaMethod()) {
             result = new SofaRpcExecutor().execute(httpRequest);
+        } else if (requestMethod.isZeromqMethod()) {
+            result = new ZeromqExecutor().execute(httpRequest);
         } else if (requestMethod.isMailMethod()) {
             result = new MailExecutor().execute(httpRequest);
         } else if (requestMethod.isPubMethod()) {
