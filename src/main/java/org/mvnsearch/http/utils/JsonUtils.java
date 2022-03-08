@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 public class JsonUtils {
@@ -85,6 +86,11 @@ public class JsonUtils {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public static String convertToTJSON(String jsonText) throws Exception {
+        final Map map = JsonUtils.readValue(jsonText, Map.class);
+        return writeValueAsString(map);
     }
 }
 
