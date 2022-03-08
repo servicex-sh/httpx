@@ -226,7 +226,9 @@ public class HttpRequest {
     }
 
     public void setBodyStarted(boolean bodyStarted) {
-        this.bodyStarted = bodyStarted;
+        if (method != null) {
+            this.bodyStarted = bodyStarted;
+        }
     }
 
     /**
