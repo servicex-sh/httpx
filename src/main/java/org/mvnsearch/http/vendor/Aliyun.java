@@ -1,6 +1,7 @@
 package org.mvnsearch.http.vendor;
 
 import org.jetbrains.annotations.Nullable;
+import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
 
 import java.io.File;
@@ -9,6 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 public class Aliyun {
+    public static String[] readAliyunAccessToken(HttpRequest httpRequest) {
+        String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
+        if (keyIdAndSecret == null) { // read default profile
+            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(null);
+        } else if (keyIdAndSecret.length == 2 && keyIdAndSecret[1].length() <= 4) { // id match
+            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(keyIdAndSecret[0]);
+        }
+        return keyIdAndSecret;
+    }
 
     /**
      * you need to run `aliyun configure` first, then read `~/.aliyun/config.json`
