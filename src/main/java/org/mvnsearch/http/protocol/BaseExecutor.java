@@ -1,6 +1,7 @@
 package org.mvnsearch.http.protocol;
 
 import com.jayway.jsonpath.JsonPath;
+import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
 import picocli.CommandLine;
@@ -44,7 +45,10 @@ public interface BaseExecutor {
         }
     }
 
-    default String prettyJsonFormatWithJsonPath(String jsonText, String jsonPath) {
+    default String prettyJsonFormatWithJsonPath(String jsonText, @Nullable String jsonPath) {
+        if (jsonPath == null) {
+            return prettyJsonFormat(jsonText);
+        }
         try {
             if (jsonText.startsWith("{") || jsonText.startsWith("[")) {
                 final Object result = JsonPath.read(jsonText, jsonPath);
