@@ -13,6 +13,7 @@ public class HttpMethod {
     public static final List<String> THRIFT_METHODS = List.of("THRIFT");
     public static final List<String> ZEROMQ_METHODS = List.of("ZEROREQ");
     public static final List<String> MAIL_METHODS = List.of("MAIL");
+    public static final List<String> ALIYUN_METHODS = List.of("ALIYUN", "ALICLOUD");
     public static final List<String> PUB_METHODS = List.of("PUB");
     public static final List<String> SUB_METHODS = List.of("SUB");
     private String name;
@@ -46,6 +47,7 @@ public class HttpMethod {
                 || GRAPHQL_METHODS.contains(method)
                 || DUBBO_METHODS.contains(method)
                 || THRIFT_METHODS.contains(method)
+                || ALIYUN_METHODS.contains(method)
                 || ZEROMQ_METHODS.contains(method)
                 || SOFA_METHODS.contains(method)
                 || MAIL_METHODS.contains(method)
@@ -91,6 +93,10 @@ public class HttpMethod {
 
     public boolean isMailMethod() {
         return MAIL_METHODS.contains(name);
+    }
+
+    public boolean isAliyunMethod() {
+        return ALIYUN_METHODS.contains(name);
     }
 
     public boolean isPubMethod() {
