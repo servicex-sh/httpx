@@ -20,6 +20,7 @@ public class HttpRequest {
     private List<String> tags;
     private HttpMethod method;
     private List<HttpHeader> headers;
+    private boolean bodyStarted = false;
     private List<String> bodyLines;
     private byte[] body;
     private String jsTestCode;
@@ -217,6 +218,15 @@ public class HttpRequest {
 
     public boolean isBodyEmpty() {
         return bodyLines == null || bodyLines.isEmpty();
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isBodyStarted() {
+        return bodyStarted;
+    }
+
+    public void setBodyStarted(boolean bodyStarted) {
+        this.bodyStarted = bodyStarted;
     }
 
     /**
