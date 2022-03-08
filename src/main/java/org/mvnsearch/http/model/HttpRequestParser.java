@@ -36,8 +36,8 @@ public class HttpRequestParser {
                         httpRequest = new HttpRequest(index);
                         httpRequest.setComment(comment);
                     }
-                } else if (httpRequest.isBodyEmpty()) {
-                    if ((line.startsWith("#") || line.startsWith("//")) && httpRequest.isBodyEmpty()) { //comment
+                } else if (!httpRequest.isBodyStarted()) {
+                    if ((line.startsWith("#") || line.startsWith("//")) && !httpRequest.isBodyStarted()) { //comment
                         if (line.contains("@")) { // tag for httpRequest
                             String tag = line.substring(line.indexOf("@") + 1);
                             String[] parts = tag.split("[=\\s]+", 2);
@@ -50,17 +50,19 @@ public class HttpRequestParser {
                                 httpRequest.setComment(line.substring(2).trim());
                             }
                         }
-                    } else if (HttpMethod.isRequestLine(line) && httpRequest.isBodyEmpty()) {  // request line parse
+                    } else if (HttpMethod.isRequestLine(line) && !httpRequest.isBodyStarted()) {  // request line parse
                         int position = line.indexOf(' ');
                         final String method = line.substring(0, position);
                         httpRequest.setMethod(HttpMethod.valueOf(method));
                         httpRequest.setRequestTarget(HttpRequestTarget.valueOf(method, line.substring(position + 1)));
-                    } else if (line.indexOf(':') > 0 && httpRequest.isBodyEmpty()) { //http request headers parse: body should be empty
+                    } else if (line.indexOf(':') > 0 && !httpRequest.isBodyStarted()) { //http request headers parse: body should be empty
                         int position = line.indexOf(':');
                         httpRequest.addHttpHeader(line.substring(0, position), line.substring(position + 1).trim());
                     } else {
                         if (!line.isEmpty()) { // ignore lines between headers and body
                             httpRequest.addBodyLine(rawLine);
+                        } else {
+                            httpRequest.setBodyStarted(true);
                         }
                     }
                 } else {  // parse httpRequest body
