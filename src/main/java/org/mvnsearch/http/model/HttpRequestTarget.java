@@ -174,6 +174,10 @@ public class HttpRequestTarget {
             if (!requestUri.startsWith("wss://")) {
                 requestUri = "wss://" + requestUri;
             }
+        } else if (method.equals("THRIFT")) {
+            if (!requestUri.startsWith("thrift://")) {
+                requestUri = "thrift://" + requestUri;
+            }
         } else if (method.startsWith("ZERO")) {
             if (!requestUri.startsWith("tcp://") && requestUri.contains(":")) {
                 requestUri = "tcp://" + requestUri;
