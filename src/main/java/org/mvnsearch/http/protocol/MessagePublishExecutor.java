@@ -29,7 +29,6 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
-import org.mvnsearch.http.vendor.Aliyun;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
@@ -47,6 +46,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static org.mvnsearch.http.vendor.Aliyun.readAliyunAccessToken;
 import static reactor.core.publisher.SignalType.ON_COMPLETE;
 
 
@@ -329,13 +329,4 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         }
     }
 
-    private String[] readAliyunAccessToken(HttpRequest httpRequest) {
-        String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
-        if (keyIdAndSecret == null) { // read default profile
-            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(null);
-        } else if (keyIdAndSecret.length == 2 && keyIdAndSecret[1].length() <= 4) { // id match
-            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(keyIdAndSecret[0]);
-        }
-        return keyIdAndSecret;
-    }
 }
