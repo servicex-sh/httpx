@@ -43,7 +43,7 @@ public class AliyunExecutor implements BaseExecutor {
             request.putQueryParameter("Format", queries.getOrDefault("Format", "JSON"));
             CommonResponse response = client.getCommonResponse(request);
             String text = response.getData();
-            System.out.print(prettyJsonFormat(text));
+            System.out.print(prettyJsonFormatWithJsonPath(text, httpRequest.getHeader("X-JSON-PATH")));
             return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("HTX-101-500", e);
