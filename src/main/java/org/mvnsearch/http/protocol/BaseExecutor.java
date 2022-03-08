@@ -1,5 +1,6 @@
 package org.mvnsearch.http.protocol;
 
+import com.jayway.jsonpath.JsonPath;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
 import picocli.CommandLine;
@@ -35,6 +36,23 @@ public interface BaseExecutor {
             } else if (jsonText.startsWith("[")) {
                 final List<?> jsonArray = JsonUtils.readValue(jsonText, List.class);
                 return JsonUtils.writeValueAsPrettyColorString(jsonArray);
+            } else {
+                return jsonText;
+            }
+        } catch (Exception e) {
+            return jsonText;
+        }
+    }
+
+    default String prettyJsonFormatWithJsonPath(String jsonText, String jsonPath) {
+        try {
+            if (jsonText.startsWith("{") || jsonText.startsWith("[")) {
+                final Object result = JsonPath.read(jsonText, jsonPath);
+                if (result != null) {
+                    return JsonUtils.writeValueAsPrettyString(result);
+                } else {
+                    return "{}";
+                }
             } else {
                 return jsonText;
             }
