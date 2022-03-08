@@ -328,20 +328,11 @@
             <artifactId>json</artifactId>
             <version>20211205</version>
         </dependency>
-        <!-- <dependency>
-             <groupId>org.bouncycastle</groupId>
-             <artifactId>bcpkix-jdk15on</artifactId>
-             <version>1.69</version>
-         </dependency>-->
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
             <version>4.6.0</version>
             <exclusions>
-                <exclusion>
-                    <groupId>javax.xml.bind</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.glassfish.jaxb</groupId>
                     <artifactId>jaxb-runtime</artifactId>
@@ -358,14 +349,6 @@
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15on</artifactId>
                 </exclusion>
-                <!-- <exclusion>
-                     <groupId>io.opentracing</groupId>
-                     <artifactId>opentracing-api</artifactId>
-                 </exclusion>
-                 <exclusion>
-                     <groupId>io.opentracing</groupId>
-                     <artifactId>opentracing-util</artifactId>
-                 </exclusion>-->
             </exclusions>
         </dependency>
         <!-- mns-->
