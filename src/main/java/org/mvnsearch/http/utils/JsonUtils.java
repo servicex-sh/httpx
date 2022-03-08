@@ -89,7 +89,7 @@ public class JsonUtils {
     }
 
     public static String convertToTJSON(String jsonText) throws Exception {
-        final Map map = JsonUtils.readValue(jsonText, Map.class);
+        final Map<?, ?> map = JsonUtils.readValue(jsonText, Map.class);
         return writeValueAsString(map);
     }
 }
