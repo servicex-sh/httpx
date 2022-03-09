@@ -14,6 +14,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HttpExecutorTest {
 
     @Test
+    public void testHttpRequestMultiLines() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### hello ip
+                GET https://httpbin.org/get
+                  ?id=1
+                  &name=xxx
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new HttpExecutor().execute(request);
+    }
+
+    @Test
     public void testHttpRequestGetIp() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
