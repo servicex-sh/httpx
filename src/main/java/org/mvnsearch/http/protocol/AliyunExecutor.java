@@ -23,9 +23,19 @@ public class AliyunExecutor implements BaseExecutor {
         try {
             final URI requestUri = httpRequest.getRequestTarget().getUri();
             String host = requestUri.getHost();
-            String regionId = host.replace(".aliyuncs.com", "");
-            if (regionId.contains(".")) {
-                regionId = regionId.substring(regionId.indexOf(".") + 1);
+            //resolve region id from X-Region-Id header or host name
+            String regionId = httpRequest.getHeader("X-Region-Id");
+            if (regionId == null) { //resolve region id from host
+                String tempRegionId = host.replace(".aliyuncs.com", "");
+                if (tempRegionId.contains(".")) {
+                    tempRegionId = tempRegionId.substring(tempRegionId.indexOf(".") + 1);
+                }
+                if (Aliyun.regions().contains(tempRegionId)) {
+                    regionId = tempRegionId;
+                }
+            }
+            if (regionId == null) {
+                regionId = "cn-hangzhou";
             }
             String[] keyIdAndSecret = Aliyun.readAliyunAccessToken(httpRequest);
             DefaultProfile profile = DefaultProfile.getProfile(
