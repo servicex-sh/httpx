@@ -29,6 +29,8 @@ public class AliyunExecutor implements BaseExecutor {
                 String tempRegionId = host.replace(".aliyuncs.com", "");
                 if (tempRegionId.contains(".")) {
                     tempRegionId = tempRegionId.substring(tempRegionId.indexOf(".") + 1);
+                } else if (tempRegionId.contains("-")) {
+                    tempRegionId = tempRegionId.substring(tempRegionId.indexOf("-") + 1);
                 }
                 if (Aliyun.regions().contains(tempRegionId)) {
                     regionId = tempRegionId;
