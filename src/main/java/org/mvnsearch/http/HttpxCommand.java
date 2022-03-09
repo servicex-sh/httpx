@@ -1,5 +1,6 @@
 package org.mvnsearch.http;
 
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.gen.CodeGenerator;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
@@ -10,12 +11,14 @@ import org.mvnsearch.http.model.HttpRequestParser;
 import org.mvnsearch.http.protocol.*;
 import org.mvnsearch.http.utils.JsonUtils;
 import org.springframework.stereotype.Component;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,18 +30,20 @@ import java.util.concurrent.Callable;
 @Command(name = "httpx", version = "0.14.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
 public class HttpxCommand implements Callable<Integer> {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpxCommand.class);
+    @CommandLine.Unmatched
+    private List<String> unmatchedOptions;
     @Option(names = {"--completions"}, description = "Shell Completion, such as zsh, bash")
     private String completions;
-    @Option(names = {"--gen"}, description = "Generate code for target", arity = "0..1")
-    private String gen;
-    @Option(names = {"-p", "--profile"}, description = "Profile")
+    @Option(names = {"-p"}, description = "Profile")
     private String[] profile;
-    @Option(names = {"-e", "--env"}, description = "Environment variables")
-    private String[] variables;
+    @Option(names = {"-e"}, description = "Example code generate")
+    private String example;
     @Option(names = {"-f", "--httpfile"}, description = "Http file", defaultValue = "index.http")
     private String httpFile;
-    @Option(names = {"-t", "--target"}, description = "Targets to run")
+    @Option(names = {"-t"}, description = "Targets to run")
     private String target;
+    @Option(names = {"-d", "--data"}, description = "Body data from text, @file or HTTP url")
+    private String bodyData;
     @Option(names = {"-l", "--list"}, description = "Display list")
     private boolean listRequests;
     @Option(names = {"-s", "--summary"}, description = "Display summary")
@@ -46,7 +51,10 @@ public class HttpxCommand implements Callable<Integer> {
     @Parameters(description = "positional params")
     private List<String> targets;
     private boolean requestFromStdin = false;
-    private String bodyFromStdin = null;
+    /**
+     * body from input - stdin, data text, @file or http url
+     */
+    private byte[] bodyFromInput = null;
 
     @Override
     public Integer call() {
@@ -62,19 +70,19 @@ public class HttpxCommand implements Callable<Integer> {
                 httpCode = httpCodeOrBody;
                 requestFromStdin = true;
             } else {
-                bodyFromStdin = httpCodeOrBody.trim(); //trim end line
+                bodyFromInput = httpCodeOrBody.trim().getBytes(StandardCharsets.UTF_8); //trim end line
+            }
+        }
+        Path httpFilePath;
+        if (Objects.equals(httpFile, "index.http")) {  //resolve index.http with parent directory support
+            httpFilePath = resolveIndexHttpFile(Path.of(httpFile).toAbsolutePath());
+        } else { //resolve normal http file
+            httpFilePath = Path.of(httpFile);
+            if (!httpFilePath.toFile().exists()) {
+                httpFilePath = null;
             }
         }
         if (httpCode == null) {
-            Path httpFilePath;
-            if (Objects.equals(httpFile, "index.http")) {  //resolve index.http with parent directory support
-                httpFilePath = resolveIndexHttpFile(Path.of(httpFile).toAbsolutePath());
-            } else { //resolve normal http file
-                httpFilePath = Path.of(httpFile);
-                if (!httpFilePath.toFile().exists()) {
-                    httpFilePath = null;
-                }
-            }
             if (httpFilePath == null) {
                 System.out.println("http file not found: " + httpFile);
                 return -1;
@@ -86,6 +94,13 @@ public class HttpxCommand implements Callable<Integer> {
                     log.error("HTX-001-501", httpFile);
                 }
             }
+        }
+        // resolve body data from data option
+        try {
+            resolveBodyData(httpFilePath);
+        } catch (Exception e) {
+            log.error("HTX-001-502", bodyData, e);
+            return -1;
         }
         try {
             Map<String, Object> context = requestFromStdin ? new HashMap<>() : constructHttpClientContext(Path.of(httpFile));
@@ -100,10 +115,10 @@ public class HttpxCommand implements Callable<Integer> {
                 //noinspection unchecked
                 context = (Map<String, Object>) context.get(activeProfile);
             }
-            // profile variables overwrite by definition: `-e user=xxx`
-            if (variables != null && variables.length > 0) {
-                for (String variable : variables) {
-                    final String[] parts = variable.split("=", 2);
+            // profile variables overwrite by unmatched options: `-e user=xxx`
+            if (unmatchedOptions != null && !unmatchedOptions.isEmpty()) {
+                for (String variable : unmatchedOptions) {
+                    final String[] parts = variable.substring(2).split("=", 2);
                     if (parts.length == 2) {
                         context.put(parts[0], parts[1]);
                     } else {
@@ -160,7 +175,7 @@ public class HttpxCommand implements Callable<Integer> {
                             System.out.println("=========================================");
                         }
                         targetFound = true;
-                        if (gen != null) {  // generate Language SDK example code
+                        if (example != null) {  // generate Language SDK example code
                             generateCode(request);
                         } else { //execute request
                             execute(request);
@@ -172,7 +187,7 @@ public class HttpxCommand implements Callable<Integer> {
                 System.err.println("Target not found in http file: " + String.join(",", targets));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("HTX-002-500", httpFile, e);
             return -1;
         }
         return 0;
@@ -213,9 +228,9 @@ public class HttpxCommand implements Callable<Integer> {
 
     public void execute(HttpRequest httpRequest) throws Exception {
         httpRequest.cleanBody();
-        //reset body from stdin
-        if (bodyFromStdin != null) {
-            httpRequest.setBodyBytes(bodyFromStdin.getBytes(StandardCharsets.UTF_8));
+        //reset body from input
+        if (bodyFromInput != null && bodyFromInput.length > 0) {
+            httpRequest.setBodyBytes(bodyFromInput);
         }
         final HttpMethod requestMethod = httpRequest.getMethod();
         List<byte[]> result;
@@ -257,7 +272,7 @@ public class HttpxCommand implements Callable<Integer> {
 
     public void generateCode(HttpRequest httpRequest) throws Exception {
         httpRequest.cleanBody();
-        String result = new CodeGenerator().generate(httpRequest, gen);
+        String result = new CodeGenerator().generate(httpRequest, example);
         if (!result.isEmpty()) {
             System.out.println(result);
         }
@@ -340,6 +355,27 @@ public class HttpxCommand implements Callable<Integer> {
             return resolveIndexHttpFile(parentDir.resolve("index.http"));
         }
         return httpFilePath;
+    }
+
+    private void resolveBodyData(@Nullable Path httpFilePath) throws Exception {
+        if (bodyData != null) {
+            if (bodyData.startsWith("@")) {  //read data from file
+                String dataFilePath = bodyData.substring(1);
+                if (dataFilePath.startsWith("/") || dataFilePath.contains(":\\")) { // linux/windows absolute path
+                    bodyFromInput = Files.readAllBytes(Path.of(dataFilePath));
+                } else { //relative path
+                    if (httpFilePath != null) { // read file relative to http file path
+                        bodyFromInput = Files.readAllBytes(httpFilePath.resolve(dataFilePath));
+                    } else { // read file relative to current directory
+                        bodyFromInput = Files.readAllBytes(Path.of(dataFilePath));
+                    }
+                }
+            } else if (bodyData.startsWith("https://") || bodyData.startsWith("http://")) {
+                bodyFromInput = IOUtils.toByteArray(new URL(bodyData));
+            } else {
+                bodyFromInput = bodyData.getBytes(StandardCharsets.UTF_8);
+            }
+        }
     }
 
 }
