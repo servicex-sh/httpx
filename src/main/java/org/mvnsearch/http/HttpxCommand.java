@@ -233,8 +233,13 @@ public class HttpxCommand implements Callable<Integer> {
             httpRequest.setBodyBytes(bodyFromInput);
         }
         final HttpMethod requestMethod = httpRequest.getMethod();
+        String host = httpRequest.getRequestTarget().getHost();
         List<byte[]> result;
-        if (requestMethod.isHttpMethod()) {
+        if (requestMethod.isAwsMethod() || host.endsWith(".amazonaws.com")) {
+            result = new AwsExecutor().execute(httpRequest);
+        } else if (requestMethod.isAliyunMethod() || host.endsWith(".aliyuncs.com")) {
+            result = new AliyunExecutor().execute(httpRequest);
+        } else if (requestMethod.isHttpMethod()) {
             result = new HttpExecutor().execute(httpRequest);
         } else if (requestMethod.isRSocketMethod()) {
             result = new RSocketExecutor().execute(httpRequest);
@@ -252,8 +257,6 @@ public class HttpxCommand implements Callable<Integer> {
             result = new ZeromqExecutor().execute(httpRequest);
         } else if (requestMethod.isMailMethod()) {
             result = new MailExecutor().execute(httpRequest);
-        } else if (requestMethod.isAliyunMethod()) {
-            result = new AliyunExecutor().execute(httpRequest);
         } else if (requestMethod.isPubMethod()) {
             result = new MessagePublishExecutor().execute(httpRequest);
         } else if (requestMethod.isSubMethod()) {
