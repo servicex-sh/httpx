@@ -7,6 +7,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
+import org.mvnsearch.http.model.HttpRequest;
 import reactor.netty.http.client.HttpClient;
 
 import java.net.URI;
@@ -54,7 +55,7 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
         return Collections.emptyList();
     }
 
-    public List<byte[]> request(HttpClient.ResponseReceiver<?> responseReceiver, URI requestUri) {
+    public List<byte[]> request(HttpClient.ResponseReceiver<?> responseReceiver, URI requestUri, HttpRequest httpRequest) {
         final byte[] bytes = responseReceiver
                 .uri(requestUri)
                 .responseSingle((response, byteBufMono) -> {
@@ -72,7 +73,7 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                     return byteBufMono.asByteArray().doOnNext(content -> {
                         if (contentType != null && isPrintable(contentType)) {
                             if (contentType.contains("json")) {
-                                final String body = prettyJsonFormat(new String(content, StandardCharsets.UTF_8));
+                                final String body = prettyJsonFormatWithJsonPath(new String(content, StandardCharsets.UTF_8), httpRequest.getHeader("X-JSON-PATH"));
                                 System.out.print(body);
                             } else {
                                 System.out.print(new String(content));

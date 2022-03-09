@@ -37,7 +37,7 @@ public class HttpExecutor extends HttpBaseExecutor {
         };
         System.out.println(httpMethod + " " + requestUri);
         System.out.println();
-        return request(responseReceiver, requestUri);
+        return request(responseReceiver, requestUri, httpRequest);
     }
 
 }

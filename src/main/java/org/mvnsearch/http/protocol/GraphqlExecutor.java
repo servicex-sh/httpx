@@ -58,7 +58,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
 
     public List<byte[]> httpPost(HttpClient httpClient, URI requestUri, HttpRequest httpRequest, byte[] requestJsonBody) {
         HttpClient.ResponseReceiver<?> responseReceiver = httpClient.post().send(Mono.just(Unpooled.wrappedBuffer(requestJsonBody)));
-        return request(responseReceiver, requestUri);
+        return request(responseReceiver, requestUri,httpRequest);
     }
 
     @SuppressWarnings("CallingSubscribeInNonBlockingScope")
