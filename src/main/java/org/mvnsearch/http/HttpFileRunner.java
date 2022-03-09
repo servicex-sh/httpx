@@ -19,7 +19,9 @@ public class HttpFileRunner implements CommandLineRunner, ExitCodeGenerator {
 
     @Override
     public void run(String... args) throws Exception {
-        exitCode = new CommandLine(httpIJCommand, factory).execute(args);
+        exitCode = new CommandLine(httpIJCommand, factory)
+                .setUnmatchedArgumentsAllowed(true)
+                .execute(args);
     }
 
     @Override
