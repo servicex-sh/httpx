@@ -4,6 +4,12 @@
 # @name myip
 GET https://httpbin.org/ip
 
+### inspection http get
+//@name get
+GET https://httpbin.org/get?
+  id=123
+  &value=content
+
 ### inspection http post
 # @name post
 POST https://httpbin.org/post
