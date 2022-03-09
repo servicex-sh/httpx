@@ -121,7 +121,7 @@ public class HttpRequest {
     public String getHeader(String name) {
         if (this.headers != null) {
             for (HttpHeader header : headers) {
-                if (header.getName().equals(name)) {
+                if (header.getName().equalsIgnoreCase(name)) {
                     return header.getValue();
                 }
             }
@@ -133,7 +133,7 @@ public class HttpRequest {
     public String getHeader(String name, @NotNull String defaultValue) {
         if (this.headers != null) {
             for (HttpHeader header : headers) {
-                if (header.getName().equals(name)) {
+                if (header.getName().equalsIgnoreCase(name)) {
                     return header.getValue();
                 }
             }
