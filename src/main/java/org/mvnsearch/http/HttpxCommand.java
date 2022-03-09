@@ -365,7 +365,7 @@ public class HttpxCommand implements Callable<Integer> {
                     bodyFromInput = Files.readAllBytes(Path.of(dataFilePath));
                 } else { //relative path
                     if (httpFilePath != null) { // read file relative to http file path
-                        bodyFromInput = Files.readAllBytes(httpFilePath.resolve(dataFilePath));
+                        bodyFromInput = Files.readAllBytes(httpFilePath.toAbsolutePath().getParent().resolve(dataFilePath));
                     } else { // read file relative to current directory
                         bodyFromInput = Files.readAllBytes(Path.of(dataFilePath));
                     }
