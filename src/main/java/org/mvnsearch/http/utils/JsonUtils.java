@@ -9,6 +9,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,10 @@ public class JsonUtils {
 
     public static <T> T readValue(String jsonText, Class<T> valueType) throws IOException {
         return OBJECT_MAPPER.readValue(jsonText, valueType);
+    }
+
+    public static <T> T readValue(InputStream inputStream, Class<T> valueType) throws IOException {
+        return OBJECT_MAPPER.readValue(inputStream, valueType);
     }
 
     public static <T> T readValue(byte[] jsonBytes, Class<T> valueType) throws IOException {
