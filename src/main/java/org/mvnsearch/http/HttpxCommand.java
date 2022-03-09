@@ -46,7 +46,7 @@ public class HttpxCommand implements Callable<Integer> {
     private String bodyData;
     @Option(names = {"-l", "--list"}, description = "Display list")
     private boolean listRequests;
-    @Option(names = {"-s", "--summary"}, description = "Display summary")
+    @Option(names = {"-s"}, description = "Display summary")
     private boolean summary;
     @Parameters(description = "positional params")
     private List<String> targets;
@@ -318,7 +318,7 @@ public class HttpxCommand implements Callable<Integer> {
                    then
                       subcmds+=(${line/[[:space:]]*\\#/:})
                    fi
-                done < <(httpx --summary)
+                done < <(httpx -s)
                                     
                 _describe 'command' subcmds
                 """;
