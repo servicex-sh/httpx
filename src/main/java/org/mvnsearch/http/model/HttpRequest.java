@@ -19,6 +19,7 @@ public class HttpRequest {
     private String comment;
     private List<String> tags;
     private HttpMethod method;
+    private String requestLine;
     private List<HttpHeader> headers;
     private boolean bodyStarted = false;
     private List<String> bodyLines;
@@ -92,7 +93,26 @@ public class HttpRequest {
         this.method = method;
     }
 
+    public String getRequestLine() {
+        return requestLine;
+    }
+
+    public void setRequestLine(String requestLine) {
+        this.requestLine = requestLine;
+    }
+
+    public void appendRequestLine(String requestPart) {
+        if (requestLine == null) {
+            requestLine = requestPart.trim();
+        } else {
+            requestLine = requestLine + requestPart.trim();
+        }
+    }
+
     public HttpRequestTarget getRequestTarget() {
+        if (requestTarget == null && method != null && requestLine != null) {
+            requestTarget = HttpRequestTarget.valueOf(method.getName(), requestLine);
+        }
         return requestTarget;
     }
 
@@ -155,7 +175,7 @@ public class HttpRequest {
                 }
             }
         } else if (name.equalsIgnoreCase("host")) {
-            requestTarget.setHostHeader(value);
+            getRequestTarget().setHostHeader(value);
         }
         this.headers.add(new HttpHeader(name, value));
     }
@@ -213,7 +233,7 @@ public class HttpRequest {
     }
 
     public boolean isFilled() {
-        return method != null && requestTarget != null;
+        return method != null && requestLine != null;
     }
 
     public boolean isBodyEmpty() {
