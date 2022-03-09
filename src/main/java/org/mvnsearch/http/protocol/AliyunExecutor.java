@@ -40,7 +40,16 @@ public class AliyunExecutor implements BaseExecutor {
             request.setSysDomain(host);
             request.setSysVersion(queries.get("Version"));
             request.setSysAction(queries.get("Action"));
-            request.putQueryParameter("Format", queries.getOrDefault("Format", "JSON"));
+            String format = "JSON";
+            if (queries.containsKey("Format")) {
+                format = queries.get("Format");
+            } else {
+                final String acceptHeader = httpRequest.getHeader("Accept");
+                if (acceptHeader != null && acceptHeader.contains("xml")) {
+                    format = "XML";
+                }
+            }
+            request.putQueryParameter("Format", format);
             CommonResponse response = client.getCommonResponse(request);
             String text = response.getData();
             System.out.print(prettyJsonFormatWithJsonPath(text, httpRequest.getHeader("X-JSON-PATH")));
