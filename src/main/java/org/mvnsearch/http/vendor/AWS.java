@@ -19,7 +19,7 @@ public class AWS {
             awsCredential = header.substring(4).trim().split("\\s+");
         }
         if (awsCredential == null) { // read default profile
-            awsCredential = Aliyun.readAccessFromAliyunCli(null);
+            awsCredential = readAccessFromAwsCli(null);
         } else if (awsCredential.length > 1 && awsCredential[1].length() <= 4) { // id match
             awsCredential = Aliyun.readAccessFromAliyunCli(awsCredential[0]);
         }
