@@ -54,7 +54,9 @@ public class HttpRequestParser {
                         int position = line.indexOf(' ');
                         final String method = line.substring(0, position);
                         httpRequest.setMethod(HttpMethod.valueOf(method));
-                        httpRequest.setRequestTarget(HttpRequestTarget.valueOf(method, line.substring(position + 1)));
+                        httpRequest.setRequestLine(line.substring(position + 1));
+                    } else if ((rawLine.startsWith("  ") || rawLine.startsWith("\t")) && !httpRequest.isBodyStarted()) { // append request parts in multi lines
+                        httpRequest.appendRequestLine(line);
                     } else if (line.indexOf(':') > 0 && !httpRequest.isBodyStarted()) { //http request headers parse: body should be empty
                         int position = line.indexOf(':');
                         httpRequest.addHttpHeader(line.substring(0, position), line.substring(position + 1).trim());
