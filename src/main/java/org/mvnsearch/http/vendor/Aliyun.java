@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 public class Aliyun {
+    /**
+     * endpoints info from endpoint.json
+     */
+    private static Map<String, Object> ENDPOINTS = null;
+
     public static String[] readAliyunAccessToken(HttpRequest httpRequest) {
         String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
         if (keyIdAndSecret == null) { // read default profile
@@ -53,5 +58,20 @@ public class Aliyun {
             }
         }
         return null;
+    }
+
+    public static List<String> regions() {
+        if (ENDPOINTS == null) {
+            initEndpoints();
+        }
+        return (List<String>) ENDPOINTS.get("regions");
+    }
+
+    private static void initEndpoints() {
+        try {
+            ENDPOINTS = JsonUtils.readValue(Aliyun.class.getResourceAsStream("/endpoints.json"), Map.class);
+        } catch (Exception ignore) {
+
+        }
     }
 }
