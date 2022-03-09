@@ -40,6 +40,10 @@ public class AliyunExecutor implements BaseExecutor {
                 regionId = "cn-hangzhou";
             }
             String[] keyIdAndSecret = Aliyun.readAliyunAccessToken(httpRequest);
+            if (keyIdAndSecret == null) {
+                log.error("HTX-300-401");
+                return Collections.emptyList();
+            }
             DefaultProfile profile = DefaultProfile.getProfile(
                     regionId,
                     keyIdAndSecret[0],
