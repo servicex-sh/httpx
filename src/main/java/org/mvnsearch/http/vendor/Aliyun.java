@@ -15,6 +15,7 @@ public class Aliyun {
      */
     private static Map<String, Object> ENDPOINTS = null;
 
+    @Nullable
     public static String[] readAliyunAccessToken(HttpRequest httpRequest) {
         String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
         if (keyIdAndSecret == null) { // read default profile
