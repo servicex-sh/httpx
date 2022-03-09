@@ -216,7 +216,7 @@ public class HttpRequest {
         final String header = this.getHeader("Authorization");
         if (header != null && header.startsWith("Basic ")) {
             final String base64Text = header.substring(6).trim();
-            return new String(Base64.getDecoder().decode(base64Text), StandardCharsets.UTF_8).split(":");
+            return new String(Base64.getDecoder().decode(base64Text), StandardCharsets.UTF_8).split("[:\s]");
         }
         return null;
     }
