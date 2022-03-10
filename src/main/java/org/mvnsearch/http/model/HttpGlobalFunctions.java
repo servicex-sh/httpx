@@ -68,9 +68,10 @@ public class HttpGlobalFunctions {
 
     public static String randomInt(String[] args) {
         int min = 0;
-        int max = Integer.MAX_VALUE;
+        int max = 1000;
         if (args.length > 0) {
             min = Integer.parseInt(args[0]);
+            max = Integer.MAX_VALUE;
         }
         if (args.length > 1) {
             max = Integer.parseInt(args[1]);
