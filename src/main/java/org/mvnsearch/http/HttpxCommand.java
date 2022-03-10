@@ -196,9 +196,9 @@ public class HttpxCommand implements Callable<Integer> {
     @SuppressWarnings("unchecked")
     public Map<String, Object> constructHttpClientContext(Path httpFilePath) throws Exception {
         Map<String, Object> context = new HashMap<>();
-        final Path parentDir = httpFilePath.toAbsolutePath().getParent();
-        final File envJsonFile = parentDir.resolve("http-client.env.json").toFile();
-        final File envPrivateJsonFile = parentDir.resolve("http-client.private.env.json").toFile();
+        final Path httpFileDir = httpFilePath.toAbsolutePath().getParent();
+        final File envJsonFile = httpFileDir.resolve("http-client.env.json").toFile();
+        final File envPrivateJsonFile = httpFileDir.resolve("http-client.private.env.json").toFile();
         if (envJsonFile.exists()) { // load env.json into context
             final Map<String, Object> env = JsonUtils.readValue(envJsonFile, Map.class);
             context.putAll(env);
@@ -220,6 +220,25 @@ public class HttpxCommand implements Callable<Integer> {
                     }
                 } else {
                     context.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        //read rest-client.environmentVariables from .vscode/settings.json
+        final File vsCodeSettingsJsonFile = httpFileDir.resolve(".vscode/settings.json").toFile();
+        if (vsCodeSettingsJsonFile.exists()) {
+            final Map<String, Object> settings = JsonUtils.readValue(envJsonFile, Map.class);
+            if (settings.containsKey("rest-client.environmentVariables")) {
+                Map<String, Map<String, Object>> profiles = new HashMap<>((Map<String, Map<String, Object>>) settings.get("rest-client.environmentVariables"));
+                final Map<String, Object> sharedProfile = profiles.remove("$shared");
+                for (Map.Entry<String, Map<String, Object>> entry : profiles.entrySet()) {
+                    String profile = entry.getKey();
+                    final Map<String, Object> pairs = entry.getValue();
+                    if (sharedProfile != null) {
+                        for (Map.Entry<String, Object> sharedEntry : sharedProfile.entrySet()) {
+                            pairs.putIfAbsent(sharedEntry.getKey(), sharedEntry.getValue());
+                        }
+                    }
+                    context.put(profile, pairs);
                 }
             }
         }
