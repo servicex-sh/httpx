@@ -1,12 +1,15 @@
 package org.mvnsearch.http.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class HttpRequestParser {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpRequestParser.class);
@@ -99,27 +102,13 @@ public class HttpRequestParser {
                 break;
             }
             String name = httpFile.substring(offset, temp).trim();
-            Object value = switch (name) {
-                case "$uuid", "$guid" -> UUID.randomUUID().toString();
-                case "$timestamp" -> System.currentTimeMillis();
-                case "$randomInt" -> Math.abs(new Random().nextInt(Integer.MAX_VALUE));
-                case "$projectRoot" -> ".idea";
-                case "$historyFolder" -> ".idea/httpRequests";
-                default -> context.get(name);
-            };
-            // compatible with humao.rest-client
-            if (name.startsWith("$timestamp")) {
-                value = System.currentTimeMillis();
-            } else if (name.startsWith("$randomInt")) {
-                value = Math.abs(new Random().nextInt(Integer.MAX_VALUE));
-            } else if (name.startsWith("$datetime")) {
-                value = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-            } else if (name.startsWith("$localDatetime")) {
-                value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'").format(new Date());
-            } else if (name.startsWith("$processEnv")) {
-                String variableName = name.substring(name.indexOf(' ') + 1);
-                return System.getenv(variableName.toUpperCase());
+            Object value;
+            if (name.startsWith("$")) { // function
+                value = evaluateFunction(name, context);
+            } else {  // env variable
+                value = context.get(name);
             }
+
             //append value from context
             builder.append(value == null ? "" : value);
             // find next variable
@@ -131,6 +120,84 @@ public class HttpRequestParser {
             } else {  // no more variable
                 builder.append(httpFile.substring(temp + 2));
                 break;
+            }
+        }
+        return builder.toString();
+    }
+
+    @Nullable
+    public static String evaluateFunction(String functionExpression, Map<String, Object> context) {
+        String functionName = functionExpression.substring(1);
+        List<String> functionParams = new ArrayList<>();
+        if (functionName.contains(" ")) { //contains functionParams
+            functionName = functionName.substring(0, functionName.indexOf(' '));
+            String paramsText = functionExpression.substring(functionExpression.indexOf(' ') + 1).trim();
+            // fun1 %name text    fun1 `hello %{name}` %demo demo
+            while (!paramsText.isEmpty()) {
+                if (paramsText.startsWith("`")) {
+                    final int offset = paramsText.indexOf('`', 1);
+                    if (offset < 0) {
+                        log.error("HTX-002-502", paramsText);
+                        System.exit(-1);
+                    }
+                    String arg = paramsText.substring(0, offset + 1);
+                    functionParams.add(arg);
+                    paramsText = paramsText.substring(offset + 1).trim();
+                } else {
+                    final int offset = paramsText.indexOf(' ', 1);
+                    if (offset > 0) {
+                        String arg = paramsText.substring(0, offset);
+                        functionParams.add(arg);
+                        paramsText = paramsText.substring(offset + 1).trim();
+                    } else {
+                        functionParams.add(paramsText);
+                        paramsText = "";
+                    }
+                }
+            }
+        }
+        // clean function params
+        String[] args = new String[functionParams.size()];
+        for (int i = 0; i < functionParams.size(); i++) {
+            String param = functionParams.get(i);
+            if (param.startsWith("%")) {
+                args[i] = context.getOrDefault(param.substring(1), "").toString();
+            } else if (param.startsWith("`")) {
+                final String template = param.substring(1, param.length() - 1);
+                args[i] = evaluateTemplate(template, context);
+            } else {
+                args[i] = param;
+            }
+        }
+        final Function<String[], String> httpFunction = HttpGlobalFunctions.getInstance().findFunction(functionName);
+        if (httpFunction != null) {
+            return httpFunction.apply(args);
+        }
+        return null;
+    }
+
+    public static String evaluateTemplate(String template, Map<String, Object> context) {
+        if (!template.contains("%{")) {
+            return template;
+        }
+        StringBuilder builder = new StringBuilder();
+        int offset = template.indexOf("%{");
+        if (offset > 0) {
+            builder.append(template, 0, offset);
+        }
+        while (offset >= 0) {
+            int index = template.indexOf("}", offset);
+            if (index < 0) {
+                log.error("HTX-002-503", template);
+                System.exit(-1);
+            }
+            String name = template.substring(offset + 2, index);
+            builder.append(context.getOrDefault(name, "").toString());
+            offset = template.indexOf("%{", index);
+            if (offset < 0) {
+                builder.append(template.substring(index + 1));
+            } else {
+                builder.append(template, index + 1, offset);
             }
         }
         return builder.toString();
