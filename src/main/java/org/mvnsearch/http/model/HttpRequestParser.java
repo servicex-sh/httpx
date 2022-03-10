@@ -5,6 +5,7 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class HttpRequestParser {
@@ -99,13 +100,26 @@ public class HttpRequestParser {
             }
             String name = httpFile.substring(offset, temp).trim();
             Object value = switch (name) {
-                case "$uuid" -> UUID.randomUUID().toString();
+                case "$uuid", "$guid" -> UUID.randomUUID().toString();
                 case "$timestamp" -> System.currentTimeMillis();
-                case "$randomInt" -> new Random().nextInt(1000);
+                case "$randomInt" -> Math.abs(new Random().nextInt(Integer.MAX_VALUE));
                 case "$projectRoot" -> ".idea";
                 case "$historyFolder" -> ".idea/httpRequests";
                 default -> context.get(name);
             };
+            // compatible with humao.rest-client
+            if (name.startsWith("$timestamp")) {
+                value = System.currentTimeMillis();
+            } else if (name.startsWith("$randomInt")) {
+                value = Math.abs(new Random().nextInt(Integer.MAX_VALUE));
+            } else if (name.startsWith("$datetime")) {
+                value = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+            } else if (name.startsWith("$localDatetime")) {
+                value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'").format(new Date());
+            } else if (name.startsWith("$processEnv")) {
+                String variableName = name.substring(name.indexOf(' ') + 1);
+                return System.getenv(variableName.toUpperCase());
+            }
             //append value from context
             builder.append(value == null ? "" : value);
             // find next variable
