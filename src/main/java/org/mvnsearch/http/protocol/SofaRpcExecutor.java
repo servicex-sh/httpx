@@ -69,7 +69,7 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
                         arguments[i] = item;
                     }
                 } catch (Exception e) {
-                    log.error("HTX-103-500", text);
+                    log.error("HTX-106-408", text);
                 }
             }
         }

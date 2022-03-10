@@ -51,7 +51,7 @@ public class ThriftExecutor extends HttpBaseExecutor {
             System.out.print(prettyJsonFormat(text));
             return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            log.error("HTX-103-408", thriftUri, e);
+            log.error("HTX-107-408", thriftUri, e);
         }
         return Collections.emptyList();
     }
