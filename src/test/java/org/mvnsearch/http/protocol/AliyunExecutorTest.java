@@ -17,8 +17,8 @@ public class AliyunExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### hello aliyun
-                ALIYUN https://ecs.ap-southeast-6.aliyuncs.com?Action=DescribeInstances&Version=2014-05-26
-                X-JSON-PATH: $.Instances.Instance[*].HostName
+                GET https://ecs.ap-southeast-6.aliyuncs.com?Action=DescribeInstances&Version=2014-05-26
+                X-Region-Id: ap-southeast-6
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
