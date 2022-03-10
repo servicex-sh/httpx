@@ -89,6 +89,7 @@ public class HttpxCommand implements Callable<Integer> {
             } else {
                 try {
                     this.httpFile = httpFilePath.toAbsolutePath().toString();
+                    System.setProperty("http.file", this.httpFile);
                     httpCode = Files.readString(httpFilePath, StandardCharsets.UTF_8);
                 } catch (Exception ignore) {
                     log.error("HTX-001-501", httpFile);
