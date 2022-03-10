@@ -102,6 +102,13 @@ public class HttpRequestTarget {
         if (Objects.equals(method, "MAIL")) { //ignore Host by mail
             return;
         }
+        if (hostHeader.startsWith("arn:aws:")) {
+            final String temp = hostHeader.replace("arn:aws:", "");
+            if (temp.contains(":")) {
+                this.schema = temp.substring(0, temp.indexOf(':'));
+            }
+            return;
+        }
         if (this.uri == null) {
             if (hostHeader.contains("://")) { // URI
                 final URI uri = URI.create(hostHeader);
