@@ -29,6 +29,7 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
+import org.mvnsearch.http.vendor.AWS;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
@@ -41,6 +42,15 @@ import reactor.rabbitmq.OutboundMessage;
 import reactor.rabbitmq.RabbitFlux;
 import reactor.rabbitmq.Sender;
 import redis.clients.jedis.Jedis;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsResultEntry;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -76,10 +86,16 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             sendMqttMessage(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("stomp")) {
             sendStompMessage(realURI, httpRequest);
-        } else if (Objects.equals(schema, "eventbridge") && host.contains(".eventbridge.")) {
-            publishAliyunEventBridge(realURI, httpRequest);
+        } else if (Objects.equals(schema, "eventbridge")) {
+            if (host.contains(".eventbridge.")) { //aliyun
+                publishAliyunEventBridge(realURI, httpRequest);
+            } else if (httpRequest.getHeader("URI", "").contains(":aws:")) {
+                sendAwsEventBridgeMessage(realURI, httpRequest);
+            }
         } else if (Objects.equals(schema, "mns") || (host.contains(".mns.") && host.endsWith(".aliyuncs.com"))) {
             sendMnsMessage(realURI, httpRequest);
+        } else if (Objects.equals(schema, "sns")) {
+            sendAwsSnsMessage(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -326,6 +342,110 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
                 } catch (MqttException ignore) {
                 }
             }
+        }
+    }
+
+    public void sendAwsSnsMessage(URI snsUri, HttpRequest httpRequest) {
+        String topic = httpRequest.getRequestLine();
+        final AwsBasicCredentials awsBasicCredentials = AWS.awsBasicCredentials(httpRequest);
+        if (awsBasicCredentials == null) {
+            System.out.println("Cannot find AWS AK info, please check");
+            return;
+        }
+        String topicArn = httpRequest.getHeader("URI");
+        String regionId = httpRequest.getHeader("X-Region-Id");
+        if (regionId == null && topicArn != null) {
+            final String[] parts = topicArn.split(":");
+            if (parts.length > 3) {
+                regionId = parts[3];
+            }
+        }
+        if (regionId == null) {
+            regionId = Region.US_EAST_1.id();
+        }
+        try (SnsClient snsClient = SnsClient.builder()
+                .region(Region.of(regionId))
+                .credentialsProvider(() -> awsBasicCredentials)
+                .build()) {
+            PublishRequest request = PublishRequest.builder()
+                    .message(new String(httpRequest.getBodyBytes(), StandardCharsets.UTF_8))
+                    .topicArn(topicArn)
+                    .build();
+            PublishResponse result = snsClient.publish(request);
+            final SdkHttpResponse response = result.sdkHttpResponse();
+            if (response.isSuccessful()) {
+                System.out.print("Succeeded to send message to " + topic + "");
+            } else {
+                System.out.print("Failed to send message to " + topic + ":");
+                System.out.println(response.statusText().get());
+            }
+        }
+    }
+
+    public void sendAwsEventBridgeMessage(URI snsUri, HttpRequest httpRequest) {
+        String topic = httpRequest.getRequestLine();
+        final AwsBasicCredentials awsBasicCredentials = AWS.awsBasicCredentials(httpRequest);
+        if (awsBasicCredentials == null) {
+            System.out.println("Cannot find AWS AK info, please check");
+            return;
+        }
+        String eventBusArn = httpRequest.getHeader("URI");
+        String regionId = httpRequest.getHeader("X-Region-Id");
+        if (regionId == null && eventBusArn != null) {
+            final String[] parts = eventBusArn.split(":");
+            if (parts.length > 3) {
+                regionId = parts[3];
+            }
+        }
+        if (regionId == null) {
+            regionId = Region.US_EAST_1.id();
+        }
+        try (software.amazon.awssdk.services.eventbridge.EventBridgeClient eventBrClient = software.amazon.awssdk.services.eventbridge.EventBridgeClient.builder()
+                .region(Region.of(regionId))
+                .credentialsProvider(() -> awsBasicCredentials)
+                .build()) {
+            final Map<String, Object> cloudEvent = JsonUtils.readValue(httpRequest.getBodyBytes(), Map.class);
+            //validate cloudEvent
+            String source = (String) cloudEvent.get("source");
+            if (source == null) {
+                System.err.println("Please supply source field in json body!");
+                return;
+            }
+            String datacontenttype = (String) cloudEvent.get("datacontenttype");
+            if (datacontenttype != null && !datacontenttype.startsWith("application/json")) {
+                System.err.println("datacontenttype value should be 'application/json'!");
+                return;
+            }
+            final Object data = cloudEvent.get("data");
+            if (data == null) {
+                System.err.println("data field should be supplied in json body!");
+                return;
+            }
+            String jsonData;
+            if (data instanceof Map<?, ?> || data instanceof List<?>) {
+                jsonData = JsonUtils.writeValueAsString(data);
+            } else {
+                jsonData = data.toString();
+            }
+            PutEventsRequestEntry reqEntry = PutEventsRequestEntry.builder()
+                    .resources(eventBusArn)
+                    .source(source)
+                    .detailType(datacontenttype)
+                    .detail(jsonData)
+                    .build();
+            PutEventsRequest eventsRequest = PutEventsRequest.builder()
+                    .entries(reqEntry)
+                    .build();
+            software.amazon.awssdk.services.eventbridge.model.PutEventsResponse result = eventBrClient.putEvents(eventsRequest);
+            for (PutEventsResultEntry resultEntry : result.entries()) {
+                if (resultEntry.eventId() != null) {
+                    System.out.print("Succeeded to send message to " + topic + " with ID " + resultEntry.eventId());
+                } else {
+                    System.out.println("Failed to send message to " + topic + ":" + resultEntry.errorCode());
+                }
+            }
+        } catch (Exception e) {
+            log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         }
     }
 
