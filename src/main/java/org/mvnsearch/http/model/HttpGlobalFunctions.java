@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 public class HttpGlobalFunctions {
     private static HttpGlobalFunctions INSTANCE = null;
+    private static Date NOW = null;
 
 
     public static HttpGlobalFunctions getInstance() {
@@ -36,6 +37,7 @@ public class HttpGlobalFunctions {
         FUNCTIONS.put("datetime", HttpGlobalFunctions::datetime);
         FUNCTIONS.put("localDatetime", HttpGlobalFunctions::localDatetime);
         FUNCTIONS.put("dotenv", HttpGlobalFunctions::dotenv);
+        FUNCTIONS.put("processEnv", HttpGlobalFunctions::processEnv);
         FUNCTIONS.put("base64", HttpGlobalFunctions::base64);
         FUNCTIONS.put("urlEncode", HttpGlobalFunctions::urlEncode);
         FUNCTIONS.put("escapeHtml", HttpGlobalFunctions::escapeHtml);
@@ -52,6 +54,7 @@ public class HttpGlobalFunctions {
         FUNCTIONS.put("sha512", HttpGlobalFunctions::sha512);
         FUNCTIONS.put("projectRoot", HttpGlobalFunctions::projectRoot);
         FUNCTIONS.put("historyFolder", HttpGlobalFunctions::historyFolder);
+        NOW = new Date();
     }
 
     @Nullable
@@ -76,7 +79,7 @@ public class HttpGlobalFunctions {
     }
 
     public static String timestamp(String[] args) {
-        long timestamp = System.currentTimeMillis();
+        long timestamp = NOW.getTime();
         if (args != null && args.length == 2) {
             long offset = Long.parseLong(args[0]);
             // s, m, h, d
@@ -117,7 +120,7 @@ public class HttpGlobalFunctions {
         }
         DateFormat df = new SimpleDateFormat(pattern); // Quoted "Z" to indicate UTC, no timezone offset
         df.setTimeZone(timeZone);
-        return df.format(new Date());
+        return df.format(NOW);
     }
 
 
