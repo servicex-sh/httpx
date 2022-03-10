@@ -102,10 +102,16 @@ public class HttpRequestTarget {
         if (Objects.equals(method, "MAIL")) { //ignore Host by mail
             return;
         }
+        // aws resource ARN
         if (headerValue.startsWith("arn:aws:")) {
-            final String temp = headerValue.replace("arn:aws:", "");
+            String temp = headerValue.replace("arn:aws:", "");
             if (temp.contains(":")) {
-                this.schema = temp.substring(0, temp.indexOf(':'));
+                temp = temp.substring(0, temp.indexOf(':'));
+                if (temp.equals("sns")) {
+                    this.schema = "sns";
+                } else if (temp.equals("events")) {
+                    this.schema = "eventbridge";
+                }
             }
             return;
         }
