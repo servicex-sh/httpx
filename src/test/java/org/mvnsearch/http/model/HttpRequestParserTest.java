@@ -15,6 +15,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HttpRequestParserTest {
 
     @Test
+    public void testEvaluateTemplate() {
+        Map<String, Object> context = new HashMap<>();
+        context.put("name", "linux_china");
+        context.put("age", "40");
+        String template = "%{age}";
+        System.out.println(HttpRequestParser.evaluateTemplate(template, context));
+    }
+
+    @Test
+    public void testEvaluateFunction() {
+        Map<String, Object> context = new HashMap<>();
+        context.put("name", "linux_china");
+        context.put("age", "40");
+        System.out.println(HttpRequestParser.evaluateFunction("$randomInt", context));
+        System.out.println(HttpRequestParser.evaluateFunction("$randomInt 1 `%{age}`", context));
+    }
+
+    @Test
     public void testReplaceVariables() throws Exception {
         Map<String, Object> context = new HashMap<>();
         context.put("base-url", "https://httpbin.org");
@@ -114,7 +132,7 @@ public class HttpRequestParserTest {
     }
 
     @Test
-    public void testPostParse() throws Exception{
+    public void testPostParse() throws Exception {
         Map<String, Object> context = new HashMap<>();
         context.put("base-url", "https://httpbin.org");
         context.put("token", "xxx.yyy.zzz");
