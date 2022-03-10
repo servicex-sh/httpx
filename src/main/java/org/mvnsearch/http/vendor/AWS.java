@@ -2,6 +2,7 @@ package org.mvnsearch.http.vendor;
 
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.model.HttpRequest;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,15 @@ import java.util.List;
 import java.util.Map;
 
 public class AWS {
+
+    @Nullable
+    public static AwsBasicCredentials awsBasicCredentials(HttpRequest httpRequest) {
+        String[] credential = AWS.readAwsAccessToken(httpRequest);
+        if (credential != null && credential.length > 1) {
+            return AwsBasicCredentials.create(credential[0], credential[1]);
+        }
+        return null;
+    }
 
     @Nullable
     public static String[] readAwsAccessToken(HttpRequest httpRequest) {
