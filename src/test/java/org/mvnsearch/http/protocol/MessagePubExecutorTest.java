@@ -20,7 +20,7 @@ public class MessagePubExecutorTest {
                 ### send kafka message
                 //@name kafka
                 PUB testTopic
-                Host: kafka://localhost:9092/
+                URI: kafka://localhost:9092/
                 Content-Type: application/json
                                
                 {
@@ -39,7 +39,7 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send rabbit message
                 PUB queue3
-                Host: amqp://localhost:5672
+                URI: amqp://localhost:5672
                 Content-Type: application/json
                                
                 {
@@ -58,7 +58,7 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send stomp message
                 PUB queue3
-                Host: stomp://localhost:61613
+                URI: stomp://localhost:61613
                 Content-Type: application/json
                                
                 {
@@ -77,7 +77,7 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send rocketmq message
                 PUB testTopic
-                Host: rocketmq://localhost:9876
+                URI: rocketmq://localhost:9876
                 Content-Type: application/json
                                
                 {
@@ -96,7 +96,7 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send rabbit message
                 PUB subject1
-                Host: nats://localhost:4222
+                URI: nats://localhost:4222
                 Content-Type: application/json
                                
                 {
@@ -115,7 +115,7 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send pulsar message
                 PUB test-topic
-                Host: pulsar://localhost:6650
+                URI: pulsar://localhost:6650
                 Content-Type: application/json
                                
                 {
@@ -134,7 +134,7 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send mqtt message
                 PUB topic1
-                Host: mqtt://localhost:1883
+                URI: mqtt://localhost:1883
                 Content-Type: application/json
                                
                 {
@@ -153,7 +153,26 @@ public class MessagePubExecutorTest {
         String httpFile = """
                 ### send redis message
                 PUB channel1
-                Host: redis://localhost:6379
+                URI: redis://localhost:6379
+                Content-Type: application/json
+                               
+                {
+                  "name": "Jackie"
+                }
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MessagePublishExecutor().execute(request);
+    }
+
+    @Test
+    public void testSendSNSMessage() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### send sns message
+                PUB sns-demo
+                URI: arn:aws:sns:us-east-1:632793027037:sns-demo
                 Content-Type: application/json
                                
                 {

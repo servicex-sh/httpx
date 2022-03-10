@@ -20,7 +20,7 @@ public class MessageSubExecutorTest {
                 ### send kafka message
                 //@name kafka
                 SUB testTopic
-                Host: kafka://localhost:9092/
+                URI: kafka://localhost:9092/
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -34,7 +34,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe rabbitmq
                 SUB queue3
-                Host: amqp://localhost:5672
+                URI: amqp://localhost:5672
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -48,7 +48,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe rabbitmq
                 SUB queue3
-                Host: stomp://localhost:61613
+                URI: stomp://localhost:61613
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -62,7 +62,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe mqtt
                 SUB topic1
-                Host: mqtt://localhost:1883
+                URI: mqtt://localhost:1883
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -76,7 +76,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe rabbitmq
                 SUB subject1
-                Host: nats://localhost:4222
+                URI: nats://localhost:4222
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -90,7 +90,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe zeromq
                 SUB topic1
-                Host: zeromq://localhost:5555
+                URI: zeromq://localhost:5555
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -104,7 +104,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe redis
                 SUB channel1
-                Host: redis://localhost:6379
+                URI: redis://localhost:6379
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -118,7 +118,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe pulsar
                 SUB test-topic
-                Host: pulsar://localhost:6650
+                URI: pulsar://localhost:6650
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
@@ -132,7 +132,7 @@ public class MessageSubExecutorTest {
         String httpFile = """
                 ### subscribe rabbitmq
                 SUB testTopic
-                Host: rocketmq://localhost:9876
+                URI: rocketmq://localhost:9876
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
