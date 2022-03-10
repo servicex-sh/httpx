@@ -4,12 +4,6 @@
 # @name myip
 GET https://httpbin.org/ip
 
-### inspection http get
-//@name get
-GET https://httpbin.org/get?
-  id=123
-  &value=content
-
 ### inspection http post
 # @name post
 POST https://httpbin.org/post
@@ -18,6 +12,12 @@ Content-Type: application/json
 [
   1
 ]
+
+### inspection http get
+//@name get
+GET https://httpbin.org/get?
+  id=123
+  &value=content
 
 ### RSocket Request
 // @name request
