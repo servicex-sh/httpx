@@ -9,6 +9,9 @@ import org.mvnsearch.http.model.HttpRequestParser;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Guides and API References: https://docs.aws.amazon.com/index.html
+ */
 public class AwsExecutorTest {
     @Test
     public void testAwsRequest() throws Exception {

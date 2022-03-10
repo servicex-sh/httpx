@@ -9,6 +9,9 @@ import org.mvnsearch.http.model.HttpRequestParser;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Aliyun OpenAPI: https://next.api.aliyun.com/home
+ */
 public class AliyunExecutorTest {
 
     @Test
