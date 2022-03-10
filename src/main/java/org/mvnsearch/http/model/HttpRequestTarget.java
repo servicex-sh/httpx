@@ -98,20 +98,20 @@ public class HttpRequestTarget {
         this.uri = uri;
     }
 
-    public void setHostHeader(String hostHeader) {
+    public void setHostOrUriHeader(String headerName, String headerValue) {
         if (Objects.equals(method, "MAIL")) { //ignore Host by mail
             return;
         }
-        if (hostHeader.startsWith("arn:aws:")) {
-            final String temp = hostHeader.replace("arn:aws:", "");
+        if (headerValue.startsWith("arn:aws:")) {
+            final String temp = headerValue.replace("arn:aws:", "");
             if (temp.contains(":")) {
                 this.schema = temp.substring(0, temp.indexOf(':'));
             }
             return;
         }
         if (this.uri == null) {
-            if (hostHeader.contains("://")) { // URI
-                final URI uri = URI.create(hostHeader);
+            if (headerValue.contains("://")) { // URI
+                final URI uri = URI.create(headerValue);
                 if (pathAbsolute == null) {
                     this.pathAbsolute = host;
                 }
@@ -130,8 +130,8 @@ public class HttpRequestTarget {
                         }
                     }
                 }
-            } else if (hostHeader.contains(":")) { // host and port
-                final String[] parts = hostHeader.split(":", 2);
+            } else if (headerValue.contains(":")) { // host and port
+                final String[] parts = headerValue.split(":", 2);
                 if (pathAbsolute == null) {
                     this.pathAbsolute = host;
                 }
@@ -141,7 +141,7 @@ public class HttpRequestTarget {
                 if (pathAbsolute == null) {
                     this.pathAbsolute = host;
                 }
-                this.host = hostHeader;
+                this.host = headerValue;
             }
         }
     }
