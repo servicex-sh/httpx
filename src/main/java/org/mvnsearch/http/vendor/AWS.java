@@ -13,10 +13,14 @@ public class AWS {
 
     @Nullable
     public static String[] readAwsAccessToken(HttpRequest httpRequest) {
-        final String header = httpRequest.getHeader("Authorization");
+        final String authHeader = httpRequest.getHeader("Authorization");
         String[] awsCredential = null;
-        if (header != null && header.startsWith("AWS ")) {
-            awsCredential = header.substring(4).trim().split("\\s+");
+        if (authHeader != null) {
+            if (authHeader.startsWith("AWS ")) { // VS Code REST Client plugin
+                awsCredential = authHeader.substring(4).trim().split("\\s+");
+            } else if (authHeader.startsWith("Basic")) {
+                return httpRequest.getBasicAuthorization();
+            }
         }
         if (awsCredential == null) { // read default profile
             awsCredential = readAccessFromAwsCli(null);
