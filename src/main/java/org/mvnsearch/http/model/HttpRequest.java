@@ -174,8 +174,8 @@ public class HttpRequest {
                     value = "Basic " + Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
                 }
             }
-        } else if (name.equalsIgnoreCase("host")) {
-            getRequestTarget().setHostHeader(value);
+        } else if (name.equalsIgnoreCase("host") || name.equalsIgnoreCase("uri")) {
+            getRequestTarget().setHostOrUriHeader(name, value);
         }
         this.headers.add(new HttpHeader(name, value));
     }
