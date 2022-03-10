@@ -37,3 +37,7 @@ dependencies:
 # dependencies updates
 updates:
    mvn versions:display-dependency-updates > updates.txt
+
+copy-dependencies:
+   rm -rf target/dependency
+   mvn dependency:copy-dependencies -DincludeGroupIds=software.amazon.awssdk
