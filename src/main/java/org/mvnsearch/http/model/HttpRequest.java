@@ -207,6 +207,10 @@ public class HttpRequest {
         return this.body != null ? this.body : new byte[]{};
     }
 
+    public String bodyText() {
+        return this.body != null ? new String(this.body, StandardCharsets.UTF_8) : "";
+    }
+
     public void setBodyBytes(byte[] body) {
         this.body = body;
     }
