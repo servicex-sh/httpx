@@ -112,7 +112,7 @@ public class HttpGlobalFunctions {
             if (Objects.equals(patternArg, "rfc1123")) {
                 pattern = "EEE, dd MMM yyyy HH:mm:ss z";
             } else if (Objects.equals(patternArg, "iso8601")) {
-                pattern = "yyyy-MM-dd'T'HH:mm'Z'";
+                pattern = "yyyy-MM-dd'T'HH:mm:ssZ";
             } else if (patternArg.startsWith("\"") || patternArg.startsWith("'")) {
                 pattern = patternArg.substring(1, patternArg.length() - 1);
             } else {
