@@ -146,5 +146,6 @@ buildNumber.properties
 DemoTest.java
 MailExecutorTest.java
 AliyunPubExecutorTest.java
+AwsPubExecutorTest.java
 dependencies.txt
 updates.txt
