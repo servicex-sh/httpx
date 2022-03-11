@@ -51,6 +51,8 @@ import software.amazon.awssdk.services.eventbridge.model.PutEventsResultEntry;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -96,6 +98,8 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             sendMnsMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "sns")) {
             sendAwsSnsMessage(realURI, httpRequest);
+        } else if (Objects.equals(schema, "sqs")) {
+            sendAwsSqsMessage(realURI, httpRequest);
         } else {
             System.err.println("Not support: " + realURI);
         }
@@ -353,16 +357,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             return;
         }
         String topicArn = httpRequest.getHeader("URI");
-        String regionId = httpRequest.getHeader("X-Region-Id");
-        if (regionId == null && topicArn != null) {
-            final String[] parts = topicArn.split(":");
-            if (parts.length > 3) {
-                regionId = parts[3];
-            }
-        }
-        if (regionId == null) {
-            regionId = Region.US_EAST_1.id();
-        }
+        String regionId = getAwsRegionId(httpRequest, topicArn);
         try (SnsClient snsClient = SnsClient.builder()
                 .region(Region.of(regionId))
                 .credentialsProvider(() -> awsBasicCredentials)
@@ -390,16 +385,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             return;
         }
         String eventBusArn = httpRequest.getHeader("URI");
-        String regionId = httpRequest.getHeader("X-Region-Id");
-        if (regionId == null && eventBusArn != null) {
-            final String[] parts = eventBusArn.split(":");
-            if (parts.length > 3) {
-                regionId = parts[3];
-            }
-        }
-        if (regionId == null) {
-            regionId = Region.US_EAST_1.id();
-        }
+        String regionId = getAwsRegionId(httpRequest, eventBusArn);
         try (software.amazon.awssdk.services.eventbridge.EventBridgeClient eventBrClient = software.amazon.awssdk.services.eventbridge.EventBridgeClient.builder()
                 .region(Region.of(regionId))
                 .credentialsProvider(() -> awsBasicCredentials)
@@ -447,6 +433,53 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
         }
+    }
+
+    public void sendAwsSqsMessage(URI snsUri, HttpRequest httpRequest) {
+        String queue = httpRequest.getRequestLine();
+        final AwsBasicCredentials awsBasicCredentials = AWS.awsBasicCredentials(httpRequest);
+        if (awsBasicCredentials == null) {
+            System.out.println("Cannot find AWS AK info, please check");
+            return;
+        }
+        String queueArn = httpRequest.getHeader("URI");
+        String regionId = getAwsRegionId(httpRequest, queueArn);
+        String queueUrl;
+        if (queueArn != null && queue.length() == 5) {
+            final String[] parts = queueArn.split(":");
+            String sqsRegionId = parts[3];
+            String sqsQueueId = parts[4];
+            String sqsName = parts[5];
+            queueUrl = "https://sqs." + sqsRegionId + ".amazonaws.com/" + sqsQueueId + "/" + sqsName;
+        } else {
+            System.out.println("SQS URI is not correct: " + queueArn);
+            return;
+        }
+        try (SqsClient sqsClient = SqsClient.builder()
+                .region(Region.of(regionId))
+                .credentialsProvider(() -> awsBasicCredentials)
+                .build()) {
+            SendMessageRequest sendMsgRequest = SendMessageRequest.builder()
+                    .queueUrl(queueUrl)
+                    .messageBody(httpRequest.bodyText())
+                    .delaySeconds(5)
+                    .build();
+            sqsClient.sendMessage(sendMsgRequest);
+        }
+    }
+
+    private String getAwsRegionId(HttpRequest httpRequest, String resourceArn) {
+        String regionId = httpRequest.getHeader("X-Region-Id");
+        if (regionId == null && resourceArn != null) {
+            final String[] parts = resourceArn.split(":");
+            if (parts.length > 3) {
+                regionId = parts[3];
+            }
+        }
+        if (regionId == null) {
+            regionId = Region.US_EAST_1.id();
+        }
+        return regionId;
     }
 
 }
