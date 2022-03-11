@@ -193,16 +193,16 @@ public class MessagePubExecutorTest {
                 PUB eventbus-demo
                 URI: arn:aws:events:us-east-1:632793027037:event-bus/eventbus-demo
                 Content-Type: application/json
-                                                
-               {
-                 "specversion": "1.0",
-                 "source": "demo.event",
-                 "type": "com.example.someevent",
-                 "datacontenttype": "application/json",
-                 "data": {
-                   "name": "jackie"
-                 }
-               }
+                                
+                {
+                  "specversion": "1.0",
+                  "source": "demo.event",
+                  "type": "com.example.someevent",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "name": "jackie"
+                  }
+                }
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
