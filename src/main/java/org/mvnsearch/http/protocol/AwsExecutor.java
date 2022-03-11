@@ -1,11 +1,9 @@
 package org.mvnsearch.http.protocol;
 
-import okhttp3.*;
-import okio.BufferedSink;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
+import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.vendor.AWS;
 import org.mvnsearch.http.vendor.Aliyun;
@@ -17,15 +15,10 @@ import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.regions.Region;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
-public class AwsExecutor implements BaseExecutor {
+public class AwsExecutor extends HttpExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(AwsExecutor.class);
 
     public List<byte[]> execute(HttpRequest httpRequest) {
@@ -74,7 +67,7 @@ public class AwsExecutor implements BaseExecutor {
                 }
             }
             final SdkHttpFullRequest.Builder requestBuilder = SdkHttpFullRequest.builder()
-                    .uri(URI.create("https://iam.amazonaws.com/?Action=ListUsers&Version=2010-05-08"))
+                    .uri(requestUri)
                     .method(SdkHttpMethod.valueOf(method));
             final Map<String, String> headers = httpRequest.getHeadersMap();
             headers.forEach((name, value) -> {
@@ -105,39 +98,12 @@ public class AwsExecutor implements BaseExecutor {
                     .build();
             final SdkHttpFullRequest awsRequest = requestBuilder.build();
             final SdkHttpFullRequest signedRequest = Aws4Signer.create().sign(awsRequest, aws4SignerParams);
-            OkHttpClient client = new OkHttpClient();
-            final Request.Builder okhttpRequestBuilder;
-            if (Objects.equals(method, "POST") || Objects.equals(method, "PUT")) {
-                okhttpRequestBuilder = new Request.Builder().method(method, new RequestBody() {
-                    @Nullable
-                    @Override
-                    public MediaType contentType() {
-                        return MediaType.parse(headers.getOrDefault("Content-Type", "txt/plain"));
-                    }
-
-                    @Override
-                    public void writeTo(@NotNull BufferedSink sink) throws IOException {
-                        if (bodyBytes != null && bodyBytes.length > 0) {
-                            sink.write(bodyBytes);
-                        }
-                    }
-                });
-            } else {
-                okhttpRequestBuilder = new Request.Builder().get().url(signedRequest.getUri().toString());
-            }
+            List<HttpHeader> newHeaders = new ArrayList<>();
             signedRequest.headers().forEach((name, values) -> {
-                okhttpRequestBuilder.header(name, values.get(0));
+                newHeaders.add(new HttpHeader(name, values.get(0)));
             });
-            final Request request = okhttpRequestBuilder.build();
-            try (Response response = client.newCall(request).execute()) {
-                @SuppressWarnings("ConstantConditions") final String text = response.body().string();
-                if (format.equals("JSON")) {
-                    System.out.println(prettyJsonFormatWithJsonPath(text, httpRequest.getHeader("X-JSON-PATH")));
-                } else {
-                    System.out.println(text);
-                }
-                return List.of(text.getBytes(StandardCharsets.UTF_8));
-            }
+            httpRequest.setHeaders(newHeaders);
+            super.execute(httpRequest);
         } catch (Exception e) {
             log.error("HTX-101-500", e);
         }
