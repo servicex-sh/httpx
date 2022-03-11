@@ -53,6 +53,7 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -464,7 +465,8 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
                     .messageBody(httpRequest.bodyText())
                     .delaySeconds(5)
                     .build();
-            sqsClient.sendMessage(sendMsgRequest);
+            final SendMessageResponse response = sqsClient.sendMessage(sendMsgRequest);
+            System.out.print("Succeeded to send message to " + queue + " with ID " + response.messageId());
         }
     }
 
