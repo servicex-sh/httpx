@@ -30,6 +30,7 @@ public class HttpRequestParserTest {
         context.put("age", "40");
         System.out.println(HttpRequestParser.evaluateFunction("$randomInt", context));
         System.out.println(HttpRequestParser.evaluateFunction("$randomInt 1 `%{age}`", context));
+        System.out.println(HttpRequestParser.evaluateFunction("$base64 'abc 1234'", context));
     }
 
     @Test
