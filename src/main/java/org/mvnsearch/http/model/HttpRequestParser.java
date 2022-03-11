@@ -134,8 +134,9 @@ public class HttpRequestParser {
             String paramsText = functionExpression.substring(functionExpression.indexOf(' ') + 1).trim();
             // fun1 %name text    fun1 `hello %{name}` %demo demo
             while (!paramsText.isEmpty()) {
-                if (paramsText.startsWith("`")) {
-                    final int offset = paramsText.indexOf('`', 1);
+                if (paramsText.startsWith("`") || paramsText.startsWith("\"") || paramsText.startsWith("'")) {
+                    String quotation = paramsText.substring(0, 1);
+                    final int offset = paramsText.indexOf(quotation, 1);
                     if (offset < 0) {
                         log.error("HTX-002-502", paramsText);
                         System.exit(-1);
@@ -165,6 +166,8 @@ public class HttpRequestParser {
             } else if (param.startsWith("`")) {
                 final String template = param.substring(1, param.length() - 1);
                 args[i] = evaluateTemplate(template, context);
+            } else if (param.startsWith("\"") || param.startsWith("'")) {
+                args[i] = param.substring(1, param.length() - 1);
             } else {
                 args[i] = param;
             }
