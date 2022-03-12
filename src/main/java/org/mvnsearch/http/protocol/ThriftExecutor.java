@@ -49,6 +49,7 @@ public class ThriftExecutor extends HttpBaseExecutor {
             final byte[] data = extractData(socketChannel);
             String text = new String(data, StandardCharsets.UTF_8);
             System.out.print(prettyJsonFormat(text));
+            runJsTest(httpRequest, 200, Collections.emptyMap(), "application/json", text);
             return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("HTX-107-408", thriftUri, e);

@@ -111,6 +111,7 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
                 } else {
                     String text = JsonUtils.writeValueAsPrettyString(appResponse);
                     System.out.print(prettyJsonFormat(text));
+                    runJsTest(httpRequest, 200, Collections.emptyMap(), "application/json", text);
                     return List.of(text.getBytes(StandardCharsets.UTF_8));
                 }
             } else {
