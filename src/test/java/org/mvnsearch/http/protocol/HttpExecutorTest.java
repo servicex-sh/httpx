@@ -42,6 +42,27 @@ public class HttpExecutorTest {
     }
 
     @Test
+    public void testHttpRequestGetIpWithJSTest() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### hello ip
+                GET https://httpbin.org/ip
+                
+                > {%
+                    client.test("Request executed successfully", function() {
+                        client.log(response.status);
+                        client.log(response.contentType);
+                        client.log(response.body);
+                    });
+                %}
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new HttpExecutor().execute(request);
+    }
+
+    @Test
     public void testHttpRequest() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
