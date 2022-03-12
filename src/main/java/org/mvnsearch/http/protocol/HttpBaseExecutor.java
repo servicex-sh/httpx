@@ -8,15 +8,14 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.vendor.Nodejs;
 import reactor.netty.http.client.HttpClient;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class HttpBaseExecutor implements BaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpBaseExecutor.class);
@@ -66,8 +65,12 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                         System.out.println(colorOutput("bold,red", "Status: " + httpStatus));
                     }
                     final HttpHeaders responseHeaders = response.responseHeaders();
+                    final Map<String, String> httpResponseHeaders = new HashMap<>();
                     //color header
-                    responseHeaders.forEach(header -> System.out.println(colorOutput("green", header.getKey()) + ": " + header.getValue()));
+                    responseHeaders.forEach(header -> {
+                        httpResponseHeaders.put(header.getKey(), header.getValue());
+                        System.out.println(colorOutput("green", header.getKey()) + ": " + header.getValue());
+                    });
                     System.out.println();
                     String contentType = responseHeaders.get("Content-Type");
                     return byteBufMono.asByteArray().doOnNext(content -> {
@@ -75,6 +78,13 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                             if (contentType.contains("json")) {
                                 final String body = prettyJsonFormatWithJsonPath(new String(content, StandardCharsets.UTF_8), httpRequest.getHeader("X-JSON-PATH"));
                                 System.out.print(body);
+                                final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
+                                if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
+                                    System.out.println();
+                                    System.out.println("============Execute JS Test============");
+                                    final String output = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, body);
+                                    System.out.println(output);
+                                }
                             } else {
                                 System.out.print(new String(content));
                             }
