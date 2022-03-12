@@ -53,6 +53,7 @@ public class RSocketExecutor implements BaseExecutor {
             var result = clientRSocket.requestResponse(rsocketRequest.createPayload()).block();
             String text = convertPayloadText(dataMimeType, result);
             System.out.println(text);
+            runJsTest(rsocketRequest.getHttpRequest(), 200, Collections.emptyMap(), dataMimeType, text);
             return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("HTX-105-408", e);
