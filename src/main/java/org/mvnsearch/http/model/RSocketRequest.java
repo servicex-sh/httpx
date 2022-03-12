@@ -243,4 +243,7 @@ public class RSocketRequest {
         return acceptMimeType;
     }
 
+    public HttpRequest getHttpRequest() {
+        return httpRequest;
+    }
 }
