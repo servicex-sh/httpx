@@ -199,6 +199,7 @@ public class HttpRequest {
         return this.redirectResponse;
     }
 
+    @Nullable
     public String getJavaScriptTestCode() {
         return this.jsTestCode;
     }
