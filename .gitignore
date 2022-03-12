@@ -149,3 +149,6 @@ AliyunPubExecutorTest.java
 AwsPubExecutorTest.java
 dependencies.txt
 updates.txt
+aliyun.http
+aws.http
+azure.http
