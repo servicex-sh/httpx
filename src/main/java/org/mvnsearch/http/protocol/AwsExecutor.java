@@ -79,13 +79,8 @@ public class AwsExecutor extends HttpExecutor {
                 requestBuilder.putHeader("Host", host);
             }
             // set default format: json
-            String format = "JSON";
             if (!headers.containsKey("Accept")) {
                 requestBuilder.putHeader("Accept", "application/json");
-            } else {
-                if (headers.get("Accept").contains("xml")) {
-                    format = "XML";
-                }
             }
             // set body
             if (bodyBytes != null && bodyBytes.length > 0) {
