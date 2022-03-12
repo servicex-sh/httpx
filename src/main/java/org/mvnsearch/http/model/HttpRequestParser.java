@@ -30,7 +30,7 @@ public class HttpRequestParser {
                 //noinspection StatementWithEmptyBody
                 if (!httpRequest.isFilled() && line.isEmpty()) {  // ignore empty lines before http request
 
-                } else if (line.startsWith("###")) { // comment for httpRequest or new HttpRequest
+                } else if (line.startsWith("###")) { // comment for httpRequest or new HttpRequest separator
                     String comment = line.substring(3).trim();
                     if (!httpRequest.isFilled()) { // fill information for current httpRequest
                         httpRequest.setComment(line.substring(3).trim());
@@ -41,7 +41,7 @@ public class HttpRequestParser {
                         httpRequest.setComment(comment);
                     }
                 } else if (!httpRequest.isBodyStarted()) {
-                    if ((line.startsWith("#") || line.startsWith("//")) && !httpRequest.isBodyStarted()) { //comment
+                    if ((line.startsWith("#") || line.startsWith("//"))) { //comment
                         if (line.contains("@")) { // tag for httpRequest
                             String tag = line.substring(line.indexOf("@") + 1);
                             String[] parts = tag.split("[=\\s]+", 2);
@@ -54,14 +54,14 @@ public class HttpRequestParser {
                                 httpRequest.setComment(line.substring(2).trim());
                             }
                         }
-                    } else if (HttpMethod.isRequestLine(line) && !httpRequest.isBodyStarted()) {  // request line parse
+                    } else if (HttpMethod.isRequestLine(line)) {  // request line parse
                         int position = line.indexOf(' ');
                         final String method = line.substring(0, position);
                         httpRequest.setMethod(HttpMethod.valueOf(method));
                         httpRequest.setRequestLine(line.substring(position + 1));
-                    } else if ((rawLine.startsWith("  ") || rawLine.startsWith("\t")) && !httpRequest.isBodyStarted()) { // append request parts in multi lines
+                    } else if ((rawLine.startsWith("  ") || rawLine.startsWith("\t"))) { // append request parts in multi lines
                         httpRequest.appendRequestLine(line);
-                    } else if (line.indexOf(':') > 0 && !httpRequest.isBodyStarted()) { //http request headers parse: body should be empty
+                    } else if (line.indexOf(':') > 0) { //http request headers parse: body should be empty
                         int position = line.indexOf(':');
                         httpRequest.addHttpHeader(line.substring(0, position), line.substring(position + 1).trim());
                     } else {
