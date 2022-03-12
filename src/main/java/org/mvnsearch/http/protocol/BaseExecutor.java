@@ -4,6 +4,7 @@ import com.jayway.jsonpath.JsonPath;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
+import org.mvnsearch.http.vendor.Nodejs;
 import picocli.CommandLine;
 
 import java.net.URI;
@@ -88,4 +89,14 @@ public interface BaseExecutor {
         return CommandLine.Help.Ansi.AUTO.string("@|" + color + " " + text + " |@");
     }
 
+
+    default void runJsTest(HttpRequest httpRequest, int statusCode, Map<String, String> headers, String contentType, String body) {
+        final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
+        if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
+            System.out.println();
+            System.out.println("============Execute JS Test============");
+            final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, statusCode, headers, contentType, body);
+            System.out.println(jsTestOutput);
+        }
+    }
 }
