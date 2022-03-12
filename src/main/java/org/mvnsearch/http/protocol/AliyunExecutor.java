@@ -8,6 +8,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.utils.JsonUtils;
 import org.mvnsearch.http.vendor.Aliyun;
 
 import java.net.URI;
@@ -67,6 +68,14 @@ public class AliyunExecutor implements BaseExecutor {
                 }
             }
             request.putQueryParameter("Format", format);
+            final byte[] bodyBytes = httpRequest.getBodyBytes();
+            if (bodyBytes != null && bodyBytes.length > 0) {
+                //String dataContentType = httpRequest.getHeader("Content-Type", "application");
+                final Map<String, Object> requestData = JsonUtils.readValue(bodyBytes, Map.class);
+                for (Map.Entry<String, Object> entry : requestData.entrySet()) {
+                    request.getSysBodyParameters().put(entry.getKey(), entry.getValue().toString());
+                }
+            }
             CommonResponse response = client.getCommonResponse(request);
             final Map<String, String> sysHeaders = response.getHttpResponse().getSysHeaders();
             String contentType = Objects.equals(format, "JSON") ? "application/json" : "application/xml";
