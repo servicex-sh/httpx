@@ -5,11 +5,13 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
-import org.mvnsearch.http.vendor.Nodejs;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class GrpcExecutor implements BaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(GrpcExecutor.class);
@@ -67,13 +69,7 @@ public class GrpcExecutor implements BaseExecutor {
             } else {
                 String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                 System.out.println(prettyJsonFormat(output));
-                final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
-                if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
-                    System.out.println();
-                    System.out.println("============Execute JS Test============");
-                    final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, 200, new HashMap<>(), "application/json", output);
-                    System.out.println(jsTestOutput);
-                }
+                runJsTest(httpRequest, 200, Collections.emptyMap(), "application/json", output);
                 return List.of(output.getBytes(StandardCharsets.UTF_8));
             }
         } catch (Exception e) {
