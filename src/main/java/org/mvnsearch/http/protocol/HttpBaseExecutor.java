@@ -76,13 +76,14 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                     return byteBufMono.asByteArray().doOnNext(content -> {
                         if (contentType != null && isPrintable(contentType)) {
                             if (contentType.contains("json")) {
-                                final String body = prettyJsonFormatWithJsonPath(new String(content, StandardCharsets.UTF_8), httpRequest.getHeader("X-JSON-PATH"));
+                                final String result = new String(content, StandardCharsets.UTF_8);
+                                final String body = prettyJsonFormatWithJsonPath(result, httpRequest.getHeader("X-JSON-PATH"));
                                 System.out.print(body);
                                 final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
                                 if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
                                     System.out.println();
                                     System.out.println("============Execute JS Test============");
-                                    final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, body);
+                                    final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, result);
                                     System.out.println(jsTestOutput);
                                 }
                             } else {
