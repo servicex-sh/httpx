@@ -44,11 +44,11 @@ public class HttpxCommand implements Callable<Integer> {
     private String target;
     @Option(names = {"-d", "--data"}, description = "Body data from text, @file or HTTP url")
     private String bodyData;
-    @Option(names = {"-l", "--list"}, description = "Display list")
+    @Option(names = {"-l", "--list"}, description = "List all targets in http file")
     private boolean listRequests;
     @Option(names = {"-s", "--summary"}, description = "Display summary")
     private boolean summary;
-    @Parameters(description = "positional params")
+    @Parameters(description = "targets to run")
     private List<String> targets;
     private boolean requestFromStdin = false;
     /**
