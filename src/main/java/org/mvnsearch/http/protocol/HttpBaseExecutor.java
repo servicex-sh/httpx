@@ -82,8 +82,8 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                                 if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
                                     System.out.println();
                                     System.out.println("============Execute JS Test============");
-                                    final String output = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, body);
-                                    System.out.println(output);
+                                    final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, body);
+                                    System.out.println(jsTestOutput);
                                 }
                             } else {
                                 System.out.print(new String(content));
