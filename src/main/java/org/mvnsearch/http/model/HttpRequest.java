@@ -332,4 +332,19 @@ public class HttpRequest {
     public boolean match(String targetName) {
         return targetName.equalsIgnoreCase(this.name) || Objects.equals(targetName, this.index.toString());
     }
+
+    public HttpxRequest convertToHttpxRequest() {
+        HttpxRequest request = new HttpxRequest();
+        request.setMethod(this.method.getName());
+        if (requestLine.contains(" ")) {
+            final String[] parts = requestLine.split("\s+", 2);
+            request.setPath(parts[0]);
+            request.setProtocol(parts[1]);
+        } else {
+            request.setPath(requestLine);
+        }
+        request.setHeaders(getHeadersMap());
+        request.setBody(getBodyBytes());
+        return request;
+    }
 }
