@@ -17,7 +17,8 @@ public class Nodejs {
     public static String executeHttpClientCode(String jsBlockCode, int statusCode, Map<String, String> headers, String contentType, String body) {
         try {
             if (httpClientExecuteJS == null) {
-                loadStubJs();
+                //noinspection ConstantConditions
+                httpClientExecuteJS = IOUtils.toString(Nodejs.class.getResourceAsStream("/http-client-execute.js"), StandardCharsets.UTF_8);
             }
             String base64Body = Base64.getEncoder().encodeToString(jsUrlEncode(body).getBytes(StandardCharsets.UTF_8));
             String jsCode = httpClientExecuteJS;
@@ -50,11 +51,6 @@ public class Nodejs {
             log.error("HTX-001-503", jsBlockCode, e);
             return "";
         }
-    }
-
-    private static void loadStubJs() throws Exception {
-        //noinspection ConstantConditions
-        httpClientExecuteJS = IOUtils.toString(Nodejs.class.getResourceAsStream("/http-client-execute.js"), StandardCharsets.UTF_8);
     }
 
     private static String jsUrlEncode(String text) {
