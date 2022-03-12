@@ -107,10 +107,10 @@ public class HttpRequestTarget {
             String temp = headerValue.replace("arn:aws:", "");
             if (temp.contains(":")) {
                 temp = temp.substring(0, temp.indexOf(':'));
-                if (temp.equals("sns")) {
-                    this.schema = "sns";
-                } else if (temp.equals("events")) {
+                if (temp.equals("events")) {
                     this.schema = "eventbridge";
+                } else {
+                    this.schema = temp;
                 }
             }
             return;
