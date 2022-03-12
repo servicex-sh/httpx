@@ -16,7 +16,7 @@ import org.springframework.nativex.hint.ResourceHint;
                 RSocketRequesterAutoConfiguration.class,
                 RSocketServerAutoConfiguration.class
         })
-@NativeHint(resources = {@ResourceHint(patterns = {"httpx/ErrorMessages.properties",})})
+@NativeHint(resources = {@ResourceHint(patterns = {"httpx/ErrorMessages.properties", "http-client-execute.js"})})
 public class HttpxApplication {
 
     public static void main(String[] args) {
