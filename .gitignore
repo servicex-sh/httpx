@@ -147,6 +147,8 @@ DemoTest.java
 MailExecutorTest.java
 AliyunPubExecutorTest.java
 AwsPubExecutorTest.java
+AliyunTest.java
+AWSTest.java
 dependencies.txt
 updates.txt
 aliyun.http
