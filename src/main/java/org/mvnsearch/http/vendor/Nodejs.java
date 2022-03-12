@@ -44,6 +44,8 @@ public class Nodejs {
                     }
                 } else {
                     System.err.println(error);
+                    System.out.println("=========JavaScript Code===========");
+                    System.out.println(jsCode);
                 }
                 return "";
             }
