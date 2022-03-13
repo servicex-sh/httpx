@@ -177,9 +177,9 @@ public class HttpxCommand implements Callable<Integer> {
                         }
                         targetFound = true;
                         if (example != null) {  // generate Language SDK example code
-                            generateCode(request);
+                            generateCode(request, httpFilePath);
                         } else { //execute request
-                            execute(request);
+                            execute(request, httpFilePath);
                         }
                     }
                 }
@@ -246,8 +246,8 @@ public class HttpxCommand implements Callable<Integer> {
         return context;
     }
 
-    public void execute(HttpRequest httpRequest) throws Exception {
-        httpRequest.cleanBody();
+    public void execute(HttpRequest httpRequest, Path httpFilePath) throws Exception {
+        httpRequest.cleanBody(httpFilePath);
         //reset body from input
         if (bodyFromInput != null && bodyFromInput.length > 0) {
             httpRequest.setBodyBytes(bodyFromInput);
@@ -293,8 +293,8 @@ public class HttpxCommand implements Callable<Integer> {
         }
     }
 
-    public void generateCode(HttpRequest httpRequest) throws Exception {
-        httpRequest.cleanBody();
+    public void generateCode(HttpRequest httpRequest, Path httpFilePath) throws Exception {
+        httpRequest.cleanBody(httpFilePath);
         String result = new CodeGenerator().generate(httpRequest, example);
         if (!result.isEmpty()) {
             System.out.println(result);
