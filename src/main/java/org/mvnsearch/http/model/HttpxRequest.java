@@ -11,6 +11,7 @@ public class HttpxRequest {
     private String method;
     private String path;
     private String protocol;
+    private String uri;
     private Map<String, String> headers;
     private byte[] body;
 
@@ -36,6 +37,14 @@ public class HttpxRequest {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public Map<String, String> getHeaders() {
