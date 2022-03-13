@@ -317,7 +317,7 @@ public class HttpRequest {
             }
             //extract redirect response file
             for (String line : lines) {
-                if (line.startsWith(">>")) { // response redirect
+                if (line.startsWith(">> ") || line.startsWith(">>! ")) { // response redirect
                     this.redirectResponse = line;
                 }
             }
