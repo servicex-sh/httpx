@@ -256,17 +256,25 @@ public class HttpRequest {
         }
     }
 
+    public void cleanBody() throws Exception {
+        cleanBody(null);
+    }
+
     /**
      * clean body: extract javascript test code, redirect response etc
      */
-    public void cleanBody() throws Exception {
+    public void cleanBody(@Nullable Path httpFilePath) throws Exception {
         if (bodyLines != null && !bodyLines.isEmpty()) {
             int offset = 0;
             boolean bodyFromExternal = false;
             if (bodyLines.get(0).startsWith("< ")) { // load body from an external file
                 String firstLine = bodyLines.get(0);
-                String fileName = firstLine.substring(1).trim();
-                this.body = Files.readAllBytes(Path.of(fileName));
+                String fileName = firstLine.substring(2).trim();
+                if (httpFilePath == null || fileName.startsWith("/") || fileName.contains(":\\")) { //absolute path
+                    this.body = Files.readAllBytes(Path.of(fileName));
+                } else {
+                    this.body = Files.readAllBytes(httpFilePath.resolve(fileName));
+                }
                 bodyFromExternal = true;
                 offset = 1;
             }
