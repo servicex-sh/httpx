@@ -343,6 +343,7 @@ public class HttpRequest {
         } else {
             request.setPath(requestLine);
         }
+        request.setUri(this.getRequestTarget().getUri().toString());
         request.setHeaders(getHeadersMap());
         request.setBody(getBodyBytes());
         return request;
