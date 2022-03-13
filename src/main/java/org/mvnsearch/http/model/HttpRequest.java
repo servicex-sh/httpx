@@ -261,57 +261,62 @@ public class HttpRequest {
      */
     public void cleanBody() throws Exception {
         if (bodyLines != null && !bodyLines.isEmpty()) {
+            int offset = 0;
+            boolean bodyFromExternal = false;
             if (bodyLines.get(0).startsWith("< ")) { // load body from an external file
                 String firstLine = bodyLines.get(0);
                 String fileName = firstLine.substring(1).trim();
                 this.body = Files.readAllBytes(Path.of(fileName));
-            } else {
-                List<String> lines = new ArrayList<>();
-                for (String bodyLine : bodyLines) {
-                    if (!bodyLine.startsWith("<>")) {
-                        lines.add(bodyLine);
-                    }
+                bodyFromExternal = true;
+                offset = 1;
+            }
+            List<String> lines = new ArrayList<>();
+            for (String bodyLine : bodyLines.subList(offset, bodyLines.size())) {
+                if (!bodyLine.startsWith("<>")) {
+                    lines.add(bodyLine);
                 }
-                // extract js code block
-                int jsScriptStartOffset = lines.size();
-                int jsScriptEndOffset = -1;
-                for (int i = 0; i < lines.size(); i++) {
-                    String line = lines.get(i);
-                    if (line.startsWith("> {%")) {
-                        jsScriptStartOffset = i;
-                    }
-                    if (line.equals("%}") && i > jsScriptStartOffset) {
-                        jsScriptEndOffset = i;
-                        break;
-                    }
+            }
+            // extract js code block
+            int jsScriptStartOffset = lines.size();
+            int jsScriptEndOffset = -1;
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line.startsWith("> {%")) {
+                    jsScriptStartOffset = i;
                 }
-                if (jsScriptEndOffset > 0) { // javascript test code found
-                    this.jsTestCode = String.join(System.lineSeparator(), lines.subList(jsScriptStartOffset + 1, jsScriptEndOffset));
-                    List<String> cleanLines = new ArrayList<>();
-                    cleanLines.addAll(lines.subList(0, jsScriptStartOffset));
-                    cleanLines.addAll(lines.subList(jsScriptEndOffset + 1, lines.size()));
-                    lines = cleanLines;
+                if (line.equals("%}") && i > jsScriptStartOffset) {
+                    jsScriptEndOffset = i;
+                    break;
                 }
-                // extract js file '> /path/to/responseHandler.js'
-                List<String> jsHandlerFiles = new ArrayList<>();
-                for (String line : lines) {
-                    if (line.startsWith("> ") && line.endsWith(".js")) { // response redirect
-                        jsHandlerFiles.add(line);
-                    }
+            }
+            if (jsScriptEndOffset > 0) { // javascript test code found
+                this.jsTestCode = String.join(System.lineSeparator(), lines.subList(jsScriptStartOffset + 1, jsScriptEndOffset));
+                List<String> cleanLines = new ArrayList<>();
+                cleanLines.addAll(lines.subList(0, jsScriptStartOffset));
+                cleanLines.addAll(lines.subList(jsScriptEndOffset + 1, lines.size()));
+                lines = cleanLines;
+            }
+            // extract js file '> /path/to/responseHandler.js'
+            List<String> jsHandlerFiles = new ArrayList<>();
+            for (String line : lines) {
+                if (line.startsWith("> ") && line.endsWith(".js")) { // response redirect
+                    jsHandlerFiles.add(line);
                 }
-                if (!jsHandlerFiles.isEmpty()) {
-                    lines.removeAll(jsHandlerFiles);
-                    //read js block from files
+            }
+            if (!jsHandlerFiles.isEmpty()) {
+                lines.removeAll(jsHandlerFiles);
+                //read js block from files
+            }
+            //extract redirect response file
+            for (String line : lines) {
+                if (line.startsWith(">>")) { // response redirect
+                    this.redirectResponse = line;
                 }
-                //extract redirect response file
-                for (String line : lines) {
-                    if (line.startsWith(">>")) { // response redirect
-                        this.redirectResponse = line;
-                    }
-                }
-                if (this.redirectResponse != null) {
-                    lines.remove(this.redirectResponse);
-                }
+            }
+            if (this.redirectResponse != null) {
+                lines.remove(this.redirectResponse);
+            }
+            if (!bodyFromExternal) { // process body from lines
                 if (!lines.isEmpty()) {
                     //remove empty lines after body
                     while (lines.get(lines.size() - 1).isEmpty()) {
