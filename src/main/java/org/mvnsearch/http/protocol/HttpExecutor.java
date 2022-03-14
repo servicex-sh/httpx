@@ -1,7 +1,5 @@
 package org.mvnsearch.http.protocol;
 
-import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
-import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
@@ -12,13 +10,15 @@ import java.util.List;
 
 
 public class HttpExecutor extends HttpBaseExecutor {
-    private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(DubboExecutor.class);
+    private static final List<String> IGNORED_HEADERS = List.of("x-json-type", "x-json-schema");
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         HttpClient client = httpClient().headers(httpHeaders -> {
             for (HttpHeader header : httpRequest.getHeaders()) {
-                httpHeaders.add(header.getName(), header.getValue());
+                if (!IGNORED_HEADERS.contains(header.getName().toLowerCase())) {
+                    httpHeaders.add(header.getName(), header.getValue());
+                }
             }
         });
         if (httpRequest.containsTag("no-redirect")) {
