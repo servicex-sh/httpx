@@ -1,0 +1,10 @@
+{
+  "method": "POST",
+  "path": "https://httpbin.org/post",
+  "protocol": "HTTP/1.1",
+  "uri": "https://httpbin.org/post",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "e1wiaWRcIjoxfQ=="
+}
