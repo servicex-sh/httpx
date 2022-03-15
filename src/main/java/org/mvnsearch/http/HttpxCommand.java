@@ -3,6 +3,7 @@ package org.mvnsearch.http;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.gen.CodeGenerator;
+import org.mvnsearch.http.gen.OpenAPIGenerator;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpMethod;
@@ -22,6 +23,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -38,7 +40,9 @@ public class HttpxCommand implements Callable<Integer> {
     private String[] profile;
     @Option(names = {"-e"}, description = "Example code generate")
     private String example;
-    @Option(names = {"-f", "--httpfile"}, description = "Http file", defaultValue = "index.http")
+    @Option(names = {"--import"}, description = "Import OpenAPI/AsyncAPI URL to generate HTTP file")
+    private String importURL;
+    @Option(names = {"-f", "--httpfile"}, description = "Http file, and default is index.http")
     private String httpFile;
     @Option(names = {"-t"}, description = "Targets to run")
     private String target;
@@ -58,6 +62,12 @@ public class HttpxCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        if (importURL != null && !importURL.isEmpty()) {
+            return importAPI();
+        }
+        if (httpFile == null) {
+            httpFile = "index.http";
+        }
         if (completions != null) {
             printShellCompletion();
             return 0;
@@ -346,6 +356,25 @@ public class HttpxCommand implements Callable<Integer> {
                 _describe 'command' subcmds
                 """;
         System.out.println(zshCompletion);
+    }
+
+    public int importAPI() {
+        try {
+            String content = new OpenAPIGenerator().generateHttpFileFromOpenAPI(importURL, targets);
+            if (httpFile != null) {
+                Path destHttpFile = Path.of(httpFile);
+                if (destHttpFile.toFile().exists()) {
+                    Files.writeString(destHttpFile, content, StandardOpenOption.APPEND);
+                } else {
+                    Files.writeString(destHttpFile, content);
+                }
+            } else {
+                System.out.println(content);
+            }
+        } catch (Exception e) {
+            log.error("HTX-003-500", e);
+        }
+        return 0;
     }
 
     @Nullable
