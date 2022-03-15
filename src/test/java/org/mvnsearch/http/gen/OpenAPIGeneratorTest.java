@@ -1,9 +1,11 @@
 package org.mvnsearch.http.gen;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+@Disabled
 public class OpenAPIGeneratorTest {
     @Test
     public void testGenerate() throws Exception {
