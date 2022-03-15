@@ -70,10 +70,9 @@ public class AliyunExecutor implements BaseExecutor {
             request.putQueryParameter("Format", format);
             final byte[] bodyBytes = httpRequest.getBodyBytes();
             if (bodyBytes != null && bodyBytes.length > 0) {
-                //String dataContentType = httpRequest.getHeader("Content-Type", "application");
                 final Map<String, Object> requestData = JsonUtils.readValue(bodyBytes, Map.class);
                 for (Map.Entry<String, Object> entry : requestData.entrySet()) {
-                    request.getSysBodyParameters().put(entry.getKey(), entry.getValue().toString());
+                    request.putQueryParameter(entry.getKey(), entry.getValue().toString());
                 }
             }
             CommonResponse response = client.getCommonResponse(request);
