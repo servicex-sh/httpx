@@ -50,7 +50,7 @@ public class AliyunExecutor implements BaseExecutor {
             CommonRequest request = new CommonRequest();
             request.setSysDomain(host);
             request.setSysAction(queries.get("Action"));
-            String version = null;
+            String version;
             if (queries.containsKey("Version")) {
                 version = queries.get("Version");
             } else {
