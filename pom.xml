@@ -407,6 +407,11 @@
             <version>${aws-java-sdk2.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser</artifactId>
+            <version>2.0.30</version>
+        </dependency>
+        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli-spring-boot-starter</artifactId>
             <version>${picocli.version}</version>
