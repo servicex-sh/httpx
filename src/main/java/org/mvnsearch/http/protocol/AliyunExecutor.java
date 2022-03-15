@@ -25,18 +25,11 @@ public class AliyunExecutor implements BaseExecutor {
         try {
             final URI requestUri = httpRequest.getRequestTarget().getUri();
             String host = requestUri.getHost();
+            String serviceName = Aliyun.getServiceName(host);
             //resolve region id from X-Region-Id header or host name
             String regionId = httpRequest.getHeader("X-Region-Id");
             if (regionId == null) { //resolve region id from host
-                String tempRegionId = host.replace(".aliyuncs.com", "");
-                if (tempRegionId.contains(".")) {
-                    tempRegionId = tempRegionId.substring(tempRegionId.indexOf(".") + 1);
-                } else if (tempRegionId.contains("-")) {
-                    tempRegionId = tempRegionId.substring(tempRegionId.indexOf("-") + 1);
-                }
-                if (Aliyun.regions().contains(tempRegionId)) {
-                    regionId = tempRegionId;
-                }
+                regionId = Aliyun.getRegionId(host);
             }
             if (regionId == null) {
                 regionId = "cn-hangzhou";
@@ -56,8 +49,14 @@ public class AliyunExecutor implements BaseExecutor {
             IAcsClient client = new DefaultAcsClient(profile);
             CommonRequest request = new CommonRequest();
             request.setSysDomain(host);
-            request.setSysVersion(queries.get("Version"));
             request.setSysAction(queries.get("Action"));
+            String version = null;
+            if (queries.containsKey("Version")) {
+                version = queries.get("Version");
+            } else {
+                version = Aliyun.getApiVersion(serviceName);
+            }
+            request.setSysVersion(version);
             String format = "JSON";
             if (queries.containsKey("Format")) {
                 format = queries.get("Format");
