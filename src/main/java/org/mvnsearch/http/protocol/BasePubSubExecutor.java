@@ -4,6 +4,7 @@ import org.mvnsearch.http.model.HttpRequest;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import java.net.URI;
+import java.util.concurrent.CountDownLatch;
 
 
 public interface BasePubSubExecutor extends BaseExecutor {
@@ -71,6 +72,19 @@ public interface BasePubSubExecutor extends BaseExecutor {
             }
         }
         return headers;
+    }
+
+    default void latch() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Thread.sleep(200);
+                latch.countDown();
+                System.out.println("Shutting down ...");
+            } catch (Exception ignore) {
+            }
+        }));
+        latch.await();
     }
 
 }
