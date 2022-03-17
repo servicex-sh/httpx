@@ -449,7 +449,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         String queueArn = httpRequest.getHeader("URI");
         String regionId = getAwsRegionId(httpRequest, queueArn);
         String queueUrl;
-        if (queueArn != null && queue.length() == 5) {
+        if (queueArn != null) {
             final String[] parts = queueArn.split(":");
             String sqsRegionId = parts[3];
             String sqsQueueId = parts[4];
@@ -466,7 +466,6 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             SendMessageRequest sendMsgRequest = SendMessageRequest.builder()
                     .queueUrl(queueUrl)
                     .messageBody(httpRequest.bodyText())
-                    .delaySeconds(5)
                     .build();
             final SendMessageResponse response = sqsClient.sendMessage(sendMsgRequest);
             System.out.print("Succeeded to send message to " + queue + " with ID " + response.messageId());
