@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.protocol.mqtt3.Mqtt3SubscriberExecutor;
 import org.springframework.messaging.simp.stomp.*;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
@@ -37,7 +38,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 
 
 public class MessageSubscribeExecutor implements BasePubSubExecutor {
@@ -61,8 +61,10 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             subscribePulsar(realURI, httpRequest);
         } else if (Objects.equals(schema, "rocketmq")) {
             subscribeRocketmq(realURI, httpRequest);
+        } else if (schema != null && schema.startsWith("mqtt5")) {
+            subscribeMqtt5(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("mqtt")) {
-            subscribeMqtt(realURI, httpRequest);
+            new Mqtt3SubscriberExecutor().subscribeMqtt3(realURI, httpRequest);
         } else if (Objects.equals(schema, "stomp")) {
             subscribeStomp(realURI, httpRequest);
         } else {
@@ -217,7 +219,7 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
         }
     }
 
-    public void subscribeMqtt(URI mqttURI, HttpRequest httpRequest) {
+    public void subscribeMqtt5(URI mqttURI, HttpRequest httpRequest) {
         MqttClient mqttClient = null;
         try {
             UriAndSubject uriAndTopic = getMqttUriAndTopic(mqttURI, httpRequest);
@@ -334,19 +336,6 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
         } finally {
             consumer.shutdown();
         }
-    }
-
-    private void latch() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                Thread.sleep(200);
-                latch.countDown();
-                System.out.println("Shutting down ...");
-            } catch (Exception ignore) {
-            }
-        }));
-        latch.await();
     }
 
 }

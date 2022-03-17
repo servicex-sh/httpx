@@ -28,6 +28,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
+import org.mvnsearch.http.protocol.mqtt3.Mqtt3PublisherExecutor;
 import org.mvnsearch.http.utils.JsonUtils;
 import org.mvnsearch.http.vendor.AWS;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
@@ -85,8 +86,10 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             sendRedisMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "pulsar")) {
             sendPulsarMessage(realURI, httpRequest);
+        } else if (schema != null && schema.startsWith("mqtt5")) {
+            sendMqtt5Message(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("mqtt")) {
-            sendMqttMessage(realURI, httpRequest);
+            new Mqtt3PublisherExecutor().sendMqtt3Message(realURI, httpRequest);
         } else if (schema != null && schema.startsWith("stomp")) {
             sendStompMessage(realURI, httpRequest);
         } else if (Objects.equals(schema, "eventbridge")) {
@@ -323,7 +326,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         }
     }
 
-    public void sendMqttMessage(URI mqttURI, HttpRequest httpRequest) {
+    public void sendMqtt5Message(URI mqttURI, HttpRequest httpRequest) {
         MqttClient mqttClient = null;
         try {
             UriAndSubject uriAndTopic = getMqttUriAndTopic(mqttURI, httpRequest);
