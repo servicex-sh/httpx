@@ -151,16 +151,34 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
-        //eclipse paho mqtt client
+        //eclipse paho mqtt5 client
         registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/logging/JSR47Logger.class"));
         registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/client/internal/nls/logcat.properties"));
         registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/common/nls/logcat.properties"));
         registry.resources().add(NativeResourcesEntry.ofBundle("org/eclipse/paho/mqttv5/common/nls/messages"));
-        final Class<?>[] mqttClassArray = {Logger.class, JSR47Logger.class, LoggerFactory.class,
+        final Class<?>[] mqtt5ClassArray = {Logger.class, JSR47Logger.class, LoggerFactory.class,
                 NetworkModuleFactory.class, WebSocketNetworkModuleFactory.class,
                 WebSocketSecureNetworkModuleFactory.class, SSLNetworkModuleFactory.class,
                 TCPNetworkModuleFactory.class};
-        for (Class<?> clazz : mqttClassArray) {
+        for (Class<?> clazz : mqtt5ClassArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //eclipse paho mqtt3 client
+        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/client/mqttv3/logging/JSR47Logger.class"));
+        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/client/mqttv3/internal/nls/logcat.properties"));
+        registry.resources().add(NativeResourcesEntry.ofBundle("org/eclipse/paho/client/mqttv3/internal/nls/messages"));
+        final Class<?>[] mqtt3ClassArray = {
+                org.eclipse.paho.client.mqttv3.logging.Logger.class,
+                org.eclipse.paho.client.mqttv3.logging.JSR47Logger.class,
+                org.eclipse.paho.client.mqttv3.logging.LoggerFactory.class,
+                org.eclipse.paho.client.mqttv3.spi.NetworkModuleFactory.class,
+                org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModuleFactory.class,
+                org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModuleFactory.class,
+                org.eclipse.paho.client.mqttv3.internal.SSLNetworkModuleFactory.class,
+                org.eclipse.paho.client.mqttv3.internal.TCPNetworkModuleFactory.class,
+        };
+        for (Class<?> clazz : mqtt3ClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
