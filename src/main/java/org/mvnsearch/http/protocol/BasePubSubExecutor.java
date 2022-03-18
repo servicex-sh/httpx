@@ -15,7 +15,10 @@ public interface BasePubSubExecutor extends BaseExecutor {
     default UriAndSubject getRedisUriAndChannel(URI redisURI, HttpRequest httpRequest) {
         String connectionUri;
         String channel;
-        final String hostHeader = httpRequest.getHeader("Host");
+        String hostHeader = httpRequest.getHeader("Host");
+        if (hostHeader == null) {
+            hostHeader = httpRequest.getHeader("URI");
+        }
         if (hostHeader != null) {
             connectionUri = hostHeader;
             channel = httpRequest.getRequestTarget().getRequestLine();
@@ -29,16 +32,11 @@ public interface BasePubSubExecutor extends BaseExecutor {
     }
 
     default UriAndSubject getRabbitUriAndQueue(URI rabbitURI, HttpRequest httpRequest) {
-        String connectionUri;
-        String queue;
-        final String hostHeader = httpRequest.getHeader("Host");
-        if (hostHeader != null) {
-            connectionUri = hostHeader;
-            queue = httpRequest.getRequestTarget().getRequestLine();
-        } else {
-            connectionUri = rabbitURI.toString();
-            queue = queryToMap(rabbitURI).get("queue");
+        String connectionUri = httpRequest.getHeader("URI");
+        if (connectionUri == null) {
+            connectionUri = httpRequest.getHeader("Host");
         }
+        String queue = httpRequest.getRequestTarget().getRequestLine();
         return new UriAndSubject(connectionUri, queue);
     }
 
