@@ -151,7 +151,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             connectionFactory.setUri(rabbitUriAndQueue.uri());
             reactor.rabbitmq.SenderOptions senderOptions = new reactor.rabbitmq.SenderOptions()
                     .connectionFactory(connectionFactory)
-                    .resourceManagementScheduler(Schedulers.boundedElastic());
+                    .resourceManagementScheduler(Schedulers.immediate());
             try (Sender rabbitSender = RabbitFlux.createSender(senderOptions)) {
                 rabbitSender
                         .send(Mono.just(new OutboundMessage("", rabbitUriAndQueue.subject(), httpRequest.getBodyBytes())))

@@ -119,7 +119,7 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             connectionFactory.setUri(rabbitUriAndQueue.uri());
             ReceiverOptions receiverOptions = new ReceiverOptions()
                     .connectionFactory(connectionFactory)
-                    .connectionSubscriptionScheduler(Schedulers.boundedElastic());
+                    .connectionSubscriptionScheduler(Schedulers.immediate());
             final Receiver receiver = RabbitFlux.createReceiver(receiverOptions);
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             receiver.consumeAutoAck(rabbitUriAndQueue.subject())
