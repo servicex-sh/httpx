@@ -78,7 +78,7 @@ public class AliyunExecutor implements BaseExecutor {
             final Map<String, String> sysHeaders = response.getHttpResponse().getSysHeaders();
             String contentType = Objects.equals(format, "JSON") ? "application/json" : "application/xml";
             String text = response.getData();
-            System.out.print(prettyJsonFormatWithJsonPath(text, httpRequest.getHeader("X-JSON-PATH")));
+            System.out.print(prettyJsonFormatWithJsonPath(text, httpRequest.getHeader("X-JSON-Path")));
             runJsTest(httpRequest, response.getHttpStatus(), sysHeaders, contentType, text);
             return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {

@@ -77,7 +77,7 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                         if (contentType != null && isPrintable(contentType)) {
                             if (contentType.contains("json")) {
                                 final String result = new String(content, StandardCharsets.UTF_8);
-                                final String body = prettyJsonFormatWithJsonPath(result, httpRequest.getHeader("X-JSON-PATH"));
+                                final String body = prettyJsonFormatWithJsonPath(result, httpRequest.getHeader("X-JSON-Path"));
                                 System.out.print(body);
                                 final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
                                 if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
