@@ -195,6 +195,8 @@ public class HttpRequestTarget {
             if (!requestUri.startsWith("tcp://") && requestUri.contains(":")) {
                 requestUri = "tcp://" + requestUri;
             }
+        } else if (method.equals("MEMCACHE")) {
+            requestTarget.schema = "memcache";
         }
         if (!requestUri.contains("://")) { //correct uri without schema
             if (requestUri.contains(":") || requestUri.indexOf('/') > 0) { // uri without schema
