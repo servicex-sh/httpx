@@ -14,6 +14,7 @@ public class HttpMethod {
     public static final List<String> ZEROMQ_METHODS = List.of("ZEROREQ");
     public static final List<String> MAIL_METHODS = List.of("MAIL");
     public static final List<String> ALIYUN_METHODS = List.of("ALIYUN", "ALICLOUD");
+    public static final List<String> MEMCACHE_METHODS = List.of("MEMCACHE");
     public static final List<String> AWS_METHODS = List.of("AWS");
     public static final List<String> PUB_METHODS = List.of("PUB");
     public static final List<String> SUB_METHODS = List.of("SUB");
@@ -54,7 +55,8 @@ public class HttpMethod {
                 || SOFA_METHODS.contains(method)
                 || MAIL_METHODS.contains(method)
                 || PUB_METHODS.contains(method)
-                || SUB_METHODS.contains(method);
+                || SUB_METHODS.contains(method)
+                || MEMCACHE_METHODS.contains(method);
     }
 
     public static HttpMethod valueOf(String methodName) {
@@ -111,5 +113,9 @@ public class HttpMethod {
 
     public boolean isSubMethod() {
         return SUB_METHODS.contains(name);
+    }
+
+    public boolean isMemcacheMethod() {
+        return MEMCACHE_METHODS.contains(name);
     }
 }
