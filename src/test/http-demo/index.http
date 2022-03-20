@@ -178,3 +178,19 @@ Content-Type: application/json
 //@name zero-sub
 SUB topic1
 Host: zeromq://localhost:5555
+
+### memcache set
+//@name mem-set
+MEMCACHE user.1
+URI: memcache://localhost:11211
+Content-Type: application/json
+
+{
+  "id": 111,
+  "name": "jackie"
+}
+
+### memcache set
+//@name mem-get
+MEMCACHE user.1
+URI: memcache://localhost:11211
