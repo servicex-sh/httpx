@@ -45,7 +45,7 @@ public class MemcacheExecutor extends HttpBaseExecutor {
                 if (content != null && content.length > 0) {
                     System.out.println(prettyJsonFormat(new String(content, StandardCharsets.UTF_8)));
                 } else {
-                    System.out.println("Failed to find cache by: " + key);
+                    System.out.println("Failed to find cache: " + key);
                 }
             }
             client.shutdown();
