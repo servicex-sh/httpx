@@ -300,6 +300,8 @@ public class HttpxCommand implements Callable<Integer> {
             result = new MessagePublishExecutor().execute(httpRequest);
         } else if (requestMethod.isSubMethod()) {
             result = new MessageSubscribeExecutor().execute(httpRequest);
+        } else if (requestMethod.isMemcacheMethod()) {
+            result = new MemcacheExecutor().execute(httpRequest);
         } else {
             result = Collections.emptyList();
             System.out.print("Not support: " + requestMethod.getName());
