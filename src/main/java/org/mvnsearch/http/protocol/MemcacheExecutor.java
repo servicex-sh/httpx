@@ -24,8 +24,12 @@ public class MemcacheExecutor extends HttpBaseExecutor {
         System.out.println();
         try {
             byte[] content = null;
+            int port = memcacheURI.getPort();
+            if (port <= 0) {
+                port = 11211;
+            }
             final MemcacheClient<byte[]> client = MemcacheClientBuilder.newByteArrayClient()
-                    .withAddress(memcacheURI.getHost(), memcacheURI.getPort())
+                    .withAddress(memcacheURI.getHost(), port)
                     .connectAscii();
             ConnectFuture.connectFuture(client).toCompletableFuture().get();
             final byte[] bodyBytes = httpRequest.getBodyBytes();
