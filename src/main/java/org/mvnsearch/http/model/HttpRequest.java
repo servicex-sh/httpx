@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mvnsearch.http.model.extension.HttpxExtensionRequest;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
@@ -346,8 +347,8 @@ public class HttpRequest {
         return targetName.equalsIgnoreCase(this.name) || Objects.equals(targetName, this.index.toString());
     }
 
-    public HttpxRequest convertToHttpxRequest() {
-        HttpxRequest request = new HttpxRequest();
+    public HttpxExtensionRequest convertToHttpxRequest() {
+        HttpxExtensionRequest request = new HttpxExtensionRequest();
         request.setMethod(this.method.getName());
         if (requestLine.contains(" ")) {
             final String[] parts = requestLine.split("\s+", 2);
