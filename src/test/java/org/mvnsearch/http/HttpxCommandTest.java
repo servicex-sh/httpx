@@ -17,4 +17,22 @@ public class HttpxCommandTest {
         final Map<String, String> development = (Map<String, String>) context.get("development");
         assertThat(development).containsKey("base-url");
     }
+
+    @Test
+    public void testExtensionRequest() throws Exception {
+        String extensionRequestJson = """
+                {
+                  "method": "POST",
+                  "path": "https://httpbin.org/post",
+                  "protocol": "HTTP/1.1",
+                  "uri": "https://httpbin.org/post",
+                  "headers": {
+                    "Content-Type": "application/json"
+                  },
+                  "body": "e1wiaWRcIjoxfQ=="
+                }
+                """.trim();
+        HttpxCommand httpxCommand = new HttpxCommand();
+        httpxCommand.executeExtensionRequest(extensionRequestJson);
+    }
 }
