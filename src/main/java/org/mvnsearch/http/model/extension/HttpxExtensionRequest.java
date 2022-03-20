@@ -1,4 +1,4 @@
-package org.mvnsearch.http.model;
+package org.mvnsearch.http.model.extension;
 
 import java.util.Map;
 
@@ -7,7 +7,7 @@ import java.util.Map;
  *
  * @author linux_china
  */
-public class HttpxRequest {
+public class HttpxExtensionRequest {
     private String method;
     private String path;
     private String protocol;
