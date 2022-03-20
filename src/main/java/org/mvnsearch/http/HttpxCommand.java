@@ -9,6 +9,8 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpMethod;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
+import org.mvnsearch.http.model.HttpRequestTarget;
+import org.mvnsearch.http.model.extension.HttpxExtensionRequest;
 import org.mvnsearch.http.protocol.*;
 import org.mvnsearch.http.utils.JsonUtils;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import picocli.CommandLine.Parameters;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -80,7 +83,13 @@ public class HttpxCommand implements Callable<Integer> {
                 httpCode = httpCodeOrBody;
                 requestFromStdin = true;
             } else {
-                bodyFromInput = httpCodeOrBody.trim().getBytes(StandardCharsets.UTF_8); //trim end line
+                final String stdinText = httpCodeOrBody.trim();
+                // check is httpx extension request or not
+                if (stdinText.startsWith("{") && stdinText.contains("\"method\"") && stdinText.contains("\"uri\"")) {
+                    return executeExtensionRequest(stdinText);
+                } else {
+                    bodyFromInput = stdinText.getBytes(StandardCharsets.UTF_8); //trim end line
+                }
             }
         }
         Path httpFilePath;
@@ -256,7 +265,7 @@ public class HttpxCommand implements Callable<Integer> {
         return context;
     }
 
-    public void execute(HttpRequest httpRequest, Path httpFilePath) throws Exception {
+    public void execute(HttpRequest httpRequest, @Nullable Path httpFilePath) throws Exception {
         httpRequest.cleanBody(httpFilePath);
         //reset body from input
         if (bodyFromInput != null && bodyFromInput.length > 0) {
@@ -430,4 +439,31 @@ public class HttpxCommand implements Callable<Integer> {
         }
     }
 
+    public int executeExtensionRequest(String extensionRequestJson) {
+        try {
+            final HttpxExtensionRequest extensionRequest = JsonUtils.readValue(extensionRequestJson, HttpxExtensionRequest.class);
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.setMethod(HttpMethod.valueOf(extensionRequest.getMethod()));
+            HttpRequestTarget requestTarget = new HttpRequestTarget();
+            final URI uri = URI.create(extensionRequest.getUri());
+            requestTarget.setUri(uri);
+            requestTarget.setHost(uri.getHost());
+            httpRequest.setRequestTarget(requestTarget);
+            final Map<String, String> headers = extensionRequest.getHeaders();
+            if (headers != null && !headers.isEmpty()) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    httpRequest.addHttpHeader(entry.getKey(), entry.getValue());
+                }
+            }
+            final byte[] body = extensionRequest.getBody();
+            if (body != null && body.length > 0) {
+                httpRequest.setBodyBytes(body);
+            }
+            execute(httpRequest, null);
+        } catch (Exception e) {
+            log.error("HTX-401-500", e);
+            return -1;
+        }
+        return 0;
+    }
 }
