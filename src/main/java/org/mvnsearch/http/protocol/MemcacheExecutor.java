@@ -17,6 +17,9 @@ public class MemcacheExecutor extends HttpBaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(MemcacheExecutor.class);
 
     public List<byte[]> execute(HttpRequest httpRequest) {
+        if (!httpRequest.isHostOrUriAvailable()) {
+            httpRequest.addHttpHeader("Host", "localhost:11211");
+        }
         final URI memcacheURI = httpRequest.getRequestTarget().getUri();
         String key = httpRequest.getRequestLine();
         String methodName = httpRequest.getMethod().getName();
