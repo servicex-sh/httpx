@@ -13,6 +13,8 @@ httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbra
 * Sofa RPC
 * Email sending by SMTP
 * GraphQL with HTTP and WebSocket
+* Memcache: set/get/delete
+* Redis: set/hmset/eval
 
 # How to install?
 
