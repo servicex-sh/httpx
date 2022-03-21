@@ -20,7 +20,7 @@ public class HttpRequestParser {
             final BufferedReader bufferedReader = new BufferedReader(new StringReader(replaceVariables(httpFileCode, context)));
             List<String> lines = bufferedReader.lines().toList();
             int index = 1;
-            int lineNumber = 0;
+            int lineNumber = 1;
             //remove shebang
             if (lines.get(0).startsWith("#!/usr/bin/env")) {
                 lines = lines.subList(1, lines.size());
