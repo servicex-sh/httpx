@@ -45,4 +45,40 @@ public class RedisExecutorTest {
         request.cleanBody();
         new RedisExecutor().execute(request);
     }
+
+    @Test
+    public void testRedisEval() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### redis hset
+                EVAL 0
+                Host: localhost:6379
+                Content-Type: text/x-lua
+                                
+                local val="Hello Compose" 
+                return val
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new RedisExecutor().execute(request);
+    }
+
+    @Test
+    public void testRedisEvalWithParams() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### redis hset
+                EVAL 0 Jackie
+                Host: localhost:6379
+                Content-Type: text/x-lua
+                  
+                local val="Hello "                 
+                return val .. ARGV[1]
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new RedisExecutor().execute(request);
+    }
 }
