@@ -1,6 +1,8 @@
 package org.mvnsearch.http.model;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
@@ -85,10 +87,11 @@ public class HttpRequestTarget {
             builder.append(":").append(port);
         }
         if (pathAbsolute != null) {
-            if (pathAbsolute.startsWith("/")) {
-                builder.append(pathAbsolute);
+            final String encodedPath = URLEncoder.encode(pathAbsolute, StandardCharsets.UTF_8);
+            if (encodedPath.startsWith("/")) {
+                builder.append(encodedPath);
             } else {
-                builder.append("/").append(pathAbsolute);
+                builder.append("/").append(encodedPath);
             }
         }
         return URI.create(builder.toString());
@@ -197,7 +200,7 @@ public class HttpRequestTarget {
             }
         } else if (method.equals("MEMCACHE")) {
             requestTarget.schema = "memcache";
-        } else if (method.equals("SET") || method.equals("HMSET")) {
+        } else if (HttpMethod.REDIS_METHODS.contains(method)) {
             requestTarget.schema = "redis";
         }
         if (!requestUri.contains("://")) { //correct uri without schema
