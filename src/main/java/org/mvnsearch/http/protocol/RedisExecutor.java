@@ -19,7 +19,7 @@ public class RedisExecutor implements BasePubSubExecutor {
         try (Jedis jedis = new Jedis(redisUriAndKey.uri())) {
             String key = redisUriAndKey.subject();
             switch (methodName) {
-                case "SET" -> {
+                case "RSET" -> {
                     jedis.set(key, httpRequest.bodyText());
                     System.out.print("Succeeded to set value!");
                 }
