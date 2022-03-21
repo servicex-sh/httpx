@@ -20,6 +20,9 @@ public interface BasePubSubExecutor extends BaseExecutor {
             hostHeader = httpRequest.getHeader("URI");
         }
         if (hostHeader != null) {
+            if (!hostHeader.contains("://")) {
+                hostHeader = "redis://" + hostHeader;
+            }
             connectionUri = hostHeader;
             channel = httpRequest.getRequestTarget().getRequestLine();
         } else {
@@ -35,6 +38,9 @@ public interface BasePubSubExecutor extends BaseExecutor {
         String connectionUri = httpRequest.getHeader("URI");
         if (connectionUri == null) {
             connectionUri = httpRequest.getHeader("Host");
+            if (connectionUri != null && !connectionUri.contains("://")) {
+                connectionUri = "amqp://" + connectionUri;
+            }
         }
         String queue = httpRequest.getRequestTarget().getRequestLine();
         return new UriAndSubject(connectionUri, queue);
