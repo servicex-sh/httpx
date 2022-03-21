@@ -372,6 +372,9 @@ public class HttpRequest {
     public boolean match(String targetName) {
         if (targetName.startsWith("line:")) {
             int lineNumber = Integer.parseInt(targetName.substring(5));
+            if (lineNumber == 0) {
+                lineNumber = 1;
+            }
             return this.containsLineNumber(lineNumber);
         }
         return targetName.equalsIgnoreCase(this.name)
