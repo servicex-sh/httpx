@@ -70,7 +70,7 @@ public class RedisExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### redis hset
-                EVAL 0 Jackie
+                EVAL 1 name Jackie
                 Host: localhost:6379
                 Content-Type: text/x-lua
                   
