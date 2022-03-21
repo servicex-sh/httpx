@@ -24,6 +24,7 @@ public class HttpRequest {
     private List<HttpHeader> headers;
     private boolean bodyStarted = false;
     private List<String> bodyLines;
+    private final List<Integer> lineNumbers = new ArrayList<>();
     private byte[] body;
     private String jsTestCode;
     private String redirectResponse;
@@ -183,6 +184,14 @@ public class HttpRequest {
 
     public List<String> getBodyLines() {
         return bodyLines;
+    }
+
+    public void addLineNumber(int lineNumber) {
+        this.lineNumbers.add(lineNumber);
+    }
+
+    public boolean containsLineNumber(int lineNumber) {
+        return this.lineNumbers.contains(lineNumber);
     }
 
     public void setBodyLines(List<String> bodyLines) {
