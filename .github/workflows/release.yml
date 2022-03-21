@@ -13,7 +13,7 @@ jobs:
           - os: ubuntu-latest
             fileName: httpx-linux-x86_64
             file: target/httpx-linux-x86_64
-          - os: windows-latest
+          - os: windows-2019
             fileName: httpx-windows-x86_64.exe
             file: target/httpx-windows-x86_64.exe
           - os: macos-latest
