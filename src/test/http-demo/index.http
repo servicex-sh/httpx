@@ -197,7 +197,7 @@ URI: memcache://localhost:11211
 
 ### redis set
 //@name redis-set
-SET nick
+RSET nick
 Host: localhost:6379
 Content-Type: text/plain
 
