@@ -18,8 +18,7 @@ public class RedisExecutorTest {
         @Language("HTTP Request")
         String httpFile = """
                 ### redis set
-                SET nick
-                Host: localhost:6379
+                RSET nick
                 Content-Type: text/plain
                      
                 Jackie   
@@ -56,8 +55,8 @@ public class RedisExecutorTest {
                 Host: localhost:6379
                 Content-Type: text/x-lua
                                 
-                local val="Hello Compose" 
-                return val
+                local welcome="Hello Compose" 
+                return welcome
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
