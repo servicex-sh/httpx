@@ -353,7 +353,12 @@ public class HttpRequest {
     }
 
     public boolean match(String targetName) {
-        return targetName.equalsIgnoreCase(this.name) || Objects.equals(targetName, this.index.toString());
+        if (targetName.startsWith("line:")) {
+            int lineNumber = Integer.parseInt(targetName.substring(5));
+            return this.containsLineNumber(lineNumber);
+        }
+        return targetName.equalsIgnoreCase(this.name)
+                || Objects.equals(targetName, this.index.toString());
     }
 
     public HttpxExtensionRequest convertToHttpxRequest() {
