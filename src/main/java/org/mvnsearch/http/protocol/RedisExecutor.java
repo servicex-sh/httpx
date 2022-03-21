@@ -7,10 +7,7 @@ import org.mvnsearch.http.utils.JsonUtils;
 import redis.clients.jedis.Jedis;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class RedisExecutor implements BasePubSubExecutor {
@@ -34,13 +31,11 @@ public class RedisExecutor implements BasePubSubExecutor {
                         if (requestLine.isEmpty() || requestLine.equals("0")) {
                             result = jedis.eval(luaScript);
                         } else {
-                            final String[] parts = requestLine.split("\\s+");
-                            int paramCount = parts.length / 2;
-                            String[] params = new String[paramCount];
-                            for (int i = 0; i < paramCount; i++) {
-                                params[i] = parts[i * 2 + 1];
-                            }
-                            result = jedis.eval(luaScript, paramCount - 1, params);
+                            final List<String> parts = Arrays.asList(requestLine.split("\\s+"));
+                            int paramCount = Integer.parseInt(parts.get(0));
+                            final List<String> keys = parts.subList(1, paramCount + 1);
+                            final List<String> args = parts.subList(paramCount + 1, parts.size());
+                            result = jedis.eval(luaScript, keys, args);
                         }
                         colorOutput("bold,green", "Succeeded to eval Lua script:");
                         if (result == null) {
