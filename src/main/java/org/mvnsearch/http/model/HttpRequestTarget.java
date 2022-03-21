@@ -197,6 +197,8 @@ public class HttpRequestTarget {
             }
         } else if (method.equals("MEMCACHE")) {
             requestTarget.schema = "memcache";
+        } else if (method.equals("SET") || method.equals("HMSET")) {
+            requestTarget.schema = "redis";
         }
         if (!requestUri.contains("://")) { //correct uri without schema
             if (requestUri.contains(":") || requestUri.indexOf('/') > 0) { // uri without schema
