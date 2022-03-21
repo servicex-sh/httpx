@@ -19,11 +19,13 @@ public class HttpRequestParser {
         try {
             final BufferedReader bufferedReader = new BufferedReader(new StringReader(replaceVariables(httpFileCode, context)));
             List<String> lines = bufferedReader.lines().toList();
+            int index = 1;
+            int lineNumber = 0;
             //remove shebang
             if (lines.get(0).startsWith("#!/usr/bin/env")) {
                 lines = lines.subList(1, lines.size());
+                lineNumber++;
             }
-            int index = 1;
             HttpRequest httpRequest = new HttpRequest(index);
             for (String rawLine : lines) {
                 String line = rawLine.trim();
@@ -75,6 +77,8 @@ public class HttpRequestParser {
                 } else {  // parse httpRequest body
                     httpRequest.addBodyLine(rawLine);
                 }
+                httpRequest.addLineNumber(lineNumber);
+                lineNumber++;
             }
             if (httpRequest.isFilled()) {  //add last httpRequest
                 requests.add(httpRequest);
