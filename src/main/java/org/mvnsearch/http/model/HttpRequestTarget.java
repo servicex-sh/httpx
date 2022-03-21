@@ -87,7 +87,7 @@ public class HttpRequestTarget {
             builder.append(":").append(port);
         }
         if (pathAbsolute != null) {
-            final String encodedPath = URLEncoder.encode(pathAbsolute, StandardCharsets.UTF_8);
+            final String encodedPath = URLEncoder.encode(pathAbsolute, StandardCharsets.UTF_8).replaceAll("%2F", "/");
             if (encodedPath.startsWith("/")) {
                 builder.append(encodedPath);
             } else {
