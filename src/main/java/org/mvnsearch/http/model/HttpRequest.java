@@ -177,7 +177,10 @@ public class HttpRequest {
                 }
             }
         } else if (name.equalsIgnoreCase("host") || name.equalsIgnoreCase("uri")) {
-            getRequestTarget().setHostOrUriHeader(name, value);
+            final HttpRequestTarget requestTarget = getRequestTarget();
+            if (requestTarget != null) {
+                requestTarget.setHostOrUriHeader(name, value);
+            }
         }
         this.headers.add(new HttpHeader(name, value));
     }
