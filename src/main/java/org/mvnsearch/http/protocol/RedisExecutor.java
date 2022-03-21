@@ -6,6 +6,7 @@ import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
 import redis.clients.jedis.Jedis;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -15,7 +16,11 @@ public class RedisExecutor implements BasePubSubExecutor {
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         String methodName = httpRequest.getMethod().getName();
-        final UriAndSubject redisUriAndKey = getRedisUriAndChannel(httpRequest.getRequestTarget().getUri(), httpRequest);
+        if (!httpRequest.isHostOrUriAvailable()) {
+            httpRequest.addHttpHeader("Host", "localhost:6379");
+        }
+        URI redisURI = httpRequest.getRequestTarget().getUri();
+        final UriAndSubject redisUriAndKey = getRedisUriAndChannel(redisURI, httpRequest);
         try (Jedis jedis = new Jedis(redisUriAndKey.uri())) {
             String key = redisUriAndKey.subject();
             switch (methodName) {
