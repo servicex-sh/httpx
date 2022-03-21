@@ -18,6 +18,8 @@ public class HttpMethod {
     public static final List<String> AWS_METHODS = List.of("AWS");
     public static final List<String> PUB_METHODS = List.of("PUB");
     public static final List<String> SUB_METHODS = List.of("SUB");
+    
+    public static final List<String> REDIS_METHODS = List.of("RSET", "RHSET");
     private String name;
 
     public HttpMethod() {
@@ -56,6 +58,7 @@ public class HttpMethod {
                 || MAIL_METHODS.contains(method)
                 || PUB_METHODS.contains(method)
                 || SUB_METHODS.contains(method)
+                || REDIS_METHODS.contains(method)
                 || MEMCACHE_METHODS.contains(method);
     }
 
@@ -117,5 +120,8 @@ public class HttpMethod {
 
     public boolean isMemcacheMethod() {
         return MEMCACHE_METHODS.contains(name);
+    }
+    public boolean isRedisMethod() {
+        return REDIS_METHODS.contains(name);
     }
 }
