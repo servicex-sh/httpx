@@ -55,7 +55,7 @@ public class Nodejs {
         }
     }
 
-    private static String jsUrlEncode(String text) {
+    public static String jsUrlEncode(String text) {
         return URLEncoder.encode(text, StandardCharsets.UTF_8)
                 .replaceAll("\\+", "%20")
                 .replaceAll("%21", "!")
