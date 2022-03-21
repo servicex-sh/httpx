@@ -194,3 +194,11 @@ Content-Type: application/json
 //@name mem-get
 MEMCACHE user.1
 URI: memcache://localhost:11211
+
+### redis set
+//@name redis-set
+SET nick
+Host: localhost:6379
+Content-Type: text/plain
+
+Jackie
