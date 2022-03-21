@@ -251,6 +251,18 @@ public class HttpRequest {
         return method != null && requestLine != null;
     }
 
+    public boolean isHostOrUriAvailable() {
+        if (headers != null && !headers.isEmpty()) {
+            for (HttpHeader header : headers) {
+                final String headerName = header.getName();
+                if (headerName.equalsIgnoreCase("Host") || headerName.equalsIgnoreCase("URI")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean isBodyEmpty() {
         return bodyLines == null || bodyLines.isEmpty();
     }
