@@ -177,10 +177,12 @@ public class HttpRequest {
                 }
             }
         } else if (name.equalsIgnoreCase("host") || name.equalsIgnoreCase("uri")) {
-            final HttpRequestTarget requestTarget = getRequestTarget();
-            if (requestTarget != null) {
-                requestTarget.setHostOrUriHeader(name, value);
+            HttpRequestTarget requestTarget = getRequestTarget();
+            if (requestTarget == null) {
+                requestTarget = HttpRequestTarget.valueOf("UNKNOWN", "/");
+                this.setRequestTarget(requestTarget);
             }
+            requestTarget.setHostOrUriHeader(name, value);
         }
         this.headers.add(new HttpHeader(name, value));
     }
