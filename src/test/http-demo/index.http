@@ -202,3 +202,12 @@ Host: localhost:6379
 Content-Type: text/plain
 
 Jackie
+
+### redis eval
+//@name redis-eval
+EVAL 1 name Jackie
+Host: localhost:6379
+Content-Type: text/x-lua
+
+local val="Hello "
+return val .. ARGV[1]
