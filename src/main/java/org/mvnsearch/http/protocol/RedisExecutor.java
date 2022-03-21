@@ -17,7 +17,7 @@ public class RedisExecutor implements BasePubSubExecutor {
     public List<byte[]> execute(HttpRequest httpRequest) {
         String methodName = httpRequest.getMethod().getName();
         if (!httpRequest.isHostOrUriAvailable()) {
-            httpRequest.addHttpHeader("Host", "localhost:6379");
+            httpRequest.addHttpHeader("Host", "127.0.0.1:6379");
         }
         URI redisURI = httpRequest.getRequestTarget().getUri();
         final UriAndSubject redisUriAndKey = getRedisUriAndChannel(redisURI, httpRequest);

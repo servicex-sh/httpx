@@ -18,7 +18,7 @@ public class MemcacheExecutor extends HttpBaseExecutor {
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         if (!httpRequest.isHostOrUriAvailable()) {
-            httpRequest.addHttpHeader("Host", "localhost:11211");
+            httpRequest.addHttpHeader("Host", "127.0.0.1:11211");
         }
         final URI memcacheURI = httpRequest.getRequestTarget().getUri();
         String key = httpRequest.getRequestLine();
