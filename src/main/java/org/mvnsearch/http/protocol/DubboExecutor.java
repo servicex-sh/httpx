@@ -14,13 +14,32 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class DubboExecutor extends HttpBaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(DubboExecutor.class);
+    private static final Map<String, String> SHORT_TYPE_MAPPING = new HashMap<>();
+
+    static {
+        SHORT_TYPE_MAPPING.put("boolean", "java.lang.Boolean");
+        SHORT_TYPE_MAPPING.put("Boolean", "java.lang.Boolean");
+        SHORT_TYPE_MAPPING.put("byte", "java.lang.Byte");
+        SHORT_TYPE_MAPPING.put("Byte", "java.lang.Byte");
+        SHORT_TYPE_MAPPING.put("char", "java.lang.Char");
+        SHORT_TYPE_MAPPING.put("Char", "java.lang.Char");
+        SHORT_TYPE_MAPPING.put("short", "java.lang.Short");
+        SHORT_TYPE_MAPPING.put("Short", "java.lang.Short");
+        SHORT_TYPE_MAPPING.put("int", "java.lang.Integer");
+        SHORT_TYPE_MAPPING.put("Integer", "java.lang.Integer");
+        SHORT_TYPE_MAPPING.put("long", "java.lang.Long");
+        SHORT_TYPE_MAPPING.put("Long", "java.lang.Long");
+        SHORT_TYPE_MAPPING.put("float", "java.lang.Float");
+        SHORT_TYPE_MAPPING.put("Float", "java.lang.Float");
+        SHORT_TYPE_MAPPING.put("double", "java.lang.Double");
+        SHORT_TYPE_MAPPING.put("Double", "java.lang.Double");
+        SHORT_TYPE_MAPPING.put("String", "java.lang.String");
+    }
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         final URI dubboUri = httpRequest.getRequestTarget().getUri();
@@ -39,7 +58,7 @@ public class DubboExecutor extends HttpBaseExecutor {
             methodName = methodSignature.substring(0, methodSignature.indexOf('('));
             final String parts = methodSignature.substring(methodSignature.indexOf('(') + 1, methodSignature.indexOf(')'));
             if (!parts.isEmpty()) {
-                paramsTypeArray = parts.split(",");
+                paramsTypeArray = Arrays.stream(parts.split(",")).map(this::convertJavaType).toArray(String[]::new);
             }
         }
         if (paramsTypeArray.length > 0) {
@@ -130,6 +149,10 @@ public class DubboExecutor extends HttpBaseExecutor {
             counter++;
         } while (readCount == 1024);
         return bos.toByteArray();
+    }
+
+    public String convertJavaType(String typeName) {
+        return SHORT_TYPE_MAPPING.getOrDefault(typeName, typeName);
     }
 
 }
