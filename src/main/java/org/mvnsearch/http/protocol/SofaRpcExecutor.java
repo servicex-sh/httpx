@@ -16,6 +16,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,9 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
             methodName = methodSignature.substring(0, methodSignature.indexOf('('));
             final String parts = methodSignature.substring(methodSignature.indexOf('(') + 1, methodSignature.indexOf(')'));
             if (!parts.isEmpty()) {
-                paramsTypeArray = parts.split(",");
+                paramsTypeArray = Arrays.stream(parts.split(","))
+                        .map(typeName -> DubboExecutor.SHORT_TYPE_MAPPING.getOrDefault(typeName, typeName))
+                        .toArray(String[]::new);
             }
         }
         if (paramsTypeArray.length > 0) {
