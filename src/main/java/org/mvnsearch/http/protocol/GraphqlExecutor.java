@@ -24,9 +24,13 @@ public class GraphqlExecutor extends HttpBaseExecutor {
         String contentType = httpRequest.getHeader("Content-Type", "application/json");
         byte[] requestJsonBody = httpRequest.getBodyBytes();
         try {
-            Map<String, Object> jsonBody;
             if (contentType.startsWith("application/graphql")) {  // convert graphql code into json object
-                jsonBody = Collections.singletonMap("query", new String(requestJsonBody, StandardCharsets.UTF_8));
+                Map<String, Object> jsonBody = new HashMap<>();
+                jsonBody.put("query", httpRequest.bodyText());
+                final String variablesJson = httpRequest.getHeader("X-GraphQL-Variables");
+                if (variablesJson != null && variablesJson.startsWith("{")) {
+                    jsonBody.put("variables", JsonUtils.readValue(variablesJson, Map.class));
+                }
                 requestJsonBody = JsonUtils.writeValueAsBytes(jsonBody);
             }
         } catch (Exception ignore) {
@@ -58,7 +62,7 @@ public class GraphqlExecutor extends HttpBaseExecutor {
 
     public List<byte[]> httpPost(HttpClient httpClient, URI requestUri, HttpRequest httpRequest, byte[] requestJsonBody) {
         HttpClient.ResponseReceiver<?> responseReceiver = httpClient.post().send(Mono.just(Unpooled.wrappedBuffer(requestJsonBody)));
-        return request(responseReceiver, requestUri,httpRequest);
+        return request(responseReceiver, requestUri, httpRequest);
     }
 
     @SuppressWarnings("CallingSubscribeInNonBlockingScope")
