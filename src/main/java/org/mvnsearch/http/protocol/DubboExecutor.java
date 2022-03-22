@@ -24,21 +24,30 @@ public class DubboExecutor extends HttpBaseExecutor {
     static {
         SHORT_TYPE_MAPPING.put("boolean", "java.lang.Boolean");
         SHORT_TYPE_MAPPING.put("Boolean", "java.lang.Boolean");
+        SHORT_TYPE_MAPPING.put("Boolean[]", "java.lang.Boolean[]");
         SHORT_TYPE_MAPPING.put("byte", "java.lang.Byte");
         SHORT_TYPE_MAPPING.put("Byte", "java.lang.Byte");
+        SHORT_TYPE_MAPPING.put("Byte[]", "java.lang.Byte[]");
         SHORT_TYPE_MAPPING.put("char", "java.lang.Char");
         SHORT_TYPE_MAPPING.put("Char", "java.lang.Char");
+        SHORT_TYPE_MAPPING.put("Char[]", "java.lang.Char[]");
         SHORT_TYPE_MAPPING.put("short", "java.lang.Short");
         SHORT_TYPE_MAPPING.put("Short", "java.lang.Short");
+        SHORT_TYPE_MAPPING.put("Short[]", "java.lang.Short[]");
         SHORT_TYPE_MAPPING.put("int", "java.lang.Integer");
         SHORT_TYPE_MAPPING.put("Integer", "java.lang.Integer");
+        SHORT_TYPE_MAPPING.put("Integer[]", "java.lang.Integer[]");
         SHORT_TYPE_MAPPING.put("long", "java.lang.Long");
         SHORT_TYPE_MAPPING.put("Long", "java.lang.Long");
+        SHORT_TYPE_MAPPING.put("Long[]", "java.lang.Long[]");
         SHORT_TYPE_MAPPING.put("float", "java.lang.Float");
         SHORT_TYPE_MAPPING.put("Float", "java.lang.Float");
+        SHORT_TYPE_MAPPING.put("Float[]", "java.lang.Float[]");
         SHORT_TYPE_MAPPING.put("double", "java.lang.Double");
         SHORT_TYPE_MAPPING.put("Double", "java.lang.Double");
+        SHORT_TYPE_MAPPING.put("Double[]", "java.lang.Double[]");
         SHORT_TYPE_MAPPING.put("String", "java.lang.String");
+        SHORT_TYPE_MAPPING.put("String[]", "java.lang.String[]");
     }
 
     public List<byte[]> execute(HttpRequest httpRequest) {
