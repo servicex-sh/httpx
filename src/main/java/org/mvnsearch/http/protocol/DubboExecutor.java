@@ -19,7 +19,7 @@ import java.util.*;
 
 public class DubboExecutor extends HttpBaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(DubboExecutor.class);
-    private static final Map<String, String> SHORT_TYPE_MAPPING = new HashMap<>();
+    public static final Map<String, String> SHORT_TYPE_MAPPING = new HashMap<>();
 
     static {
         SHORT_TYPE_MAPPING.put("boolean", "java.lang.Boolean");
@@ -67,7 +67,9 @@ public class DubboExecutor extends HttpBaseExecutor {
             methodName = methodSignature.substring(0, methodSignature.indexOf('('));
             final String parts = methodSignature.substring(methodSignature.indexOf('(') + 1, methodSignature.indexOf(')'));
             if (!parts.isEmpty()) {
-                paramsTypeArray = Arrays.stream(parts.split(",")).map(this::convertJavaType).toArray(String[]::new);
+                paramsTypeArray = Arrays.stream(parts.split(","))
+                        .map(typeName -> SHORT_TYPE_MAPPING.getOrDefault(typeName, typeName))
+                        .toArray(String[]::new);
             }
         }
         if (paramsTypeArray.length > 0) {
@@ -158,10 +160,6 @@ public class DubboExecutor extends HttpBaseExecutor {
             counter++;
         } while (readCount == 1024);
         return bos.toByteArray();
-    }
-
-    public String convertJavaType(String typeName) {
-        return SHORT_TYPE_MAPPING.getOrDefault(typeName, typeName);
     }
 
 }
