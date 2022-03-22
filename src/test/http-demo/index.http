@@ -217,5 +217,5 @@ EVAL 1 name Jackie
 Host: localhost:6379
 Content-Type: text/x-lua
 
-local val="Hello "
-return val .. ARGV[1]
+local welcome="Hello "
+return welcome .. ARGV[1]
