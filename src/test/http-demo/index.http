@@ -203,6 +203,14 @@ Content-Type: text/plain
 
 Jackie
 
+### redis hmset
+//@name redis-hmset
+HMSET user.1
+Host: localhost:6379
+Content-Type: application/json
+
+{ "id": 1, "name": "jackie", age: 20}
+
 ### redis eval
 //@name redis-eval
 EVAL 1 name Jackie
