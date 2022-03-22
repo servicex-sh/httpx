@@ -33,7 +33,7 @@ public class RedisExecutorTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
-                ### redis hset
+                ### redis hmset
                 HMSET user.1
                 Host: localhost:6379
                 Content-Type: application/json
