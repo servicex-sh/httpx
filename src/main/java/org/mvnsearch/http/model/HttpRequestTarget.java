@@ -202,6 +202,8 @@ public class HttpRequestTarget {
             requestTarget.schema = "memcache";
         } else if (HttpMethod.REDIS_METHODS.contains(method)) {
             requestTarget.schema = "redis";
+        } else if (HttpMethod.SSH_METHODS.contains(method)) {
+            requestTarget.schema = "ssh";
         }
         if (!requestUri.contains("://")) { //correct uri without schema
             if (requestUri.contains(":") || requestUri.indexOf('/') > 0) { // uri without schema
