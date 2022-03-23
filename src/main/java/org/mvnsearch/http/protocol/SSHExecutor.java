@@ -101,6 +101,7 @@ public class SSHExecutor implements BaseExecutor {
                 }
             }
         });
-        return builder.toString();
+        final String script = builder.toString();
+        return script.substring(0, script.length() - 2);
     }
 }
