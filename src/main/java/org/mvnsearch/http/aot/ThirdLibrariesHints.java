@@ -217,5 +217,43 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
+        //jsch
+        try {
+            final Class<?>[] jschClassArray = {
+                    com.jcraft.jsch.DHEC256.class,
+                    com.jcraft.jsch.DHEC384.class,
+                    com.jcraft.jsch.DHEC521.class,
+                    com.jcraft.jsch.DHG14.class,
+                    Class.forName("com.jcraft.jsch.UserAuthNone"),
+                    Class.forName("com.jcraft.jsch.UserAuthPassword"),
+                    Class.forName("com.jcraft.jsch.UserAuthPublicKey"),
+                    Class.forName("com.jcraft.jsch.jce.AES128CBC"),
+                    Class.forName("com.jcraft.jsch.jce.AES128CTR"),
+                    Class.forName("com.jcraft.jsch.jce.AES192CBC"),
+                    Class.forName("com.jcraft.jsch.jce.AES192CTR"),
+                    Class.forName("com.jcraft.jsch.jce.AES256CBC"),
+                    Class.forName("com.jcraft.jsch.jce.AES256CTR"),
+                    Class.forName("com.jcraft.jsch.jce.DH"),
+                    Class.forName("com.jcraft.jsch.jce.ECDHN"),
+                    Class.forName("com.jcraft.jsch.jce.HMACSHA1"),
+                    Class.forName("com.jcraft.jsch.jce.MD5"),
+                    Class.forName("com.jcraft.jsch.jce.Random"),
+                    Class.forName("com.jcraft.jsch.jce.SHA1"),
+                    Class.forName("com.jcraft.jsch.jce.SHA256"),
+                    Class.forName("com.jcraft.jsch.jce.SHA384"),
+                    Class.forName("com.jcraft.jsch.jce.SHA512"),
+                    Class.forName("com.jcraft.jsch.jce.SignatureECDSA256"),
+                    Class.forName("com.jcraft.jsch.jce.SignatureECDSA384"),
+                    Class.forName("com.jcraft.jsch.jce.SignatureECDSA521"),
+                    Class.forName("com.jcraft.jsch.jce.SignatureRSA"),
+                    Class.forName("com.jcraft.jsch.jce.TripleDESCTR"),
+            };
+            for (Class<?> clazz : jschClassArray) {
+                registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                        .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
