@@ -304,6 +304,8 @@ public class HttpxCommand implements Callable<Integer> {
             result = new MemcacheExecutor().execute(httpRequest);
         } else if (requestMethod.isRedisMethod()) {
             result = new RedisExecutor().execute(httpRequest);
+        } else if (requestMethod.isSSHMethod()) {
+            result = new SSHExecutor().execute(httpRequest);
         } else {
             result = Collections.emptyList();
             System.out.print("Not support: " + requestMethod.getName());
