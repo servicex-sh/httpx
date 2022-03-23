@@ -94,10 +94,10 @@ public class SSHExecutor implements BaseExecutor {
         body.lines().forEach(rawLine -> {
             String line = rawLine.trim();
             if (!line.isEmpty() && !line.startsWith("#")) {
-                if (line.endsWith(" \\")) { //concat next line
-                    builder.append(line).append(" ");
+                if (line.endsWith("\\")) { //concat next line
+                    builder.append(rawLine, 0, rawLine.lastIndexOf('\\'));
                 } else {
-                    builder.append(line).append("; ");
+                    builder.append(rawLine).append("; ");
                 }
             }
         });
