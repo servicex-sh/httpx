@@ -219,3 +219,9 @@ Content-Type: text/x-lua
 
 local welcome="Hello "
 return welcome .. ARGV[1]
+
+### ssh demo
+//@name ssh-demo
+SSH test:test@localhost:2022
+
+ls -al
