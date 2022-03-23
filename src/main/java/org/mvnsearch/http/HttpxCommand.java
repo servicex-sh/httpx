@@ -311,11 +311,12 @@ public class HttpxCommand implements Callable<Integer> {
             System.out.print("Not support: " + requestMethod.getName());
         }
         System.out.println();
-        if (!requestFromStdin) { // if request from stdin, ignore to write response to file
+        //disable response written to file because of security
+        /*if (!requestFromStdin) { // if request from stdin, ignore to write response to file
             if (httpRequest.getRedirectResponse() != null && !result.isEmpty()) {
                 writeResponse(httpRequest.getRedirectResponse(), result);
             }
-        }
+        }*/
     }
 
     public void generateCode(HttpRequest httpRequest, Path httpFilePath) throws Exception {
