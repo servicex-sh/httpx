@@ -274,11 +274,7 @@ public class HttpxCommand implements Callable<Integer> {
         final HttpMethod requestMethod = httpRequest.getMethod();
         String host = httpRequest.getRequestTarget().getHost();
         List<byte[]> result;
-        if (requestMethod.isAwsMethod() || host.endsWith(".amazonaws.com")) {
-            result = new AwsExecutor().execute(httpRequest);
-        } else if (requestMethod.isAliyunMethod() || host.endsWith(".aliyuncs.com")) {
-            result = new AliyunExecutor().execute(httpRequest);
-        } else if (requestMethod.isHttpMethod()) {
+        if (requestMethod.isHttpMethod()) {
             result = new HttpExecutor().execute(httpRequest);
         } else if (requestMethod.isRSocketMethod()) {
             result = new RSocketExecutor().execute(httpRequest);
@@ -306,6 +302,10 @@ public class HttpxCommand implements Callable<Integer> {
             result = new RedisExecutor().execute(httpRequest);
         } else if (requestMethod.isSSHMethod()) {
             result = new SSHExecutor().execute(httpRequest);
+        } else if (requestMethod.isAwsMethod() || (host.endsWith(".amazonaws.com") && requestMethod.isHttpMethod())) {
+            result = new AwsExecutor().execute(httpRequest);
+        } else if (requestMethod.isAliyunMethod()) {
+            result = new AliyunExecutor().execute(httpRequest);
         } else {
             result = Collections.emptyList();
             System.out.print("Not support: " + requestMethod.getName());
