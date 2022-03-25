@@ -15,7 +15,7 @@ public class HttpMethod {
     public static final List<String> MAIL_METHODS = List.of("MAIL");
     public static final List<String> ALIYUN_METHODS = List.of("ALIYUN", "ALICLOUD");
     public static final List<String> MEMCACHE_METHODS = List.of("MEMCACHE");
-    public static final List<String> AWS_METHODS = List.of("AWS");
+    public static final List<String> AWS_METHODS = List.of("AWS", "AWSPOST", "AWSDELETE", "AWSPUT");
     public static final List<String> PUB_METHODS = List.of("PUB");
     public static final List<String> SUB_METHODS = List.of("SUB");
 
