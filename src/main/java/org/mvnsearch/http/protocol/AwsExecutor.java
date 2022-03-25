@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpHeader;
+import org.mvnsearch.http.model.HttpMethod;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.vendor.AWS;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -24,11 +25,11 @@ public class AwsExecutor extends HttpExecutor {
         try {
             String method = httpRequest.getMethod().getName();
             final byte[] bodyBytes = httpRequest.getBodyBytes();
-            if (Objects.equals(method, "AWS")) {
-                if (bodyBytes == null || bodyBytes.length == 0) {
+            if (HttpMethod.AWS_METHODS.contains(method)) {
+                if (Objects.equals(method, "AWS")) {
                     method = "GET";
                 } else {
-                    method = "POST";
+                    method = method.substring(3);
                 }
             }
             final URI requestUri = httpRequest.getRequestTarget().getUri();
