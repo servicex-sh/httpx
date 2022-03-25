@@ -6,7 +6,6 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.vendor.AWS;
-import org.mvnsearch.http.vendor.Aliyun;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.signer.Aws4Signer;
 import software.amazon.awssdk.auth.signer.params.Aws4SignerParams;
@@ -44,12 +43,7 @@ public class AwsExecutor extends HttpExecutor {
                 } else if (tempRegionId.contains("-")) {
                     tempRegionId = tempRegionId.substring(tempRegionId.indexOf("-") + 1);
                 }
-                if (Aliyun.regions().contains(tempRegionId)) {
-                    regionId = tempRegionId;
-                }
-            }
-            if (regionId == null) {
-                regionId = "us-east-1";
+                regionId = tempRegionId;
             }
             @Nullable String[] credential = AWS.readAwsAccessToken(httpRequest);
             if (credential == null || credential.length < 2) {
