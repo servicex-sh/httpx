@@ -80,4 +80,39 @@ public class AWS {
         }
         return null;
     }
+
+    private static String readDefaultRegionFromCLI() {
+        final Path awsConfigFile = Path.of(System.getProperty("user.home")).resolve(".aws").resolve("config").toAbsolutePath();
+        if (awsConfigFile.toFile().exists()) {
+            try {
+                final List<String> lines = Files.readAllLines(awsConfigFile);
+                for (int i = 0; i < lines.size(); i++) {
+                    if (lines.get(i).contains("[default]")) {
+                        return lines.get(i + 1).trim();
+                    }
+                }
+            } catch (Exception ignore) {
+
+            }
+        }
+        return null;
+    }
+
+    public static String readRegionId(HttpRequest httpRequest) {
+        String regionId = httpRequest.getHeader("X-Region-Id");
+        if (regionId == null) { //resolve region id from host
+            String host = httpRequest.getRequestTarget().getUri().getHost();
+            String tempRegionId = host.replace(".amazonaws.com", "");
+            if (tempRegionId.contains(".")) {
+                tempRegionId = tempRegionId.substring(tempRegionId.indexOf(".") + 1);
+            }
+            if (tempRegionId.contains("-")) {
+                regionId = tempRegionId;
+            }
+        }
+        if (regionId == null) {
+            regionId = readDefaultRegionFromCLI();
+        }
+        return regionId == null ? "us-east-1" : regionId;
+    }
 }
