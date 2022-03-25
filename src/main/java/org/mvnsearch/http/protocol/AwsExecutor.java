@@ -36,16 +36,7 @@ public class AwsExecutor extends HttpExecutor {
             String host = requestUri.getHost();
             String serviceName = host.substring(0, host.indexOf('.'));
             //resolve region id from X-Region-Id header or host name
-            String regionId = httpRequest.getHeader("X-Region-Id");
-            if (regionId == null) { //resolve region id from host
-                String tempRegionId = host.replace(".amazonaws.com", "");
-                if (tempRegionId.contains(".")) {
-                    tempRegionId = tempRegionId.substring(tempRegionId.indexOf(".") + 1);
-                } else if (tempRegionId.contains("-")) {
-                    tempRegionId = tempRegionId.substring(tempRegionId.indexOf("-") + 1);
-                }
-                regionId = tempRegionId;
-            }
+            String regionId = AWS.readRegionId(httpRequest);
             @Nullable String[] credential = AWS.readAwsAccessToken(httpRequest);
             if (credential == null || credential.length < 2) {
                 log.error("HTX-301-401");
