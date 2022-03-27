@@ -20,6 +20,7 @@ public class AwsExecutorTest {
         String httpFile = """
                 ### hello aws
                 GET https://iam.amazonaws.com/?Action=ListUsers&Version=2010-05-08
+                X-Region-Id: us-east-1
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
