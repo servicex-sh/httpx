@@ -8,14 +8,12 @@ import io.rsocket.transport.netty.server.TcpServerTransport;
 import io.rsocket.util.DefaultPayload;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 
 public class RSocketServerApp {
     public static void main(String[] args) {
-        Hooks.onErrorDropped(throwable -> {
-        });
+
         final CloseableChannel closeableChannel = RSocketServer.create()
                 .acceptor((setup, sendingSocket) -> Mono.just(new RSocket() {
                     @Override

@@ -12,7 +12,6 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.RSocketRequest;
-import reactor.core.publisher.Hooks;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -23,12 +22,6 @@ import java.util.List;
 
 public class RSocketExecutor implements BaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(RSocketExecutor.class);
-
-    static {
-        Hooks.onErrorDropped(throwable -> {
-
-        });
-    }
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         RSocketRequest rsocketRequest = new RSocketRequest(httpRequest);
