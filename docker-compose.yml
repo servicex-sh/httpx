@@ -9,8 +9,8 @@ services:
       - "61613:61613"
       - "5672:5672"
       - "15672:15672"
-  mailcatcher:
-    image: soulteary/maildev
+  maildev:
+    image: soulteary/maildev:2.0.2
     ports:
       - "1025:1025"
       - "1080:1080"
