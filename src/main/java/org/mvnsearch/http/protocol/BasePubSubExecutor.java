@@ -52,6 +52,8 @@ public interface BasePubSubExecutor extends BaseExecutor {
         String brokerUrl = mqttURI.toString();
         if (schema.contains("+")) {
             brokerUrl = brokerUrl.substring(brokerUrl.indexOf("+") + 1);
+        } else if (schema.equals("mqtt5")) {
+            brokerUrl = brokerUrl.replace("mqtt5://", "tcp://");
         } else {
             brokerUrl = brokerUrl.replace("mqtt://", "tcp://");
         }
