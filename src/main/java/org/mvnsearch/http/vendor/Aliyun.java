@@ -1,5 +1,7 @@
 package org.mvnsearch.http.vendor;
 
+import org.ini4j.Ini;
+import org.ini4j.Profile;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
@@ -185,14 +187,25 @@ public class Aliyun {
     }
 
     @Nullable
-    public static String[] readAliyunAccessToken(HttpRequest httpRequest) {
+    public static CloudAccount readAliyunAccessToken(HttpRequest httpRequest) {
+        CloudAccount account;
         String[] keyIdAndSecret = httpRequest.getBasicAuthorization();
         if (keyIdAndSecret == null) { // read default profile
-            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(null);
+            account = Aliyun.readAccessFromAliyunCli(null);
+            if (account == null) {
+                account = Aliyun.readAccessFromCredentials(null);
+            }
         } else if (keyIdAndSecret.length == 2 && keyIdAndSecret[1].length() <= 4) { // id match
-            keyIdAndSecret = Aliyun.readAccessFromAliyunCli(keyIdAndSecret[0]);
+            account = Aliyun.readAccessFromAliyunCli(keyIdAndSecret[0]);
+            if (account == null) {
+                account = Aliyun.readAccessFromCredentials(keyIdAndSecret[0]);
+            }
+        } else {
+            account = new CloudAccount();
+            account.setAccessKeyId(keyIdAndSecret[0]);
+            account.setAccessKeySecret(keyIdAndSecret[1]);
         }
-        return keyIdAndSecret;
+        return account;
     }
 
     /**
@@ -202,7 +215,7 @@ public class Aliyun {
      * @return AK with ID and key
      */
     @Nullable
-    public static String[] readAccessFromAliyunCli(@Nullable String partOfId) {
+    public static CloudAccount readAccessFromAliyunCli(@Nullable String partOfId) {
         final File aliyunConfigJsonFile = Path.of(System.getProperty("user.home")).resolve(".aliyun").resolve("config.json").toAbsolutePath().toFile();
         if (aliyunConfigJsonFile.exists()) {
             try {
@@ -220,8 +233,42 @@ public class Aliyun {
                                 }
                             })
                             .findFirst()
-                            .map(profile -> new String[]{(String) profile.get("access_key_id"), (String) profile.get("access_key_secret")})
+                            .map(profile -> new CloudAccount((String) profile.get("access_key_id"), (String) profile.get("access_key_secret"), (String) profile.get("region_id")))
                             .orElse(null);
+                }
+            } catch (Exception ignore) {
+
+            }
+        }
+        return null;
+    }
+
+    /**
+     * read AK from $HOME/.alibabacloud/credentials.ini
+     *
+     * @param partOfId part of id
+     * @return ak
+     */
+    public static CloudAccount readAccessFromCredentials(@Nullable String partOfId) {
+        final Path configPath = Path.of(System.getProperty("user.home"), ".alibabacloud", "credentials.ini");
+        if (configPath.toFile().exists()) {
+            try {
+                final Ini config = new Ini(configPath.toFile());
+                Profile.Section profile = null;
+                if (partOfId != null) {
+                    for (Profile.Section tempProfile : config.values()) {
+                        if (tempProfile.containsKey("access_key_id")) {
+                            if (tempProfile.get("access_key_id").contains(partOfId)) {
+                                profile = tempProfile;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    profile = config.get("default");
+                }
+                if (profile != null) {
+                    return new CloudAccount(profile.get("access_key_id"), profile.get("access_key_secret"), profile.get("region_id"));
                 }
             } catch (Exception ignore) {
 
