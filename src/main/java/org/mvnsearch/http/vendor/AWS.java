@@ -1,5 +1,7 @@
 package org.mvnsearch.http.vendor;
 
+import org.ini4j.Ini;
+import org.ini4j.Profile;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.model.HttpRequest;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -81,15 +83,13 @@ public class AWS {
         return null;
     }
 
-    private static String readDefaultRegionFromCLI() {
+    public static String readDefaultRegionFromCLI() {
         final Path awsConfigFile = Path.of(System.getProperty("user.home")).resolve(".aws").resolve("config").toAbsolutePath();
         if (awsConfigFile.toFile().exists()) {
             try {
-                final List<String> lines = Files.readAllLines(awsConfigFile);
-                for (int i = 0; i < lines.size(); i++) {
-                    if (lines.get(i).contains("[default]")) {
-                        return lines.get(i + 1).trim();
-                    }
+                final Profile.Section profile = new Ini(awsConfigFile.toFile()).get("default");
+                if (profile != null) {
+                    return profile.get("region");
                 }
             } catch (Exception ignore) {
 
