@@ -19,6 +19,27 @@ public class Aliyun {
     private static Map<String, Object> ENDPOINTS = null;
     private static final Map<String, String> API_VERSIONS = new HashMap<>();
 
+    private static final List<String> GLOBAL_REGIONS = List.of("cn-qingdao",
+            "cn-beijing",
+            "cn-zhangjiakou",
+            "cn-huhehaote",
+            "cn-hangzhou",
+            "cn-shanghai",
+            "cn-shenzhen",
+            "cn-hongkong",
+            "ap-southeast-1",
+            "ap-southeast-2",
+            "ap-southeast-3",
+            "ap-southeast-4",
+            "ap-southeast-5",
+            "ap-southeast-6",
+            "ap-south-1",
+            "ap-northeast-1",
+            "us-west-1",
+            "us-east-1",
+            "eu-central-1",
+            "me-east-1");
+
     public static String getApiVersion(String productCode) {
         if (API_VERSIONS.isEmpty()) {
             API_VERSIONS.put("arms", "2019-08-08");
@@ -125,19 +146,12 @@ public class Aliyun {
 
     @Nullable
     public static String getRegionId(String host) {
-        if (host.contains(".fc.aliyuncs.com")) {
-            return host.substring(0, host.indexOf('.'));
-        }
-        String regionId = null;
-        String tempRegionId = host.replace(".aliyuncs.com", "");
-        if (tempRegionId.contains(".")) {
-            regionId = tempRegionId.substring(tempRegionId.indexOf(".") + 1);
-        } else if (tempRegionId.contains("-")) {
-            if (!tempRegionId.contains("r-kvstore")) {
-                regionId = tempRegionId.substring(tempRegionId.indexOf("-") + 1);
+        for (String globalRegion : GLOBAL_REGIONS) {
+            if (host.contains(globalRegion)) {
+                return globalRegion;
             }
         }
-        return regionId;
+        return null;
     }
 
     public static String getServiceName(String host) {
@@ -258,10 +272,7 @@ public class Aliyun {
     }
 
     public static List<String> regions() {
-        if (ENDPOINTS == null) {
-            initEndpoints();
-        }
-        return (List<String>) ENDPOINTS.get("regions");
+        return GLOBAL_REGIONS;
     }
 
     private static void initEndpoints() {
