@@ -10,6 +10,7 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
 import org.mvnsearch.http.vendor.Aliyun;
+import org.mvnsearch.http.vendor.CloudAccount;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -31,18 +32,18 @@ public class AliyunExecutor implements BaseExecutor {
             if (regionId == null) { //resolve region id from host
                 regionId = Aliyun.getRegionId(host);
             }
-            if (regionId == null) {
-                regionId = "cn-hangzhou";
-            }
-            String[] keyIdAndSecret = Aliyun.readAliyunAccessToken(httpRequest);
-            if (keyIdAndSecret == null) {
+            CloudAccount cloudAccount = Aliyun.readAliyunAccessToken(httpRequest);
+            if (cloudAccount == null) {
                 log.error("HTX-300-401");
                 return Collections.emptyList();
             }
+            if (regionId == null) {
+                regionId = cloudAccount.getRegionId();
+            }
             DefaultProfile profile = DefaultProfile.getProfile(
                     regionId,
-                    keyIdAndSecret[0],
-                    keyIdAndSecret[1]);
+                    cloudAccount.getAccessKeyId(),
+                    cloudAccount.getAccessKeySecret());
             System.out.println("ALIYUN" + " " + requestUri);
             System.out.println();
             final Map<String, String> queries = queryToMap(requestUri);

@@ -242,8 +242,8 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
 
     @SuppressWarnings("unchecked")
     public void publishAliyunEventBridge(URI eventBridgeURI, HttpRequest httpRequest) {
-        String[] keyIdAndSecret = readAliyunAccessToken(httpRequest);
-        if (keyIdAndSecret == null) {
+        org.mvnsearch.http.vendor.CloudAccount cloudAccount = readAliyunAccessToken(httpRequest);
+        if (cloudAccount == null) {
             System.err.println("Please supply access key Id/Secret in Authorization header as : `Authorization: Basic keyId:secret`");
             return;
         }
@@ -277,8 +277,8 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
                 eventId = UUID.randomUUID().toString();
             }
             Config authConfig = new Config();
-            authConfig.accessKeyId = keyIdAndSecret[0];
-            authConfig.accessKeySecret = keyIdAndSecret[1];
+            authConfig.accessKeyId = cloudAccount.getAccessKeyId();
+            authConfig.accessKeySecret = cloudAccount.getAccessKeySecret();
             authConfig.endpoint = eventBridgeURI.getHost();
             EventBridge eventBridgeClient = new EventBridgeClient(authConfig);
             final CloudEvent event = EventBuilder.builder()
@@ -300,14 +300,14 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
     }
 
     public void sendMnsMessage(URI mnsURI, HttpRequest httpRequest) {
-        String[] keyIdAndSecret = readAliyunAccessToken(httpRequest);
-        if (keyIdAndSecret == null) {
+        org.mvnsearch.http.vendor.CloudAccount cloudAccount = readAliyunAccessToken(httpRequest);
+        if (cloudAccount == null) {
             System.err.println("Please supply access key Id/Secret in Authorization header as : `Authorization: Basic keyId:secret`");
             return;
         }
         try {
             String topic = mnsURI.getPath().substring(1);
-            final MNSClient mnsClient = new CloudAccount(keyIdAndSecret[0], keyIdAndSecret[1], "https://" + mnsURI.getHost()).getMNSClient();
+            final MNSClient mnsClient = new CloudAccount(cloudAccount.getAccessKeyId(), cloudAccount.getAccessKeySecret(), "https://" + mnsURI.getHost()).getMNSClient();
             final CloudQueue queueRef = mnsClient.getQueueRef(topic);
             final com.aliyun.mns.model.Message message = queueRef.putMessage(new com.aliyun.mns.model.Message(httpRequest.getBodyBytes()));
             System.out.println("Succeeded to send message to " + topic + " with ID: " + message.getMessageId());
