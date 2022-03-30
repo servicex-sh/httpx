@@ -255,5 +255,27 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //ini4j
+        final Class<?>[] ini4jArray = {
+                org.ini4j.spi.EscapeTool.class,
+                org.ini4j.spi.IniBuilder.class,
+                org.ini4j.spi.IniParser.class
+        };
+        for (Class<?> clazz : ini4jArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
+        //json-smart
+        final Class<?>[] jsonSmartArray = {
+                net.minidev.json.JSONArray.class,
+                net.minidev.json.JSONAware.class,
+                net.minidev.json.JSONAwareEx.class,
+                net.minidev.json.JSONStreamAware.class,
+                net.minidev.json.JSONStreamAwareEx.class
+        };
+        for (Class<?> clazz : jsonSmartArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
     }
 }
