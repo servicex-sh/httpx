@@ -60,8 +60,25 @@ public class RSocketRequest {
         this.setupMetadata = httpRequest.getHeader("Setup-Metadata");
         this.setupData = httpRequest.getHeader("Setup-Data");
         this.metadata = httpRequest.getHeader("Metadata");
-        this.body = httpRequest.requestBody();
         this.httpRequest = httpRequest;
+        //graphql convert
+        if (Objects.equals(dataMimeType, "application/graphql")) {
+            Map<String, Object> jsonRequest = new HashMap<>();
+            jsonRequest.put("query", httpRequest.bodyText());
+            String graphqlVariables = httpRequest.getHeader("x-graphql-variables");
+            if (graphqlVariables != null && graphqlVariables.startsWith("{")) {
+                try {
+                    jsonRequest.put("variables", JsonUtils.readValue(graphqlVariables, Map.class));
+                } catch (Exception ignore) {
+
+                }
+            }
+            String tempBody = JsonUtils.writeValueAsString(jsonRequest);
+            this.body = Mono.just(Unpooled.wrappedBuffer(tempBody.getBytes(StandardCharsets.UTF_8)));
+            this.dataMimeType = "application/json";
+        } else {
+            this.body = httpRequest.requestBody();
+        }
     }
 
     public Payload setupPayload() {
