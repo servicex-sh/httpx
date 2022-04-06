@@ -13,16 +13,16 @@
     <version>0.23.0</version>
     <name>httpx</name>
     <description>CLI to run HTTP file</description>
-    <url>https://httpx.sh</url>
+    <url>https://servicex.sh</url>
 
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <spring-native.version>0.11.3</spring-native.version>
+        <spring-native.version>0.11.4</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.8.2</junit5.version>
-        <aws-java-sdk2.version>2.17.163</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.17.164</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -46,9 +46,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com:linux-china/httpx.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:linux-china/httpx.git</developerConnection>
-        <url>https://github.com/linux-china/httpx</url>
+        <connection>scm:git:ssh://git@github.com:servicex-sh/httpx.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:servicex-sh/httpx.git</developerConnection>
+        <url>https://servicex.sh</url>
     </scm>
 
     <dependencies>
