@@ -27,7 +27,11 @@ public class TarpcExecutor extends HttpBaseExecutor {
         System.out.println("TARPC " + tarpcUri);
         System.out.println();
         Instant now = Instant.now().plusSeconds(10); //plus 10 seconds for deadline
-        String functionName = StringUtils.capitalize(tarpcUri.getPath().substring(1));
+        String functionName = tarpcUri.getPath().substring(1);
+        if (functionName.contains("/")) {
+            functionName = functionName.substring(functionName.lastIndexOf('/') + 1);
+        }
+        functionName = StringUtils.capitalize(functionName);
         String jsonRequest = """
                 {
                   "Request": {
@@ -67,6 +71,10 @@ public class TarpcExecutor extends HttpBaseExecutor {
             buffer.rewind();
             socketChannel.write(buffer);
             final byte[] data = extractData(socketChannel);
+            if (data.length == 0) {
+                System.out.println("Failed to call remote service, please check function and arguments!");
+                return Collections.emptyList();
+            }
             String text = new String(data, StandardCharsets.UTF_8);
             boolean okResultFound = false;
             if (text.startsWith("{")) {
@@ -89,7 +97,7 @@ public class TarpcExecutor extends HttpBaseExecutor {
             }
             return List.of(text.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            log.error("HTX-107-408", tarpcUri, e);
+            log.error("HTX-110-500", tarpcUri, e);
         }
         return Collections.emptyList();
     }
@@ -102,6 +110,9 @@ public class TarpcExecutor extends HttpBaseExecutor {
         int counter = 0;
         do {
             readCount = socketChannel.read(buf);
+            if (readCount < 0) {
+                return new byte[]{};
+            }
             int startOffset = 0;
             int length = readCount;
             if (counter == 0) {
