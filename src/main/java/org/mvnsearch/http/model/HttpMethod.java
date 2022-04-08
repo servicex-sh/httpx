@@ -10,6 +10,7 @@ public class HttpMethod {
     public static final List<String> GRAPHQL_METHODS = List.of("GRAPHQL", "GRAPHQLWS", "GRAPHQLWSS");
     public static final List<String> DUBBO_METHODS = List.of("DUBBO");
     public static final List<String> SOFA_METHODS = List.of("SOFA", "BOLT");
+    public static final List<String> TARPC_METHODS = List.of("TARPC");
     public static final List<String> THRIFT_METHODS = List.of("THRIFT");
     public static final List<String> ZEROMQ_METHODS = List.of("ZEROREQ");
     public static final List<String> MAIL_METHODS = List.of("MAIL");
@@ -56,6 +57,7 @@ public class HttpMethod {
                 || AWS_METHODS.contains(method)
                 || ZEROMQ_METHODS.contains(method)
                 || SOFA_METHODS.contains(method)
+                || TARPC_METHODS.contains(method)
                 || MAIL_METHODS.contains(method)
                 || PUB_METHODS.contains(method)
                 || SUB_METHODS.contains(method)
@@ -94,6 +96,10 @@ public class HttpMethod {
 
     public boolean isSofaMethod() {
         return SOFA_METHODS.contains(name);
+    }
+
+    public boolean isTarpcMethod() {
+        return TARPC_METHODS.contains(name);
     }
 
     public boolean isZeromqMethod() {

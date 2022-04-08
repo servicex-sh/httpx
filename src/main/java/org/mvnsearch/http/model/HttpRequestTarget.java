@@ -182,6 +182,10 @@ public class HttpRequestTarget {
             if (!requestUri.startsWith("bolt://") && requestUri.contains(":")) {
                 requestUri = "bolt://" + requestUri;
             }
+        } else if (method.equals("TARPC")) {
+            if (!requestUri.startsWith("tarpc://") && requestUri.contains(":")) {
+                requestUri = "tarpc://" + requestUri;
+            }
         } else if (method.equals("GRAPHQLWS")) {
             if (!requestUri.startsWith("ws://")) {
                 requestUri = "ws://" + requestUri;
