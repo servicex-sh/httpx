@@ -17,7 +17,7 @@ public class TarpcExecutorTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
-                ### thrift request
+                ### tarpc request
                 TARPC 127.0.0.1:4500/hello
                 Content-Type: application/json
                      
