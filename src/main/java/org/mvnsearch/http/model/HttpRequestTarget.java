@@ -175,14 +175,17 @@ public class HttpRequestTarget {
             }
         }
         if (method.equals("DUBBO")) {
+            requestTarget.schema = "dubbo";
             if (!requestUri.startsWith("dubbo://") && requestUri.contains(":")) {
                 requestUri = "dubbo://" + requestUri;
             }
         } else if (method.equals("SOFA")) {
+            requestTarget.schema = "bolt";
             if (!requestUri.startsWith("bolt://") && requestUri.contains(":")) {
                 requestUri = "bolt://" + requestUri;
             }
         } else if (method.equals("TARPC")) {
+            requestTarget.schema = "tarpc";
             if (!requestUri.startsWith("tarpc://") && requestUri.contains(":")) {
                 requestUri = "tarpc://" + requestUri;
             }
@@ -195,6 +198,7 @@ public class HttpRequestTarget {
                 requestUri = "wss://" + requestUri;
             }
         } else if (method.equals("THRIFT")) {
+            requestTarget.schema = "thrift";
             if (!requestUri.startsWith("thrift://")) {
                 requestUri = "thrift://" + requestUri;
             }
