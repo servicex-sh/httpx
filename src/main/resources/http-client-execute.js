@@ -83,13 +83,13 @@ class HttpResponse {
     }
 
     setHeaders(headers) {
-        for (const [key, value] of Object.entries(variables)) {
+        for (const [key, value] of Object.entries(headers)) {
             this.headers.add(key, value);
         }
     }
 
     setBase64Body(base64Text) {
-        let bodyText = decodeURIComponent(atob(base64Text))
+        let bodyText = decodeURIComponent(Buffer.from(base64Text, 'base64').toString('utf-8'))
         if (this.contentType.mimeType.indexOf("json") >= 0) {
             this.body = JSON.parse(bodyText);
         } else {
@@ -126,7 +126,7 @@ class HttpClient {
 }
 
 function encodeBody(plainText) {
-    return btoa(encodeURIComponent(plainText));
+   return Buffer.from(encodeURIComponent(plainText)).toString('base64');
 }
 
 const statusCode = 222;
