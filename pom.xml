@@ -110,6 +110,11 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.msgpack</groupId>
+            <artifactId>jackson-dataformat-msgpack</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.skjolber.jackson</groupId>
             <artifactId>jackson-syntax-highlight</artifactId>
             <version>1.0.6</version>
