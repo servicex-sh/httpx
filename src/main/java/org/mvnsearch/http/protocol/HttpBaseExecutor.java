@@ -40,7 +40,13 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
 
     protected List<HttpCookie> cookies(String domain) {
         try {
-            final Path cookieFile = Path.of(".idea/httpRequests/http-client.cookies");
+            final String httpFilePath = System.getProperty("http.file");
+            Path cookieFile;
+            if (httpFilePath != null) {
+                cookieFile = Path.of(httpFilePath).getParent().resolve(".idea/httpRequests/http-client.cookies").toAbsolutePath();
+            } else {
+                cookieFile = Path.of(".idea/httpRequests/http-client.cookies");
+            }
             if (cookieFile.toFile().exists()) {
                 final List<String> lines = Files.readAllLines(cookieFile);
                 if (lines.size() > 1) {
