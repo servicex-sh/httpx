@@ -148,7 +148,9 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                 System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received from " + msg.getSubject()));
                 System.out.println(prettyJsonFormat(new String(msg.getData(), StandardCharsets.UTF_8)));
             });
-            dispatcher.subscribe(topic);
+            for (String part : topic.split("[,;]")) {
+                dispatcher.subscribe(part);
+            }
             System.out.println("Succeeded to subscribe: " + topic + "!");
             latch();
         } catch (Exception e) {
