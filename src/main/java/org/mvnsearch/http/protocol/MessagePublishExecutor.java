@@ -200,7 +200,11 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         String topic = natsURI.getPath().substring(1);
         byte[] body = httpRequest.getBodyBytes();
         try (io.nats.client.Connection nc = Nats.connect(natsURI.toString())) {
-            nc.publish(topic, body);
+            for (String part : topic.split("[,;]")) {
+                if (!part.isEmpty()) {
+                    nc.publish(part, body);
+                }
+            }
             System.out.print("Succeeded to send message to " + topic + "!");
         } catch (Exception e) {
             log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e);
