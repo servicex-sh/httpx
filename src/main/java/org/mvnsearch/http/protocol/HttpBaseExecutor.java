@@ -10,6 +10,7 @@ import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.vendor.Nodejs;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.transport.ProxyProvider;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -21,13 +22,20 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpBaseExecutor.class);
 
     protected HttpClient httpClient() {
-        return HttpClient.create().secure(sslContextSpec -> {
+        HttpClient httpClient = HttpClient.create().secure(sslContextSpec -> {
             try {
                 sslContextSpec.sslContext(SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build());
             } catch (Exception ignore) {
 
             }
         });
+        if (System.getProperty("http.proxyHost") != null) {
+            httpClient = httpClient.proxy(spec -> spec.type(ProxyProvider.Proxy.HTTP)
+                    .host(System.getProperty("http.proxyHost"))
+                    .port(Integer.parseInt(System.getProperty("http.proxyPort")))
+                    .connectTimeoutMillis(20_000));
+        }
+        return httpClient;
     }
 
     protected List<HttpCookie> cookies(String domain) {
