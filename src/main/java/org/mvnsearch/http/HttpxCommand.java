@@ -43,6 +43,8 @@ public class HttpxCommand implements Callable<Integer> {
     private String[] profile;
     @Option(names = {"-e"}, description = "Example code generate")
     private String example;
+    @Option(names = {"-x"}, description = "HTTP proxy")
+    private String httpProxy;
     @Option(names = {"--import"}, description = "Import OpenAPI/AsyncAPI URL to generate HTTP file")
     private String importURL;
     @Option(names = {"-f", "--httpfile"}, description = "Http file, and default is index.http")
@@ -188,6 +190,15 @@ public class HttpxCommand implements Callable<Integer> {
                 targets = List.of("1");
             }
             boolean targetFound = false;
+            //proxy setting
+            if (httpProxy != null && !httpProxy.isEmpty()) {
+                if (!httpProxy.contains("://")) {
+                    httpProxy = "http://" + httpProxy;
+                }
+                var proxyUri = URI.create(httpProxy);
+                System.setProperty("http.proxyHost", proxyUri.getHost());
+                System.setProperty("http.proxyPort", "" + proxyUri.getPort());
+            }
             for (String target : targets) {
                 for (HttpRequest request : requests) {
                     if (request.match(target)) {
