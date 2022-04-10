@@ -227,6 +227,28 @@ public class HttpRequest {
         return this.body != null ? new String(this.body, StandardCharsets.UTF_8) : "";
     }
 
+    public String jsonArrayBodyWithArgsHeaders() {
+        final Map<String, String> argsHeaders = headers.stream()
+                .filter(httpHeader -> httpHeader.getName().toLowerCase().startsWith("x-args-"))
+                .collect(Collectors.toMap(httpHeader -> httpHeader.getName().toLowerCase(), HttpHeader::getValue));
+        if (argsHeaders.isEmpty()) {
+            return bodyText();
+        }
+        String newBody = bodyText();
+        final String contentType = getHeader("Content-Type", "application/json");
+        if (!contentType.contains("json")) {
+            if (!newBody.startsWith("\"")) {
+                newBody = "\"" + newBody + "\"";
+            }
+        }
+        List<String> argLines = new ArrayList<>();
+        for (int i = 0; i <= argsHeaders.size(); i++) {
+            String key = "x-args-" + i;
+            argLines.add(argsHeaders.getOrDefault(key, newBody));
+        }
+        return "[" + String.join(",", argLines) + "]";
+    }
+
     public void setBodyBytes(byte[] body) {
         this.body = body;
     }
