@@ -2,6 +2,7 @@ package org.mvnsearch.http.model;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.model.extension.HttpxExtensionRequest;
@@ -238,7 +239,7 @@ public class HttpRequest {
         final String contentType = getHeader("Content-Type", "application/json");
         if (!contentType.contains("json")) {
             if (!newBody.startsWith("\"")) {
-                newBody = "\"" + newBody + "\"";
+                newBody = "\"" + escapeDoubleQuote(newBody) + "\"";
             }
         }
         List<String> argLines = new ArrayList<>();
@@ -247,6 +248,13 @@ public class HttpRequest {
             argLines.add(argsHeaders.getOrDefault(key, newBody));
         }
         return "[" + String.join(",", argLines) + "]";
+    }
+
+    public String escapeDoubleQuote(String text) {
+        String escapedText = StringUtils.replace(text, "\"", "\\\"");
+        escapedText = StringUtils.replace(escapedText, "\n", "\\n");
+        escapedText = StringUtils.replace(escapedText, "\r", "");
+        return escapedText;
     }
 
     public void setBodyBytes(byte[] body) {
