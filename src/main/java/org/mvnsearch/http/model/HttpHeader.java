@@ -1,8 +1,10 @@
 package org.mvnsearch.http.model;
 
 
+import org.jetbrains.annotations.NotNull;
+
 @SuppressWarnings("unused")
-public class HttpHeader {
+public class HttpHeader implements Comparable<HttpHeader> {
     private String name;
     private String value;
 
@@ -28,6 +30,11 @@ public class HttpHeader {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public int compareTo(@NotNull HttpHeader o) {
+        return this.name.compareTo(o.name);
     }
 }
 
