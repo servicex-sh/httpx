@@ -55,7 +55,8 @@ public class MsgpackRpcExecutorTest {
                 X-Args-1: []
                 Content-Type: text/x-lua
                   
-                return vim.api.nvim_win_get_cursor(0)[1]
+                name = "line: "  
+                return name .. vim.api.nvim_win_get_cursor(0)[1]
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
