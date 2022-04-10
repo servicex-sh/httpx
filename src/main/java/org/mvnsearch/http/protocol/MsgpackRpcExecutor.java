@@ -67,10 +67,11 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
                 return List.of(resultJson.getBytes(StandardCharsets.UTF_8));
             } else {
                 Object error = response.get(2);
-                if (error == null) {
-                    error = "Unknown error";
+                if (error != null) {
+                    System.out.println(colorOutput("bold,red", JsonUtils.writeValueAsString(error)));
+                } else {
+                    System.out.println(colorOutput("bold,green", "nil"));
                 }
-                return List.of(JsonUtils.writeValueAsBytes(error));
             }
         } catch (Exception e) {
             log.error("HTX-111-500", msgpackUri, e);
