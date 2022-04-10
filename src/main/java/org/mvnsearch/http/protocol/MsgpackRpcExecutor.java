@@ -1,7 +1,8 @@
 package org.mvnsearch.http.protocol;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.msgpack.jackson.dataformat.MessagePackFactory;
+import org.msgpack.jackson.dataformat.MessagePackMapper;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -48,7 +49,7 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
         msgpackRequest.add(0); //msg id
         msgpackRequest.add(functionName);
         msgpackRequest.add(args);
-        ObjectMapper objectMapper = new ObjectMapper(new MessagePackFactory());
+        ObjectMapper objectMapper = new MessagePackMapper();
         try (SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress(msgpackUri.getHost(), msgpackUri.getPort()))) {
             byte[] content = objectMapper.writeValueAsBytes(msgpackRequest);
             socketChannel.write(ByteBuffer.wrap(content));
@@ -57,8 +58,8 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
                 System.out.println("Failed to call remote service, please check function and arguments!");
                 return Collections.emptyList();
             }
-            //noinspection unchecked
-            List<Object> response = objectMapper.readValue(data, List.class);
+            List<Object> response = objectMapper.readValue(data, new TypeReference<>() {
+            });
             if (response.size() > 3 && response.get(3) != null) {
                 final String resultJson = JsonUtils.writeValueAsPrettyString(response.get(3));
                 System.out.println(prettyJsonFormat(resultJson));
