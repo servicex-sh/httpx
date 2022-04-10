@@ -30,7 +30,7 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
             functionName = functionName.substring(functionName.lastIndexOf('/') + 1);
         }
         Object[] args = new Object[]{};
-        String body = httpRequest.bodyText();
+        String body = httpRequest.jsonArrayBodyWithArgsHeaders();
         if (!body.isEmpty()) {
             if (!body.startsWith("[")) {
                 body = "[" + body + "]";
