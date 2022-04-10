@@ -2,6 +2,7 @@ package org.mvnsearch.http.protocol;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.HessianSerializerInput;
+import org.apache.commons.lang3.StringUtils;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -73,27 +74,26 @@ public class DubboExecutor extends HttpBaseExecutor {
             }
         }
         if (paramsTypeArray.length > 0) {
-            final byte[] body = httpRequest.getBodyBytes();
-            if (body == null || body.length == 0) {
+            final String body = httpRequest.bodyText();
+            if (body.isEmpty()) {
                 arguments = new Object[]{null};
             } else {
-                String text = new String(body, StandardCharsets.UTF_8);
+                String text = httpRequest.jsonArrayBodyWithArgsHeaders();
                 if (!text.startsWith("[")) { // one object
-                    if (text.startsWith("\"") && text.endsWith("\"")) { //remove double quota
-                        text = text.substring(1, text.length() - 1);
-                    }
-                    arguments = new Object[]{text};
+                    arguments = new Object[]{convertToDoubleQuoteString(text)};
                 } else { // array
                     try {
                         final List<?> items = JsonUtils.readValue(text, List.class);
                         arguments = new Object[items.size()];
                         for (int i = 0; i < items.size(); i++) {
                             final Object item = items.get(i);
+                            String value;
                             if (item instanceof String) {
-                                arguments[i] = item;
+                                value = (String) item;
                             } else {
-                                arguments[i] = JsonUtils.writeValueAsString(item);
+                                value = JsonUtils.writeValueAsString(item);
                             }
+                            arguments[i] = convertToDoubleQuoteString(value);
                         }
                     } catch (Exception e) {
                         log.error("HTX-103-500", text);
@@ -160,6 +160,15 @@ public class DubboExecutor extends HttpBaseExecutor {
             counter++;
         } while (readCount == 4096);
         return bos.toByteArray();
+    }
+
+    private String convertToDoubleQuoteString(String text) {
+        if (!text.startsWith("\"")) {
+            String escapedText = StringUtils.replace(text, "\"", "\\\"");
+            return "\"" + escapedText + "\"";
+        } else {
+            return text;
+        }
     }
 
 }
