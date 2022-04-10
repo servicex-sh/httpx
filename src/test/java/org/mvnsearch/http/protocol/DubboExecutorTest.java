@@ -27,4 +27,21 @@ public class DubboExecutorTest {
         request.cleanBody();
         new DubboExecutor().execute(request);
     }
+
+    @Test
+    public void testHttpRequestWithArgs() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### dubbo hi
+                DUBBO 127.0.0.1:20880/org.mvnsearch.UserService/updateDesc(java.lang.Integer,java.lang.String)
+                Content-Type: text/html
+                X-Args-0: 1
+                                
+                <div id="xxx">xxf sdfx</div>    
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new DubboExecutor().execute(request);
+    }
 }
