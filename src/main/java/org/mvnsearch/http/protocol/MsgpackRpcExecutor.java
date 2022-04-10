@@ -1,6 +1,5 @@
 package org.mvnsearch.http.protocol;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.msgpack.jackson.dataformat.MessagePackMapper;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
@@ -58,8 +57,7 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
                 System.out.println("Failed to call remote service, please check function and arguments!");
                 return Collections.emptyList();
             }
-            List<Object> response = objectMapper.readValue(data, new TypeReference<>() {
-            });
+            List<Object> response = objectMapper.readValue(data, List.class);
             if (response.size() > 3 && response.get(3) != null) {
                 final String resultJson = JsonUtils.writeValueAsPrettyString(response.get(3));
                 System.out.println(prettyJsonFormat(resultJson));
@@ -82,15 +80,14 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
 
     public byte[] extractData(SocketChannel socketChannel) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ByteBuffer buf = ByteBuffer.allocate(1024);
+        ByteBuffer buf = ByteBuffer.allocate(30720); // nvim_get_api_info
         int readCount;
         do {
             readCount = socketChannel.read(buf);
-            if (readCount < 0) {
-                return new byte[]{};
+            if (readCount > 0) {
+                bos.write(buf.array(), 0, readCount);
             }
-            bos.write(buf.array(), 0, readCount);
-        } while (readCount == 1024);
+        } while (readCount == 30720);
         return bos.toByteArray();
     }
 
