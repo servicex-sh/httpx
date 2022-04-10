@@ -105,7 +105,7 @@ public class TarpcExecutor extends HttpBaseExecutor {
 
     public byte[] extractData(SocketChannel socketChannel) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ByteBuffer buf = ByteBuffer.allocate(1024);
+        ByteBuffer buf = ByteBuffer.allocate(4096);
         int readCount;
         int counter = 0;
         do {
@@ -121,7 +121,7 @@ public class TarpcExecutor extends HttpBaseExecutor {
             }
             bos.write(buf.array(), startOffset, length);
             counter++;
-        } while (readCount == 1024);
+        } while (readCount == 4096);
         return bos.toByteArray();
     }
 

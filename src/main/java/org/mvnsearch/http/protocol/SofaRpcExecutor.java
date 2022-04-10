@@ -129,12 +129,12 @@ public class SofaRpcExecutor extends HttpBaseExecutor {
 
     public byte[] extractData(SocketChannel socketChannel) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ByteBuffer buf = ByteBuffer.allocate(1024);
+        ByteBuffer buf = ByteBuffer.allocate(4096);
         int readCount;
         do {
             readCount = socketChannel.read(buf);
             bos.write(buf.array(), 0, readCount);
-        } while (readCount == 1024);
+        } while (readCount == 4096);
         return bos.toByteArray();
     }
 
