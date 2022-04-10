@@ -27,4 +27,38 @@ public class MsgpackRpcExecutorTest {
         request.cleanBody();
         new MsgpackRpcExecutor().execute(request);
     }
+
+    @Test
+    public void testArgsHeader() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### msgpack request
+                MSGPACK 127.0.0.1:18800/add
+                X-Args-1: 1
+                Content-Type: application/json
+                     
+                4 
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MsgpackRpcExecutor().execute(request);
+    }
+
+    @Test
+    public void testNeovimLuaEval() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### msgpack request
+                MSGPACK 127.0.0.1:6666/nvim_exec_lua
+                X-Args-1: []
+                Content-Type: text/x-lua
+                  
+                return vim.api.nvim_win_get_cursor(0)[1]
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MsgpackRpcExecutor().execute(request);
+    }
 }
