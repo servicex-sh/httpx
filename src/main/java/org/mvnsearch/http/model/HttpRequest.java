@@ -229,6 +229,9 @@ public class HttpRequest {
     }
 
     public String jsonArrayBodyWithArgsHeaders() {
+        if (this.headers == null || this.headers.isEmpty()) {
+            return bodyText();
+        }
         final Map<String, String> argsHeaders = headers.stream()
                 .filter(httpHeader -> httpHeader.getName().toLowerCase().startsWith("x-args-"))
                 .collect(Collectors.toMap(httpHeader -> httpHeader.getName().toLowerCase(), HttpHeader::getValue));
