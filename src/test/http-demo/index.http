@@ -209,19 +209,30 @@ HMSET user.1
 Host: localhost:6379
 Content-Type: application/json
 
-{ "id": 1, "name": "jackie", age: 20}
+{
+  "id": 1,
+  "name": "jackie",
+  age: 20
+}
 
-### redis eval
+### redis 1
 //@name redis-eval
-EVAL 1 name Jackie
+EVAL 1 keyname1 value1
 Host: localhost:6379
-Content-Type: text/x-lua
 
-local welcome="Hello "
-return welcome .. ARGV[1]
+local welcome = "Hello "
+return welcome .. KEYS[1]
+
 
 ### ssh demo
 //@name ssh-demo
 SSH test:test@localhost:2022
 
 ls -al
+
+### msgpack request
+//@name msgpack-rpc
+MSGPACK 127.0.0.1:18800/add
+Content-Type: application/json
+
+[1, 2]
