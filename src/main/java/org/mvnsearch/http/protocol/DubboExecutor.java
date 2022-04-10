@@ -165,6 +165,8 @@ public class DubboExecutor extends HttpBaseExecutor {
     private String convertToDoubleQuoteString(String text) {
         if (!text.startsWith("\"")) {
             String escapedText = StringUtils.replace(text, "\"", "\\\"");
+            escapedText = StringUtils.replace(escapedText, "\n", "\\n");
+            escapedText = StringUtils.replace(escapedText, "\r", "");
             return "\"" + escapedText + "\"";
         } else {
             return text;
