@@ -1,6 +1,7 @@
 package org.mvnsearch.http.protocol;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.msgpack.jackson.dataformat.MessagePackMapper;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
@@ -59,14 +60,14 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
             }
             List<Object> response = objectMapper.readValue(data, List.class);
             if (response.size() > 3 && response.get(3) != null) {
-                final String resultJson = JsonUtils.writeValueAsPrettyString(response.get(3));
+                String resultJson = new Gson().toJson(response.get(3));
                 System.out.println(prettyJsonFormat(resultJson));
                 runJsTest(httpRequest, 200, Collections.emptyMap(), "application/json", resultJson);
                 return List.of(resultJson.getBytes(StandardCharsets.UTF_8));
             } else {
                 Object error = response.get(2);
                 if (error != null) {
-                    System.out.println(colorOutput("bold,red", JsonUtils.writeValueAsString(error)));
+                    System.out.println(colorOutput("bold,red", new Gson().toJson(error)));
                 } else {
                     System.out.println(colorOutput("bold,green", "nil"));
                 }
