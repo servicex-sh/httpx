@@ -32,7 +32,7 @@ public class JsonRpcExecutor extends HttpExecutor {
         Map<String, Object> jsonRpcRequest = new HashMap<>();
         jsonRpcRequest.put("jsonrpc", "2.0");
         jsonRpcRequest.put("method", functionName);
-        jsonRpcRequest.put("id", 1);
+        jsonRpcRequest.put("id", 0);
         Object params = null;
         String body = httpRequest.jsonArrayBodyWithArgsHeaders();
         if (!body.isEmpty()) {
