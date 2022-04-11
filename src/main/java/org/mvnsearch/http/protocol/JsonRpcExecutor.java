@@ -54,16 +54,19 @@ public class JsonRpcExecutor extends HttpExecutor {
             jsonRpcRequest.put("params", params);
         }
         if (jsonRpcUri.getScheme().startsWith("http")) {
-            httpRequest.setBodyBytes(JsonUtils.writeValueAsBytes(jsonRpcRequest));
-            httpRequest.setMethod(HttpMethod.valueOf("POST"));
-            return super.execute(httpRequest);
+            return jsonRpcOverHttp(jsonRpcUri, httpRequest, jsonRpcRequest);
         } else {
-            return jsonRpcByTcp(jsonRpcUri, httpRequest, jsonRpcRequest);
+            return jsonRpcOverTcp(jsonRpcUri, httpRequest, jsonRpcRequest);
         }
     }
 
+    public List<byte[]> jsonRpcOverHttp(URI jsonRpcUri, HttpRequest httpRequest, Map<String, Object> jsonRpcRequest) {
+        httpRequest.setBodyBytes(JsonUtils.writeValueAsBytes(jsonRpcRequest));
+        httpRequest.setMethod(HttpMethod.valueOf("POST"));
+        return super.execute(httpRequest);
+    }
 
-    public List<byte[]> jsonRpcByTcp(URI jsonRpcUri, HttpRequest httpRequest, Map<String, Object> jsonRpcRequest) {
+    public List<byte[]> jsonRpcOverTcp(URI jsonRpcUri, HttpRequest httpRequest, Map<String, Object> jsonRpcRequest) {
         final byte[] content = JsonUtils.writeValueAsBytes(jsonRpcRequest);
         try (SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress(jsonRpcUri.getHost(), jsonRpcUri.getPort()))) {
             socketChannel.write(ByteBuffer.wrap(content));
