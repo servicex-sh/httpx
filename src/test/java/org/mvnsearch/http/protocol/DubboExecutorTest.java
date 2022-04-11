@@ -38,7 +38,8 @@ public class DubboExecutorTest {
                 Content-Type: text/html
                 X-Args-0: 1
                                 
-                <div id="xxx">xxf sdfx</div>    
+                <div id="xxx">xxf sdfx</div>
+                gooodle    
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
