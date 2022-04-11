@@ -30,7 +30,7 @@ public class ZeromqExecutor extends HttpBaseExecutor {
             requester.close();
             return List.of(response.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            log.error("HTX-103-408", zeromqURI, e);
+            log.error("HTX-112-500", zeromqURI, e);
         }
         return Collections.emptyList();
     }
