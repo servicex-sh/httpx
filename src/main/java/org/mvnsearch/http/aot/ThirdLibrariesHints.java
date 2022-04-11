@@ -277,5 +277,13 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
+        //msgpack
+        final Class<?>[] msgPackArray = {
+                org.msgpack.jackson.dataformat.MessagePackExtensionType.class
+        };
+        for (Class<?> clazz : msgPackArray) {
+            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
+                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        }
     }
 }
