@@ -194,6 +194,11 @@ public class HttpRequestTarget {
             if (!requestUri.startsWith("msgpack://") && requestUri.contains(":")) {
                 requestUri = "msgpack://" + requestUri;
             }
+        } else if (method.equals("JSONRPC")) {
+            if (!requestUri.contains("://")) {
+                requestUri = "jsonrpc://" + requestUri;
+                requestTarget.schema = "jsonrpc";
+            }
         } else if (method.equals("GRAPHQLWS")) {
             if (!requestUri.startsWith("ws://")) {
                 requestUri = "ws://" + requestUri;
