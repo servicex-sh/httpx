@@ -301,6 +301,8 @@ public class HttpxCommand implements Callable<Integer> {
             result = new TarpcExecutor().execute(httpRequest);
         } else if (requestMethod.isMsgpackMethod()) {
             result = new MsgpackRpcExecutor().execute(httpRequest);
+        } else if (requestMethod.isJsonRPCMethod()) {
+            result = new JsonRpcExecutor().execute(httpRequest);
         } else if (requestMethod.isThriftMethod()) {
             result = new ThriftExecutor().execute(httpRequest);
         } else if (requestMethod.isZeromqMethod()) {
