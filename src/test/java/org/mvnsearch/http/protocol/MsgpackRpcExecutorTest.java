@@ -46,6 +46,19 @@ public class MsgpackRpcExecutorTest {
     }
 
     @Test
+    public void testNeovimCurrentBuf() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### msgpack request
+                MSGPACK localhost:6666/nvim_get_current_buf
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new MsgpackRpcExecutor().execute(request);
+    }
+
+    @Test
     public void testNeovimLuaEval() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
