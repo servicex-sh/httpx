@@ -150,6 +150,9 @@ public class HttpxCommand implements Callable<Integer> {
                     }
                 }
             }
+            // load global variables into context
+            loadGlobalVariables(context);
+            // parse http requests
             final List<HttpRequest> requests = HttpRequestParser.parse(httpCode, context);
             // list summary for code completion
             if (summary) {
@@ -285,6 +288,10 @@ public class HttpxCommand implements Callable<Integer> {
                 }
             }
         }
+        return context;
+    }
+
+    private void loadGlobalVariables(Map<String, Object> context) {
         // read $HOME/.servicex/global_variables.json
         final Path globalVariablesFilePath = Path.of(System.getProperty("user.home")).resolve(".servicex").resolve("global_variables.json").toAbsolutePath();
         if (globalVariablesFilePath.toFile().exists()) {
@@ -300,7 +307,6 @@ public class HttpxCommand implements Callable<Integer> {
                 log.error("HTX-002-504", globalVariablesFile, e);
             }
         }
-        return context;
     }
 
     public void execute(HttpRequest httpRequest, @Nullable Path httpFilePath) throws Exception {
