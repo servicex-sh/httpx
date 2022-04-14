@@ -39,6 +39,8 @@ public class HttpxCommand implements Callable<Integer> {
     private List<String> unmatchedOptions;
     @Option(names = {"--completions"}, description = "Shell Completion, such as zsh, bash")
     private String completions;
+    @Option(names = {"-g"}, description = "Display global variables")
+    private boolean displayGlobalVariables;
     @Option(names = {"-p"}, description = "Profile")
     private String[] profile;
     @Option(names = {"-e"}, description = "Example code generate")
@@ -69,6 +71,11 @@ public class HttpxCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        // display global variables
+        if (displayGlobalVariables) {
+            printGlobalVariables();
+            return 0;
+        }
         if (importURL != null && !importURL.isEmpty()) {
             return importAPI();
         }
@@ -151,7 +158,7 @@ public class HttpxCommand implements Callable<Integer> {
                 }
             }
             // load global variables into context
-            loadGlobalVariables(context);
+            injectGlobalVariables(context);
             // parse http requests
             final List<HttpRequest> requests = HttpRequestParser.parse(httpCode, context);
             // list summary for code completion
@@ -291,22 +298,28 @@ public class HttpxCommand implements Callable<Integer> {
         return context;
     }
 
-    private void loadGlobalVariables(Map<String, Object> context) {
+    private void injectGlobalVariables(Map<String, Object> context) {
+        Map<String, Object> globalVariables = loadGlobalVariables();
+        for (Map.Entry<String, Object> entry : globalVariables.entrySet()) {
+            if (!context.containsKey(entry.getKey())) {
+                context.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private Map<String, Object> loadGlobalVariables() {
         // read $HOME/.servicex/global_variables.json
         final Path globalVariablesFilePath = Path.of(System.getProperty("user.home")).resolve(".servicex").resolve("global_variables.json").toAbsolutePath();
         if (globalVariablesFilePath.toFile().exists()) {
             File globalVariablesFile = globalVariablesFilePath.toFile();
             try {
-                final Map<String, String> globalVariables = JsonUtils.OBJECT_MAPPER.readValue(globalVariablesFile, Map.class);
-                for (Map.Entry<String, String> entry : globalVariables.entrySet()) {
-                    if (!context.containsKey(entry.getKey())) {
-                        context.put(entry.getKey(), entry.getValue());
-                    }
-                }
+                //noinspection unchecked
+                return JsonUtils.OBJECT_MAPPER.readValue(globalVariablesFile, Map.class);
             } catch (Exception e) {
                 log.error("HTX-002-504", globalVariablesFile, e);
             }
         }
+        return Map.of();
     }
 
     public void execute(HttpRequest httpRequest, @Nullable Path httpFilePath) throws Exception {
@@ -422,6 +435,11 @@ public class HttpxCommand implements Callable<Integer> {
                 _describe 'command' subcmds
                 """;
         System.out.println(zshCompletion);
+    }
+
+    private void printGlobalVariables() {
+        final Map<String, Object> globalVariables = loadGlobalVariables();
+        System.out.println(JsonUtils.writeValueAsPrettyColorString(globalVariables));
     }
 
     public int importAPI() {
