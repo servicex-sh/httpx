@@ -57,6 +57,8 @@ public class HttpxCommand implements Callable<Integer> {
     private boolean listRequests;
     @Option(names = {"-s", "--summary"}, description = "Display summary")
     private boolean summary;
+    @Option(names = {"-a"}, description = "Run all requests")
+    private boolean runAllRequests = false;
     @Parameters(description = "targets to run")
     private List<String> targets;
     private boolean requestFromStdin = false;
@@ -149,6 +151,7 @@ public class HttpxCommand implements Callable<Integer> {
                 }
             }
             final List<HttpRequest> requests = HttpRequestParser.parse(httpCode, context);
+            // list summary for code completion
             if (summary) {
                 for (HttpRequest request : requests) {
                     String comment = request.getComment();
@@ -165,6 +168,7 @@ public class HttpxCommand implements Callable<Integer> {
                 }
                 return 0;
             }
+            // list all requests
             if (listRequests) {
                 for (HttpRequest request : requests) {
                     String comment = request.getComment();
@@ -181,6 +185,23 @@ public class HttpxCommand implements Callable<Integer> {
                 }
                 return 0;
             }
+            //http proxy configuration
+            if (httpProxy != null && !httpProxy.isEmpty()) {
+                if (!httpProxy.contains("://")) {
+                    httpProxy = "http://" + httpProxy;
+                }
+                var proxyUri = URI.create(httpProxy);
+                System.setProperty("http.proxyHost", proxyUri.getHost());
+                System.setProperty("http.proxyPort", "" + proxyUri.getPort());
+            }
+            //run all requests
+            if (runAllRequests) {
+                for (HttpRequest request : requests) {
+                    System.out.println("=============" + request.getName() + "==================");
+                    execute(request, httpFilePath);
+                }
+                return 0;
+            }
             //set targets from --target option if targets empty
             if ((targets == null || targets.isEmpty()) && target != null) {
                 targets = List.of(target.split(","));
@@ -190,15 +211,6 @@ public class HttpxCommand implements Callable<Integer> {
                 targets = List.of("1");
             }
             boolean targetFound = false;
-            //proxy setting
-            if (httpProxy != null && !httpProxy.isEmpty()) {
-                if (!httpProxy.contains("://")) {
-                    httpProxy = "http://" + httpProxy;
-                }
-                var proxyUri = URI.create(httpProxy);
-                System.setProperty("http.proxyHost", proxyUri.getHost());
-                System.setProperty("http.proxyPort", "" + proxyUri.getPort());
-            }
             for (String target : targets) {
                 for (HttpRequest request : requests) {
                     if (request.match(target)) {
