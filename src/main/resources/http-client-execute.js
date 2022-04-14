@@ -1,3 +1,7 @@
+// noinspection JSUnusedLocalSymbols
+const fs = require('fs');
+const os = require("os");
+
 class ContentType {
     mimeType = ""
     charset = "utf-8";
@@ -7,29 +11,60 @@ class ContentType {
     }
 }
 
-class Variables {
-    store = new Map();
+class GlobalVariables {
+    store = undefined
+    globalVariablesFile = undefined
 
     set(varName, varValue) {
-        this.store.set(varName, varValue);
+        this.getStore()[varName] = varValue;
+        fs.writeFileSync(this.globalVariablesFile, JSON.stringify(this.store, null, 2));
     }
 
-
     get(varName) {
-        return this.store.get(varName)
+        return this.getStore()[varName]
     }
 
     isEmpty() {
-        return this.store.size === 0
+        return Object.keys(this.getStore()).length === 0;
     }
 
-
     clear(varName) {
-        this.store.delete(varName)
+        delete this.getStore()[varName]
+        fs.writeFileSync(this.globalVariablesFile, JSON.stringify(this.store, null, 2));
     }
 
     clearAll() {
-        this.store.clear()
+        if (!this.isEmpty()) {
+            this.store = {};
+            fs.writeFileSync(this.globalVariablesFile, '{}');
+        }
+    }
+
+    getStore() {
+        if (this.store === undefined) {
+            this.initStore();
+        }
+        return this.store;
+    }
+
+    initStore() {
+        try {
+            const userHomeDir = os.homedir();
+            const servicexDir = `${userHomeDir}/.servicex`;
+            this.globalVariablesFile = `${servicexDir}/global_variables.json`
+            if (!fs.existsSync(servicexDir)) {
+                fs.mkdirSync(servicexDir);
+            }
+            if (!fs.existsSync(this.globalVariablesFile)) {
+                this.store = {};
+                fs.writeFileSync(this.globalVariablesFile, '{}');
+            } else {
+                // noinspection JSCheckFunctionSignatures
+                this.store = JSON.parse(fs.readFileSync(this.globalVariablesFile));
+            }
+        } catch (err) {
+            console.error(err)
+        }
     }
 }
 
@@ -100,13 +135,7 @@ class HttpResponse {
 }
 
 class HttpClient {
-    global = new Variables();
-
-    constructor(variables) {
-        for (const [key, value] of Object.entries(variables)) {
-            this.global.set(key, value)
-        }
-    }
+    global = new GlobalVariables();
 
     test(testName, func) {
         func();
@@ -126,14 +155,13 @@ class HttpClient {
 }
 
 function encodeBody(plainText) {
-   return Buffer.from(encodeURIComponent(plainText)).toString('base64');
+    return Buffer.from(encodeURIComponent(plainText)).toString('base64');
 }
 
 const statusCode = 222;
 const contentType = 'application/json';
 const headers = {'header': 'value'};
-const variables = {id: 111};
-const client = new HttpClient(variables);
+const client = new HttpClient();
 const response = new HttpResponse(statusCode, contentType);
 response.setHeaders(headers);
 const base64Body = encodeBody({});
