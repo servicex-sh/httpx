@@ -285,6 +285,21 @@ public class HttpxCommand implements Callable<Integer> {
                 }
             }
         }
+        // read $HOME/.servicex/global_variables.json
+        final Path globalVariablesFilePath = Path.of(System.getProperty("user.home")).resolve(".servicex").resolve("global_variables.json").toAbsolutePath();
+        if (globalVariablesFilePath.toFile().exists()) {
+            File globalVariablesFile = globalVariablesFilePath.toFile();
+            try {
+                final Map<String, String> globalVariables = JsonUtils.OBJECT_MAPPER.readValue(globalVariablesFile, Map.class);
+                for (Map.Entry<String, String> entry : globalVariables.entrySet()) {
+                    if (!context.containsKey(entry.getKey())) {
+                        context.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            } catch (Exception e) {
+                log.error("HTX-002-504", globalVariablesFile, e);
+            }
+        }
         return context;
     }
 
@@ -442,8 +457,8 @@ public class HttpxCommand implements Callable<Integer> {
             final Path currentDir = httpFilePath.getParent();
             final Path parentDir = currentDir.getParent();
             if (parentDir == null) { // can not find index.http in parent chain
-                // find default index.http ~/.httpx/index.http
-                final Path defaultIndexHttp = Path.of(System.getProperty("user.home")).resolve(".httpx").resolve("index.http").toAbsolutePath();
+                // find default index.http ~/.servicex/index.http
+                final Path defaultIndexHttp = Path.of(System.getProperty("user.home")).resolve(".servicex").resolve("index.http").toAbsolutePath();
                 if (defaultIndexHttp.toFile().exists()) {
                     return defaultIndexHttp;
                 }
