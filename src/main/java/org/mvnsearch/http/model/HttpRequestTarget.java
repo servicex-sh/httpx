@@ -194,6 +194,11 @@ public class HttpRequestTarget {
             if (!requestUri.startsWith("msgpack://") && requestUri.contains(":")) {
                 requestUri = "msgpack://" + requestUri;
             }
+        } else if (method.equals("NVIM")) {
+            requestTarget.schema = "tcp";
+            if (!requestUri.startsWith("tcp://") && requestUri.contains(":")) {
+                requestUri = "tcp://" + requestUri;
+            }
         } else if (method.equals("JSONRPC")) {
             if (!requestUri.contains("://")) {
                 requestUri = "jsonrpc://" + requestUri;
