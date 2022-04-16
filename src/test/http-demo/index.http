@@ -236,3 +236,10 @@ MSGPACK 127.0.0.1:18800/add
 Content-Type: application/json
 
 [1, 2]
+
+### neovim request
+//@name nvim-ls
+NVIM nvim_exec_lua
+Content-Type: text/x-lua
+
+vim.api.nvim_command('!ls')
