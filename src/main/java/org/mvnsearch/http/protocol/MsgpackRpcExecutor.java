@@ -44,6 +44,10 @@ public class MsgpackRpcExecutor extends HttpBaseExecutor {
                 return Collections.emptyList();
             }
         }
+        return makeRpcCall(msgpackUri, functionName, args, httpRequest);
+    }
+
+    public List<byte[]> makeRpcCall(URI msgpackUri, String functionName, Object[] args, HttpRequest httpRequest) {
         List<Object> msgpackRequest = new ArrayList<>();
         msgpackRequest.add(0); //RPC request
         msgpackRequest.add(0); //msg id
