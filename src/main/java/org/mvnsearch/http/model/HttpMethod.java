@@ -12,6 +12,7 @@ public class HttpMethod {
     public static final List<String> SOFA_METHODS = List.of("SOFA", "BOLT");
     public static final List<String> TARPC_METHODS = List.of("TARPC");
     public static final List<String> MSGPACK_METHODS = List.of("MSGPACK");
+    public static final List<String> NVIM_METHODS = List.of("NVIM");
     public static final List<String> JSONRPC_METHODS = List.of("JSONRPC");
     public static final List<String> THRIFT_METHODS = List.of("THRIFT");
     public static final List<String> ZEROMQ_METHODS = List.of("ZEROREQ");
@@ -62,6 +63,7 @@ public class HttpMethod {
                 || TARPC_METHODS.contains(method)
                 || JSONRPC_METHODS.contains(method)
                 || MSGPACK_METHODS.contains(method)
+                || NVIM_METHODS.contains(method)
                 || MAIL_METHODS.contains(method)
                 || PUB_METHODS.contains(method)
                 || SUB_METHODS.contains(method)
@@ -108,6 +110,10 @@ public class HttpMethod {
 
     public boolean isMsgpackMethod() {
         return MSGPACK_METHODS.contains(name);
+    }
+
+    public boolean isNvimMethod() {
+        return NVIM_METHODS.contains(name);
     }
 
     public boolean isJsonRPCMethod() {
