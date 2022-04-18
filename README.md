@@ -15,11 +15,13 @@ httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbra
 * GraphQL with HTTP and WebSocket
 * Memcache: set/get/delete
 * Redis: set/hmset/eval
+* msgpack-rpc:  Neovim support
+* json-rpc: HTTP and TCP support
 
 # How to install?
 
-* Mac : `brew install httpx-sh/tap/httpx`
-* Other platform: download binary from https://github.com/httpx-sh/httpx/releases
+* Mac : `brew install servicex-sh/tap/httpx`
+* Other platform: download binary from https://github.com/servicex-sh/httpx/releases
 
 # How to use?
 
