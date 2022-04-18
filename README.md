@@ -22,6 +22,8 @@ httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbra
 
 * Mac : `brew install servicex-sh/tap/httpx`
 * Other platform: download binary from https://github.com/servicex-sh/httpx/releases
+* JetBrains IDEs plugin: https://plugins.jetbrains.com/plugin/18807-httpx-requests
+* Neovim plugin: https://github.com/servicex-sh/httpx.vim
 
 # How to use?
 
