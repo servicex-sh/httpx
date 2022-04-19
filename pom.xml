@@ -569,7 +569,7 @@
                         <version>0.9.11</version>
                         <configuration>
                             <mainClass>${start-class}</mainClass>
-                            <imageName>${project.build.finalName}-${os.detected.name}-${os.detected.arch}</imageName>
+                            <imageName>${project.build.finalName}</imageName>
                             <buildArgs>
                                 --no-fallback
                                 --enable-url-protocols=mailto

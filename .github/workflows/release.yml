@@ -12,13 +12,13 @@ jobs:
         include:
           - os: ubuntu-latest
             fileName: httpx-linux-x86_64
-            file: target/httpx-linux-x86_64
+            file: target/httpx
           - os: windows-2019
             fileName: httpx-windows-x86_64.exe
-            file: target/httpx-windows-x86_64.exe
+            file: target/httpx.exe
           - os: macos-latest
             fileName: httpx-osx-x86_64
-            file: target/httpx-osx-x86_64
+            file: target/httpx
     steps:
       - uses: actions/checkout@v3
       - uses: graalvm/setup-graalvm@v1
