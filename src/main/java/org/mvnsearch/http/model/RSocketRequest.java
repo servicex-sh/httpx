@@ -1,6 +1,5 @@
 package org.mvnsearch.http.model;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
@@ -16,7 +15,6 @@ import io.rsocket.metadata.TaggingMetadataCodec;
 import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.util.DefaultPayload;
 import org.mvnsearch.http.utils.JsonUtils;
-import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -36,7 +34,10 @@ public class RSocketRequest {
     private String authorization;
     private String userAgent;
     private String metadata;
-    private Mono<ByteBuf> body;
+    /**
+     * used for converted body, such as GraphQL
+     */
+    private String newBody;
     private HttpRequest httpRequest;
     private String appId = UUID.randomUUID().toString();
 
@@ -73,11 +74,9 @@ public class RSocketRequest {
 
                 }
             }
-            String tempBody = JsonUtils.writeValueAsString(jsonRequest);
-            this.body = Mono.just(Unpooled.wrappedBuffer(tempBody.getBytes(StandardCharsets.UTF_8)));
+            this.newBody = JsonUtils.writeValueAsString(jsonRequest);
             this.dataMimeType = "application/json";
-        } else {
-            this.body = httpRequest.requestBody();
+            this.acceptMimeType = "application/json";
         }
     }
 
@@ -95,19 +94,21 @@ public class RSocketRequest {
 
     public Payload createPayload() throws Exception {
         if (metadataMimeType.equals(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString())) {
-            var dataBuf = httpRequest.getBodyBytes();
             var compositeMetadataBuffer = compositeMetadata();
             if (isSpringBroker()) {
                 encodeAddressMetadata(Id.from(appId), compositeMetadataBuffer);
             }
-            return DefaultPayload.create(Unpooled.wrappedBuffer(dataBuf), compositeMetadataBuffer);
+            return DefaultPayload.create(Unpooled.wrappedBuffer(getBodyBytes()), compositeMetadataBuffer);
         } else { //json
             var metadata = jsonMetadata();
-            return DefaultPayload.create(httpRequest.getBodyBytes(), metadata.getBytes(StandardCharsets.UTF_8));
+            return DefaultPayload.create(getBodyBytes(), metadata.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     public byte[] getBodyBytes() throws Exception {
+        if (this.newBody != null) {
+            return newBody.getBytes(StandardCharsets.UTF_8);
+        }
         return httpRequest.getBodyBytes();
     }
 
