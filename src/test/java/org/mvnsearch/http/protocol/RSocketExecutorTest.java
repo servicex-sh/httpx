@@ -43,4 +43,48 @@ public class RSocketExecutorTest {
         httpRequest.cleanBody();
         new RSocketExecutor().execute(httpRequest);
     }
+
+    @Test
+    public void testGraphQLOverRequest() throws Exception {
+        @Language("HTTP Request")
+        String httpFileCode = """
+                ### GraphQL query over RSocket request/response
+                //@name graphql-rs-req
+                RSOCKET graphql
+                Host: ws://localhost:8080/rsocket
+                Content-Type: application/graphql
+                               
+                query {
+                    bookById(id: "book-1") {
+                        id
+                        name
+                        pageCount
+                        author {
+                            firstName
+                            lastName
+                        }
+                    }
+                }
+                """;
+        final HttpRequest httpRequest = HttpRequestParser.parse(httpFileCode, new HashMap<>()).get(0);
+        httpRequest.cleanBody();
+        new RSocketExecutor().execute(httpRequest);
+    }
+
+    @Test
+    public void testGraphQLOverStream() throws Exception {
+        @Language("HTTP Request")
+        String httpFileCode = """
+                ### GraphQL subscription over RSocket Stream
+                //@name graphql-rs-sub
+                STREAM graphql
+                Host: ws://localhost:8080/rsocket
+                Content-Type: application/graphql
+                                 
+                subscription { greetings }
+                """;
+        final HttpRequest httpRequest = HttpRequestParser.parse(httpFileCode, new HashMap<>()).get(0);
+        httpRequest.cleanBody();
+        new RSocketExecutor().execute(httpRequest);
+    }
 }
