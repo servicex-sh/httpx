@@ -27,8 +27,8 @@ grpcurl-test:
 # native build with GraalVM native-image
 native-build:
    mvn -Pnative -DskipTests clean package
-   upx -7 target/httpx-osx-x86_64
-   cp target/httpx-osx-x86_64 ~/bin/httpx
+   upx -7 target/httpx
+   cp target/httpx ~/bin/httpx
 
 # dependency tree
 dependencies:
