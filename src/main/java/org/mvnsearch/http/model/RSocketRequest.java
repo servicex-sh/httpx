@@ -77,6 +77,9 @@ public class RSocketRequest {
             this.newBody = JsonUtils.writeValueAsString(jsonRequest);
             this.dataMimeType = "application/json";
             this.acceptMimeType = "application/json";
+        } else if (Objects.equals(dataMimeType, "application/graphql+json")) {
+            this.dataMimeType = "application/json";
+            this.acceptMimeType = "application/json";
         }
     }
 
