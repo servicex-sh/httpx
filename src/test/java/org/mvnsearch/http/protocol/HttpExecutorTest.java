@@ -48,7 +48,7 @@ public class HttpExecutorTest {
         String httpFile = """
                 ### hello ip
                 GET https://httpbin.org/ip
-                
+                                
                 > {%
                     client.test("Request executed successfully", function() {
                         client.log(response.status);
