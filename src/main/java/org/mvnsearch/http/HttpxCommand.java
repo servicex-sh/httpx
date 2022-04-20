@@ -196,6 +196,9 @@ public class HttpxCommand implements Callable<Integer> {
                 return 0;
             }
             //http proxy configuration
+            if (httpProxy == null) {
+                httpProxy = System.getenv("HTTP_PROXY");
+            }
             if (httpProxy != null && !httpProxy.isEmpty()) {
                 if (!httpProxy.contains("://")) {
                     httpProxy = "http://" + httpProxy;
