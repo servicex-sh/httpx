@@ -50,7 +50,7 @@ public class RSocketExecutorTest {
         String httpFileCode = """
                 ### GraphQL query over RSocket request/response
                 //@name graphql-rs-req
-                RSOCKET graphql
+                GRAPHQLRS graphql
                 Host: ws://localhost:8080/rsocket
                 Content-Type: application/graphql
                                
@@ -77,7 +77,7 @@ public class RSocketExecutorTest {
         String httpFileCode = """
                 ### GraphQL subscription over RSocket Stream
                 //@name graphql-rs-sub
-                STREAM graphql
+                GRAPHQLRS graphql
                 Host: ws://localhost:8080/rsocket
                 Content-Type: application/graphql
                                  
