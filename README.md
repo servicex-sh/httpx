@@ -6,7 +6,7 @@ httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbra
 # Request types supported by httpx
 
 * HTTP REST
-* PUB/SUB - Apache Kafka, Apache Pulsar, RabbitMQ, NATS, Redis, MQTT, AMQP, Stomp, ZeroMQ
+* PUB/SUB - Apache Kafka/Redpanda, Apache Pulsar, RabbitMQ, NATS, Redis, MQTT, AMQP, Stomp, ZeroMQ
 * gRPC
 * RSocket
 * Apache Dubbo
