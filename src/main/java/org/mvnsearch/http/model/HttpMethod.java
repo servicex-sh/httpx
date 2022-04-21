@@ -5,7 +5,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class HttpMethod {
     public static final List<String> HTTP_METHODS = List.of("GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTION", "TRACE", "PATCH");
-    public static final List<String> RSOCKET_METHODS = List.of("RSOCKET", "RPC", "FNF", "STREAM", "METADATA_PUSH");
+    public static final List<String> RSOCKET_METHODS = List.of("RSOCKET", "RPC", "FNF", "STREAM", "METADATA_PUSH","GRAPHQLRS");
     public static final List<String> GRPC_METHODS = List.of("GRPC");
     public static final List<String> GRAPHQL_METHODS = List.of("GRAPHQL", "GRAPHQLWS", "GRAPHQLWSS");
     public static final List<String> DUBBO_METHODS = List.of("DUBBO");
