@@ -153,7 +153,7 @@ installed in `~/.m2/jdks`.
 
 # Development setup
 
-* docker-compose.yml:  MQTT/1883, Stomp/61613, RabbitMQ/5672, SMTP/1025
+* docker-compose.yml:  MQTT/1883, Stomp/61613, RabbitMQ/5672, SMTP/1025, Redpanda/9092
 
 # References
 
