@@ -19,3 +19,7 @@ services:
     ports:
       - "9092:9092"
     command: redpanda start --overprovisioned --smp 1 --memory 1G --reserve-memory 0M --node-id 0 --check=false
+  sshd-test:
+    image: linuxchina/sshd-test:latest
+    ports:
+      - "2022:22"
