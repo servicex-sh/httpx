@@ -12,11 +12,12 @@ httpx is a CLI to execute requests from [JetBrains Http File](https://www.jetbra
 * Apache Dubbo
 * Sofa RPC
 * Email sending by SMTP
-* GraphQL with HTTP and WebSocket
+* GraphQL over HTTP/WebSocket/RSocket
 * Memcache: set/get/delete
 * Redis: set/hmset/eval
-* msgpack-rpc:  Neovim support
-* json-rpc: HTTP and TCP support
+* msgpack-rpc:  with Neovim support
+* json-rpc: HTTP and TCP transports support
+* Cloud Open API: AWS and Aliyun
 
 # How to install?
 
