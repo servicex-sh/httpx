@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 
 public class RSocketExecutor implements BaseExecutor {
@@ -34,6 +35,7 @@ public class RSocketExecutor implements BaseExecutor {
             case "FNF" -> fireAndForget(rsocketRequest);
             case "STREAM" -> requestStream(rsocketRequest);
             case "METADATA_PUSH" -> metadataPush(rsocketRequest);
+            case "GRAPHQLRS" -> Objects.equals(rsocketRequest.getGraphqlOperationName(), "subscription") ? requestStream(rsocketRequest) : requestResponse(rsocketRequest);
             default -> Collections.emptyList();
         };
     }
