@@ -14,3 +14,8 @@ services:
     ports:
       - "1025:1025"
       - "1080:1080"
+  redpanda:
+    image: vectorized/redpanda:latest
+    ports:
+      - "9092:9092"
+    command: redpanda start --overprovisioned --smp 1 --memory 1G --reserve-memory 0M --node-id 0 --check=false
