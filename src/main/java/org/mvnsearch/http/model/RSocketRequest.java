@@ -39,6 +39,8 @@ public class RSocketRequest {
      */
     private String newBody;
     private HttpRequest httpRequest;
+    private String graphqlOperationName = "request";
+
     private String appId = UUID.randomUUID().toString();
 
     public RSocketRequest(HttpRequest httpRequest) {
@@ -63,18 +65,35 @@ public class RSocketRequest {
         this.metadata = httpRequest.getHeader("Metadata");
         this.httpRequest = httpRequest;
         //graphql convert
-        if (Objects.equals(dataMimeType, "application/graphql")) {
-            Map<String, Object> jsonRequest = new HashMap<>();
-            jsonRequest.put("query", httpRequest.bodyText());
-            String graphqlVariables = httpRequest.getHeader("x-graphql-variables");
-            if (graphqlVariables != null && graphqlVariables.startsWith("{")) {
+        if (Objects.equals(requestType, "GRAPHQLRS") || Objects.equals(dataMimeType, "application/graphql")) {
+            final String bodyText = httpRequest.bodyText();
+            if (Objects.equals(dataMimeType, "application/graphql")) {
+                Map<String, Object> jsonRequest = new HashMap<>();
+                if (bodyText.startsWith("subscription")) {
+                    graphqlOperationName = "subscription";
+                }
+                jsonRequest.put("query", bodyText);
+                String graphqlVariables = httpRequest.getHeader("x-graphql-variables");
+                if (graphqlVariables != null && graphqlVariables.startsWith("{")) {
+                    try {
+                        jsonRequest.put("variables", JsonUtils.readValue(graphqlVariables, Map.class));
+                    } catch (Exception ignore) {
+
+                    }
+                }
+                this.newBody = JsonUtils.writeValueAsString(jsonRequest);
+            } else if (dataMimeType.contains("json")) {
                 try {
-                    jsonRequest.put("variables", JsonUtils.readValue(graphqlVariables, Map.class));
+                    final Map<String, Object> document = JsonUtils.readValue(bodyText, Map.class);
+                    if (document.containsKey("query")) {
+                        if (document.get("query").toString().startsWith("subscription")) {
+                            graphqlOperationName = "subscription";
+                        }
+                    }
                 } catch (Exception ignore) {
 
                 }
             }
-            this.newBody = JsonUtils.writeValueAsString(jsonRequest);
             this.dataMimeType = "application/json";
             this.acceptMimeType = "application/json";
         } else if (Objects.equals(dataMimeType, "application/graphql+json")) {
@@ -235,6 +254,10 @@ public class RSocketRequest {
 
     public URI getUri() {
         return uri;
+    }
+
+    public String getGraphqlOperationName() {
+        return graphqlOperationName;
     }
 
     public URI getWebsocketRequestURI() {
