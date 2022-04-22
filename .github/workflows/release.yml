@@ -42,6 +42,13 @@ jobs:
         with:
           name: ${{ matrix.fileName }}
           path: ${{ matrix.file }}
+      - name: Zip httpx executable
+        run: cd target; zip ${{ matrix.fileName }}.zip httpx
+      - name: Upload release
+        if: github.event.release.tag_name
+        run: gh release upload ${{ github.event.release.tag_name }} target/${{ matrix.fileName }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-windows:
     name: GraalVM - ${{ matrix.os }}
@@ -90,3 +97,10 @@ jobs:
         with:
           name: ${{ matrix.fileName }}
           path: ${{ matrix.file }}
+      - name: Zip httpx executable
+        run: cd target; zip ${{ matrix.fileName }}.zip httpx
+      - name: Upload release
+        if: github.event.release.tag_name
+        run: gh release upload ${{ github.event.release.tag_name }} target/${{ matrix.fileName }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
