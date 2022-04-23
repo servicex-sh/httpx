@@ -554,7 +554,7 @@
             <id>native</id>
             <build>
                 <plugins>
-                    <plugin>
+                    <!--<plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
                         <version>3.2.4</version>
@@ -569,7 +569,7 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
+                    </plugin>-->
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
@@ -583,9 +583,9 @@
                                 --enable-url-protocols=http
                                 --enable-url-protocols=https
                             </buildArgs>
-                            <classpath>
+                            <!--<classpath>
                                 <param>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</param>
-                            </classpath>
+                            </classpath>-->
                         </configuration>
                         <executions>
                             <execution>
