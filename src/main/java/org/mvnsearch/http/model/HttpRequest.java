@@ -188,6 +188,22 @@ public class HttpRequest {
         this.headers.add(new HttpHeader(name, value));
     }
 
+    public void replaceHeader(String name, String value) {
+        if (headers != null) {
+            HttpHeader header = null;
+            for (HttpHeader httpHeader : headers) {
+                if (httpHeader.getName().equalsIgnoreCase(name)) {
+                    header = httpHeader;
+                    break;
+                }
+            }
+            if (header != null) {
+                this.headers.remove(header);
+            }
+            addHttpHeader(name, value);
+        }
+    }
+
     public List<String> getBodyLines() {
         return bodyLines;
     }
