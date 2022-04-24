@@ -174,7 +174,12 @@ public class HttpRequestTarget {
                 requestTarget.schema = "https://";
             }
         }
-        if (method.equals("DUBBO")) {
+        if (method.equals("REST")) {
+            if (!requestUri.contains("://")) {
+                requestUri = "http://" + requestUri;
+                requestTarget.schema = "http";
+            }
+        } else if (method.equals("DUBBO")) {
             requestTarget.schema = "dubbo";
             if (!requestUri.startsWith("dubbo://") && requestUri.contains(":")) {
                 requestUri = "dubbo://" + requestUri;
