@@ -5,7 +5,8 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class HttpMethod {
     public static final List<String> HTTP_METHODS = List.of("GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTION", "TRACE", "PATCH");
-    public static final List<String> RSOCKET_METHODS = List.of("RSOCKET", "RPC", "FNF", "STREAM", "METADATA_PUSH","GRAPHQLRS");
+    public static final List<String> REST_METHODS = List.of("REST");
+    public static final List<String> RSOCKET_METHODS = List.of("RSOCKET", "RPC", "FNF", "STREAM", "METADATA_PUSH", "GRAPHQLRS");
     public static final List<String> GRPC_METHODS = List.of("GRPC");
     public static final List<String> GRAPHQL_METHODS = List.of("GRAPHQL", "GRAPHQLWS", "GRAPHQLWSS");
     public static final List<String> DUBBO_METHODS = List.of("DUBBO");
@@ -51,6 +52,7 @@ public class HttpMethod {
             method = line.substring(0, offset);
         }
         return HTTP_METHODS.contains(method)
+                || REST_METHODS.contains(method)
                 || RSOCKET_METHODS.contains(method)
                 || GRPC_METHODS.contains(method)
                 || GRAPHQL_METHODS.contains(method)
@@ -78,6 +80,10 @@ public class HttpMethod {
 
     public boolean isHttpMethod() {
         return HTTP_METHODS.contains(this.name);
+    }
+
+    public boolean isRestMethod() {
+        return REST_METHODS.contains(this.name);
     }
 
     public boolean isRSocketMethod() {
