@@ -255,6 +255,33 @@ public class HttpRequest {
         return "[" + String.join(",", argLines) + "]";
     }
 
+    public String jsonObjectBodyWithArgsHeaders() {
+        if (this.headers == null || this.headers.isEmpty()) {
+            return bodyText();
+        }
+        String xBodyName = getHeader("X-Body-Name");
+        if (xBodyName == null || xBodyName.isEmpty()) {
+            return bodyText();
+        }
+        final Map<String, String> argsHeaders = headers.stream()
+                .filter(httpHeader -> httpHeader.getName().toLowerCase().startsWith("x-args-"))
+                .collect(Collectors.toMap(httpHeader -> httpHeader.getName().toLowerCase(), HttpHeader::getValue));
+        String newBody = bodyText();
+        final String contentType = getHeader("Content-Type", "application/json");
+        if (!contentType.contains("json")) {
+            newBody = convertToDoubleQuoteString(newBody);
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        for (Map.Entry<String, String> entry : argsHeaders.entrySet()) {
+            String name = entry.getKey().substring(7);
+            builder.append("\"").append(name).append("\"").append(":").append(wrapJsonValue(entry.getValue())).append(",");
+        }
+        builder.append('"').append(xBodyName).append('"').append(":").append(newBody);
+        builder.append("}");
+        return builder.toString();
+    }
+
     public String convertToDoubleQuoteString(String text) {
         String escapedText = StringUtils.replace(text, "\"", "\\\"");
         escapedText = StringUtils.replace(escapedText, "\n", "\\n");
