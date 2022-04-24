@@ -286,7 +286,7 @@ public class HttpRequest {
         String escapedText = StringUtils.replace(text, "\"", "\\\"");
         escapedText = StringUtils.replace(escapedText, "\n", "\\n");
         escapedText = StringUtils.replace(escapedText, "\r", "");
-        return escapedText;
+        return "\"" + escapedText + "\"";
     }
 
     public String wrapJsonValue(String value) {
