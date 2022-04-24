@@ -16,7 +16,10 @@ public class HttpExecutor extends HttpBaseExecutor {
         final URI requestUri = httpRequest.getRequestTarget().getUri();
         HttpClient client = httpClient().headers(httpHeaders -> {
             for (HttpHeader header : httpRequest.getHeaders()) {
-                if (!IGNORED_HEADERS.contains(header.getName().toLowerCase())) {
+                String headerName = header.getName().toLowerCase();
+                if (!IGNORED_HEADERS.contains(headerName)
+                        && !headerName.startsWith("x-args-")
+                        && !headerName.equals("x-body-name")) {
                     httpHeaders.add(header.getName(), header.getValue());
                 }
             }
