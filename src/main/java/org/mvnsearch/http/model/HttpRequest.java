@@ -248,7 +248,11 @@ public class HttpRequest {
         List<String> argLines = new ArrayList<>();
         for (int i = 0; i <= argsHeaders.size(); i++) {
             String key = "x-args-" + i;
-            argLines.add(argsHeaders.getOrDefault(key, newBody));
+            if (argsHeaders.containsKey(key)) {
+                argLines.add(wrapJsonValue(argsHeaders.get(key)));
+            } else {
+                argLines.add(newBody);
+            }
         }
         return "[" + String.join(",", argLines) + "]";
     }
@@ -258,6 +262,23 @@ public class HttpRequest {
         escapedText = StringUtils.replace(escapedText, "\n", "\\n");
         escapedText = StringUtils.replace(escapedText, "\r", "");
         return escapedText;
+    }
+
+    public String wrapJsonValue(String value) {
+        if (Objects.equals(value, "true") || Objects.equals(value, "false") || Objects.equals(value, "null")) {
+            return value;
+        } else if (value.startsWith("\"") || value.startsWith("{") || value.startsWith("[")) {
+            return value;
+        } else if (value.contains("\"")) {
+            return escapeDoubleQuote(value);
+        } else {
+            try {
+                Double.parseDouble(value);
+                return value;
+            } catch (Exception ignore) {
+                return "\"" + value + "\"";
+            }
+        }
     }
 
     public void setBodyBytes(byte[] body) {
