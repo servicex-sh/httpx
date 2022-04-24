@@ -336,6 +336,8 @@ public class HttpxCommand implements Callable<Integer> {
         List<byte[]> result;
         if (requestMethod.isHttpMethod()) {
             result = new HttpExecutor().execute(httpRequest);
+        } else if (requestMethod.isRestMethod()) {
+            result = new JsonRestExecutor().execute(httpRequest);
         } else if (requestMethod.isRSocketMethod()) {
             result = new RSocketExecutor().execute(httpRequest);
         } else if (requestMethod.isGrpcMethod()) {
