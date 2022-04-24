@@ -244,6 +244,16 @@ public class HttpRequest {
         return this.body != null ? new String(this.body, StandardCharsets.UTF_8) : "";
     }
 
+    public boolean containsArgsHeader() {
+        if (this.headers == null || this.headers.isEmpty()) {
+            return false;
+        }
+        final Map<String, String> argsHeaders = headers.stream()
+                .filter(httpHeader -> httpHeader.getName().toLowerCase().startsWith("x-args-"))
+                .collect(Collectors.toMap(httpHeader -> httpHeader.getName().toLowerCase(), HttpHeader::getValue));
+        return !argsHeaders.isEmpty();
+    }
+
     public String jsonArrayBodyWithArgsHeaders() {
         if (this.headers == null || this.headers.isEmpty()) {
             return bodyText();
