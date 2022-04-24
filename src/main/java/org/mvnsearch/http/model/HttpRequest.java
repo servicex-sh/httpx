@@ -241,9 +241,7 @@ public class HttpRequest {
         String newBody = bodyText();
         final String contentType = getHeader("Content-Type", "application/json");
         if (!contentType.contains("json")) {
-            if (!newBody.startsWith("\"")) {
-                newBody = "\"" + escapeDoubleQuote(newBody) + "\"";
-            }
+            newBody = convertToDoubleQuoteString(newBody);
         }
         List<String> argLines = new ArrayList<>();
         for (int i = 0; i <= argsHeaders.size(); i++) {
@@ -257,7 +255,7 @@ public class HttpRequest {
         return "[" + String.join(",", argLines) + "]";
     }
 
-    public String escapeDoubleQuote(String text) {
+    public String convertToDoubleQuoteString(String text) {
         String escapedText = StringUtils.replace(text, "\"", "\\\"");
         escapedText = StringUtils.replace(escapedText, "\n", "\\n");
         escapedText = StringUtils.replace(escapedText, "\r", "");
@@ -270,7 +268,7 @@ public class HttpRequest {
         } else if (value.startsWith("\"") || value.startsWith("{") || value.startsWith("[")) {
             return value;
         } else if (value.contains("\"")) {
-            return escapeDoubleQuote(value);
+            return convertToDoubleQuoteString(value);
         } else {
             try {
                 Double.parseDouble(value);
