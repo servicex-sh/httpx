@@ -22,7 +22,7 @@
         <spring-native.version>0.11.4</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.8.2</junit5.version>
-        <aws-java-sdk2.version>2.17.166</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.17.174</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -126,6 +126,10 @@
                 <exclusion>
                     <groupId>io.projectreactor.netty.incubator</groupId>
                     <artifactId>reactor-netty-incubator-quic</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-resolver-dns-native-macos</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>io.projectreactor.netty</groupId>
@@ -325,6 +329,11 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.20.1</version>
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
