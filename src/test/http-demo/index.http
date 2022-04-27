@@ -229,6 +229,7 @@ LOAD mylib
 Host: localhost:16379
 Content-Type: text/x-lua
 
+#!lua name=mylib
 redis.register_function(
         'knockknock',
         function()
