@@ -223,6 +223,19 @@ Host: localhost:6379
 local welcome = "Hello "
 return welcome .. KEYS[1]
 
+### redis 7 fuctions
+//@name redis-mylib
+LOAD mylib
+Host: localhost:16379
+Content-Type: text/x-lua
+
+redis.register_function(
+        'knockknock',
+        function()
+            return 'Who\'s there?'
+        end
+)
+
 
 ### ssh demo
 //@name ssh-demo
@@ -235,7 +248,10 @@ ls -al
 MSGPACK 127.0.0.1:18800/add
 Content-Type: application/json
 
-[1, 2]
+[
+  1,
+  2
+]
 
 ### neovim request
 //@name nvim-ls
