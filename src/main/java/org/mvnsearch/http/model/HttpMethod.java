@@ -24,7 +24,7 @@ public class HttpMethod {
     public static final List<String> PUB_METHODS = List.of("PUB");
     public static final List<String> SUB_METHODS = List.of("SUB");
 
-    public static final List<String> REDIS_METHODS = List.of("RSET", "HMSET", "EVAL");
+    public static final List<String> REDIS_METHODS = List.of("RSET", "HMSET", "EVAL", "LOAD");
     public static final List<String> SSH_METHODS = List.of("SSH");
     private String name;
 
