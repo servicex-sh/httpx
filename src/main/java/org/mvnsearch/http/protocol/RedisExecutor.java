@@ -42,12 +42,34 @@ public class RedisExecutor implements BasePubSubExecutor {
                             final List<String> args = parts.subList(paramCount + 1, parts.size());
                             result = jedis.eval(luaScript, keys, args);
                         }
-                        colorOutput("bold,green", "Succeeded to eval Lua script:");
+                        System.out.println(colorOutput("bold,green", "Succeeded to eval Lua script:"));
                         if (result == null) {
                             System.out.println("Failed to execute Lua script, please check your script.");
                         } else if (result instanceof byte[]) {
                             System.out.println(new String((byte[]) result, StandardCharsets.UTF_8));
                         } else {
+                            System.out.println(result);
+                        }
+                    } else {
+                        System.out.println("No Lua script supplied!");
+                    }
+                }
+                case "LOAD" -> {
+                    String luaScript = httpRequest.bodyText();
+                    if (!luaScript.isEmpty()) {
+                        String libName = httpRequest.getRequestLine();
+                        if (libName.contains("/")) {
+                            libName = libName.substring(libName.indexOf("/") + 1);
+                        }
+                        if (!luaScript.startsWith("#!lua")) {
+                            luaScript = "#!lua name=" + libName + "\n" + luaScript;
+                        }
+                        String result = jedis.functionLoadReplace(luaScript);
+                        if (result == null || !result.equals(libName)) {
+                            System.out.println(colorOutput("bold,red", "Load Redis functions:"));
+                            System.out.println("Failed to load Redis functions, please check your script.");
+                        } else {
+                            System.out.println(colorOutput("bold,green", "Succeed to load Redis functions:"));
                             System.out.println(result);
                         }
                     } else {
