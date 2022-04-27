@@ -80,4 +80,24 @@ public class RedisExecutorTest {
         request.cleanBody();
         new RedisExecutor().execute(request);
     }
+
+    @Test
+    public void testRedisLoad() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### redis eval
+                LOAD mylib
+                Host: localhost:16379
+                Content-Type: text/x-lua
+                  
+                redis.register_function(
+                  'knockknock',
+                  function() return 'Who\\'s there?' end
+                )
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new RedisExecutor().execute(request);
+    }
 }
