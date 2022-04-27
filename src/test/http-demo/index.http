@@ -215,7 +215,7 @@ Content-Type: application/json
   age: 20
 }
 
-### redis 1
+### redis Lua eval
 //@name redis-eval
 EVAL 1 keyname1 value1
 Host: localhost:6379
