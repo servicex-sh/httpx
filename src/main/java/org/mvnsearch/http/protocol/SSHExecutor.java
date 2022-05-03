@@ -120,7 +120,4 @@ public class SSHExecutor implements BaseExecutor {
         return script.substring(0, script.length() - 2);
     }
 
-    private void loadPrivateKeys(JSch jsch) {
-
-    }
 }
