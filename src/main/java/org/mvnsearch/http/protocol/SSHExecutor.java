@@ -52,14 +52,24 @@ public class SSHExecutor implements BaseExecutor {
                 session.setPassword(password);
             } else { //login by private key
                 String privateKey = httpRequest.getHeader("X-SSH-Private-Key");
-                if (privateKey == null) {
-                    privateKey = System.getProperty("user.home") + "/.ssh/id_rsa";
+                if (privateKey != null) {
+                    if (!new File(privateKey).exists()) {
+                        System.out.println("Failed to load SSH private key: " + privateKey);
+                        return Collections.emptyList();
+                    } else {
+                        jsch.addIdentity(privateKey);
+                    }
+                } else { // load private keys from $HOME/.ssh/
+                    final File sshDir = new File(System.getProperty("user.home"), ".ssh");
+                    if (sshDir.exists()) {
+                        final File[] privateFiles = sshDir.listFiles((dir, name) -> name.startsWith("id_") && !name.contains("."));
+                        if (privateFiles != null && privateFiles.length > 0) {
+                            for (File privateFile : privateFiles) {
+                                jsch.addIdentity(privateFile.getAbsolutePath());
+                            }
+                        }
+                    }
                 }
-                if (!new File(privateKey).exists()) {
-                    System.out.println("Failed to load SSH private key: " + privateKey);
-                    return Collections.emptyList();
-                }
-                jsch.addIdentity(privateKey);
                 session = jsch.getSession(userName, sshURI.getHost(), sshPort);
             }
             session.setConfig("StrictHostKeyChecking", "no");
@@ -74,7 +84,12 @@ public class SSHExecutor implements BaseExecutor {
                 Thread.sleep(100);
             }
             final byte[] content = responseStream.toByteArray();
-            System.out.println(responseStream.toString(StandardCharsets.UTF_8));
+            String output = responseStream.toString(StandardCharsets.UTF_8);
+            if (httpRequest.getHeader("Accept", "text/plain").contains("json")) {
+                System.out.println(prettyJsonFormat(output));
+            } else {
+                System.out.println(output);
+            }
             return Collections.singletonList(content);
         } catch (Exception e) {
             log.error("HTX-109-500", sshURI, e);
@@ -103,5 +118,9 @@ public class SSHExecutor implements BaseExecutor {
         });
         final String script = builder.toString();
         return script.substring(0, script.length() - 2);
+    }
+
+    private void loadPrivateKeys(JSch jsch) {
+
     }
 }
