@@ -1,7 +1,7 @@
 version: "3"
 services:
   rabbitmq:
-    image: rabbitmq:3.9.13-management
+    image: rabbitmq:3.10.0-management
     volumes:
       - ./src/test/etc/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     ports:
