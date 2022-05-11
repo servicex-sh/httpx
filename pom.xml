@@ -173,7 +173,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.luben</groupId>
@@ -484,7 +484,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.18</version>
+                <version>2020.0.19</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
