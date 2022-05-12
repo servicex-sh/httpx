@@ -9,6 +9,7 @@ import com.aliyun.eventbridge.util.EventBuilder;
 import com.aliyun.mns.client.CloudAccount;
 import com.aliyun.mns.client.CloudQueue;
 import com.aliyun.mns.client.MNSClient;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.ConnectionFactory;
 import io.nats.client.Nats;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -153,9 +154,11 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             reactor.rabbitmq.SenderOptions senderOptions = new reactor.rabbitmq.SenderOptions()
                     .connectionFactory(connectionFactory)
                     .resourceManagementScheduler(Schedulers.immediate());
+            String contentType = httpRequest.getHeader("Content-Type", "text/plain");
+            final AMQP.BasicProperties headers = new AMQP.BasicProperties.Builder().contentType(contentType).build();
             try (Sender rabbitSender = RabbitFlux.createSender(senderOptions)) {
                 rabbitSender
-                        .send(Mono.just(new OutboundMessage("", rabbitUriAndQueue.subject(), httpRequest.getBodyBytes())))
+                        .send(Mono.just(new OutboundMessage("", rabbitUriAndQueue.subject(), headers, httpRequest.getBodyBytes())))
                         .doOnError(e -> log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e))
                         .doFinally(signalType -> {
                             if (signalType == ON_COMPLETE) {
@@ -233,6 +236,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             //Launch the instance.
             producer.start();
             Message msg = new Message(topic, httpRequest.getBodyBytes());
+            msg.putUserProperty("Content-Type", httpRequest.getHeader("Content-Type", "text/plain"));
             //Call send message to deliver message to one of brokers.
             SendResult sendResult = producer.send(msg);
             System.out.println("Succeeded to send message to " + topic + "!");
