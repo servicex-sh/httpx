@@ -219,7 +219,9 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         String topic = pulsarURI.getPath().substring(1);
         try (PulsarClient client = PulsarClient.builder().serviceUrl(pulsarURI.toString()).build();
              Producer<byte[]> producer = client.newProducer().topic(topic).create()) {
-            final MessageId msgId = producer.send(httpRequest.getBodyBytes());
+            final MessageId msgId = producer.newMessage().value(httpRequest.getBodyBytes())
+                    .property("Content-Type", httpRequest.getHeader("Content-Type", "text/plan"))
+                    .send();
             System.out.print("Succeeded to send message to " + topic + " with id " + msgId);
         } catch (Exception e) {
             log.error("HTX-105-500", pulsarURI.toString(), e);
