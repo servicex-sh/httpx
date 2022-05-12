@@ -25,6 +25,7 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
@@ -343,7 +344,13 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
                 connOpts.setPassword(usernameAndPassword[1].getBytes(StandardCharsets.UTF_8));
             }
             mqttClient.connect(connOpts);
-            mqttClient.publish(uriAndTopic.subject(), new MqttMessage(httpRequest.getBodyBytes()));
+            final MqttMessage message = new MqttMessage(httpRequest.getBodyBytes());
+            final String contentType = httpRequest.getHeader("Content-Type");
+            if (contentType != null) {
+                message.setProperties(new MqttProperties());
+                message.getProperties().setContentType(contentType);
+            }
+            mqttClient.publish(uriAndTopic.subject(), message);
             System.out.print("Succeeded to send message to " + uriAndTopic.subject() + "!");
         } catch (Exception e) {
             log.error("HTX-105-500", mqttURI, e);
