@@ -16,6 +16,7 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.jetbrains.annotations.NotNull;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
@@ -243,7 +244,12 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
                     final String content = new String(message.getPayload(), StandardCharsets.UTF_8);
-                    if (content.startsWith("{")) { //pretty json output
+                    final MqttProperties messageProperties = message.getProperties();
+                    String contentType = "text/plain";
+                    if (messageProperties != null && messageProperties.getContentType() != null) {
+                        contentType = messageProperties.getContentType();
+                    }
+                    if (content.startsWith("{") || contentType.contains("json")) { //pretty json output
                         System.out.println(prettyJsonFormat(content));
                     } else {
                         System.out.println(content);
