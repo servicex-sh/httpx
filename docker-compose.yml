@@ -14,7 +14,7 @@ services:
     ports:
       - "16379:6379"
   maildev:
-    image: soulteary/maildev:2.0.2
+    image: soulteary/maildev:2.0.5
     ports:
       - "1025:1025"
       - "1080:1080"
