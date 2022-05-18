@@ -471,6 +471,7 @@ public class HttpRequest {
                         // Fix https://youtrack.jetbrains.com/issue/IDEA-281753/Support-formatting-for-POST-request-body-for-application-x-www-f
                         if (contentType != null && contentType.equalsIgnoreCase("application/x-www-form-urlencoded") && content.contains("\n")) {
                             content = StringUtils.replace(content, "\n", "");
+                            content = StringUtils.replace(content, "\r", "");
                         }
                         this.body = content.getBytes(StandardCharsets.UTF_8);
                     }
