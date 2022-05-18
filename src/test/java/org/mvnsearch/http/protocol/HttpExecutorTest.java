@@ -42,6 +42,24 @@ public class HttpExecutorTest {
     }
 
     @Test
+    public void testHttpPostWithFormUrlencoded() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### hello ip
+                POST https://httpbin.org/post
+                Content-Type: application/x-www-form-urlencoded
+                
+                foo1=bar
+                &foo2=bar
+                &foo3=bar
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new HttpExecutor().execute(request);
+    }
+
+    @Test
     public void testHttpRequestGetIpWithJSTest() throws Exception {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
