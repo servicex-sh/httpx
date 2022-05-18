@@ -467,6 +467,11 @@ public class HttpRequest {
                     }
                     if (!lines.isEmpty()) {
                         String content = String.join(System.lineSeparator(), lines);
+                        String contentType = getHeader("Content-Type");
+                        // Fix https://youtrack.jetbrains.com/issue/IDEA-281753/Support-formatting-for-POST-request-body-for-application-x-www-f
+                        if (contentType != null && contentType.equalsIgnoreCase("application/x-www-form-urlencoded") && content.contains("\n")) {
+                            content = StringUtils.replace(content, "\n", "");
+                        }
                         this.body = content.getBytes(StandardCharsets.UTF_8);
                     }
                 }
