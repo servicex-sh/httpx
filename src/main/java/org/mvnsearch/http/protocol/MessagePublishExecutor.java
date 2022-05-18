@@ -164,10 +164,17 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
                     .connectionFactory(connectionFactory)
                     .resourceManagementScheduler(Schedulers.immediate());
             String contentType = httpRequest.getHeader("Content-Type", "text/plain");
-            final AMQP.BasicProperties headers = new AMQP.BasicProperties.Builder().contentType(contentType).build();
+            Map<String, Object> amqpHeaders = new HashMap<>();
+            for (HttpHeader header : httpRequest.getHeaders()) {
+                String headerName = header.getName();
+                if (headerName.startsWith("X-")) {
+                    amqpHeaders.put(header.getName(), header.getValue());
+                }
+            }
+            final AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(amqpHeaders).contentType(contentType).build();
             try (Sender rabbitSender = RabbitFlux.createSender(senderOptions)) {
                 rabbitSender
-                        .send(Mono.just(new OutboundMessage("", rabbitUriAndQueue.subject(), headers, httpRequest.getBodyBytes())))
+                        .send(Mono.just(new OutboundMessage("", rabbitUriAndQueue.subject(), basicProperties, httpRequest.getBodyBytes())))
                         .doOnError(e -> log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e))
                         .doFinally(signalType -> {
                             if (signalType == ON_COMPLETE) {
