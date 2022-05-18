@@ -29,6 +29,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
+import org.mvnsearch.http.model.HttpHeader;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.protocol.mqtt3.Mqtt3PublisherExecutor;
 import org.mvnsearch.http.utils.JsonUtils;
@@ -133,8 +134,16 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         KafkaSender<String, String> sender = KafkaSender.create(SenderOptions.create(props));
-        sender.send(Mono.just(SenderRecord.create(topic, partition, System.currentTimeMillis(),
-                        key, body, null)))
+        final SenderRecord<String, String, Object> senderRecord = SenderRecord.create(topic, partition, System.currentTimeMillis(),
+                key, body, null);
+        for (HttpHeader header : httpRequest.getHeaders()) {
+            final String headerName = header.getName();
+            if (headerName.startsWith("X-")) {
+                String value = header.getValue();
+                senderRecord.headers().add(headerName.substring(2), value.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+        sender.send(Mono.just(senderRecord))
                 .doOnError(e -> log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e))
                 .doFinally(signalType -> {
                     if (signalType == ON_COMPLETE) {
