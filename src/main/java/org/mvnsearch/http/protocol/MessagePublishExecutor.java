@@ -18,6 +18,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.pulsar.client.api.MessageId;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
+import org.apache.pulsar.client.api.TypedMessageBuilder;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
@@ -27,6 +28,7 @@ import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpHeader;
@@ -136,13 +138,10 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         KafkaSender<String, String> sender = KafkaSender.create(SenderOptions.create(props));
         final SenderRecord<String, String, Object> senderRecord = SenderRecord.create(topic, partition, System.currentTimeMillis(),
                 key, body, null);
-        for (HttpHeader header : httpRequest.getHeaders()) {
-            final String headerName = header.getName();
-            if (headerName.startsWith("X-")) {
-                String value = header.getValue();
-                senderRecord.headers().add(headerName.substring(2), value.getBytes(StandardCharsets.UTF_8));
-            }
-        }
+        getMsgHeaders(httpRequest).forEach((name, value) -> {
+            senderRecord.headers().add(name, value.getBytes(StandardCharsets.UTF_8));
+        });
+        senderRecord.headers().add("Content-Type", httpRequest.getHeader("Content-Type", "text/plain").getBytes(StandardCharsets.UTF_8));
         sender.send(Mono.just(senderRecord))
                 .doOnError(e -> log.error("HTX-105-500", httpRequest.getRequestTarget().getUri(), e))
                 .doFinally(signalType -> {
@@ -164,13 +163,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
                     .connectionFactory(connectionFactory)
                     .resourceManagementScheduler(Schedulers.immediate());
             String contentType = httpRequest.getHeader("Content-Type", "text/plain");
-            Map<String, Object> amqpHeaders = new HashMap<>();
-            for (HttpHeader header : httpRequest.getHeaders()) {
-                String headerName = header.getName();
-                if (headerName.startsWith("X-")) {
-                    amqpHeaders.put(header.getName(), header.getValue());
-                }
-            }
+            Map<String, Object> amqpHeaders = new HashMap<>(getMsgHeaders(httpRequest));
             final AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(amqpHeaders).contentType(contentType).build();
             try (Sender rabbitSender = RabbitFlux.createSender(senderOptions)) {
                 rabbitSender
@@ -235,9 +228,10 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
         String topic = pulsarURI.getPath().substring(1);
         try (PulsarClient client = PulsarClient.builder().serviceUrl(pulsarURI.toString()).build();
              Producer<byte[]> producer = client.newProducer().topic(topic).create()) {
-            final MessageId msgId = producer.newMessage().value(httpRequest.getBodyBytes())
-                    .property("Content-Type", httpRequest.getHeader("Content-Type", "text/plan"))
-                    .send();
+            final TypedMessageBuilder<byte[]> builder = producer.newMessage().value(httpRequest.getBodyBytes())
+                    .property("Content-Type", httpRequest.getHeader("Content-Type", "text/plan"));
+            getMsgHeaders(httpRequest).forEach(builder::property);
+            final MessageId msgId = builder.send();
             System.out.print("Succeeded to send message to " + topic + " with id " + msgId);
         } catch (Exception e) {
             log.error("HTX-105-500", pulsarURI.toString(), e);
@@ -255,6 +249,7 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             producer.start();
             Message msg = new Message(topic, httpRequest.getBodyBytes());
             msg.putUserProperty("Content-Type", httpRequest.getHeader("Content-Type", "text/plain"));
+            getMsgHeaders(httpRequest).forEach(msg::putUserProperty);
             //Call send message to deliver message to one of brokers.
             SendResult sendResult = producer.send(msg);
             System.out.println("Succeeded to send message to " + topic + "!");
@@ -367,11 +362,15 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             }
             mqttClient.connect(connOpts);
             final MqttMessage message = new MqttMessage(httpRequest.getBodyBytes());
+            final MqttProperties mqttProperties = new MqttProperties();
+            message.setProperties(mqttProperties);
             final String contentType = httpRequest.getHeader("Content-Type");
             if (contentType != null) {
-                message.setProperties(new MqttProperties());
-                message.getProperties().setContentType(contentType);
+                mqttProperties.setContentType(contentType);
             }
+            getMsgHeaders(httpRequest).forEach((name, value) -> {
+                mqttProperties.getUserProperties().add(new UserProperty(name, value));
+            });
             mqttClient.publish(uriAndTopic.subject(), message);
             System.out.print("Succeeded to send message to " + uriAndTopic.subject() + "!");
         } catch (Exception e) {
@@ -517,6 +516,21 @@ public class MessagePublishExecutor implements BasePubSubExecutor {
             regionId = Region.US_EAST_1.id();
         }
         return regionId;
+    }
+
+    public Map<String, String> getMsgHeaders(HttpRequest httpRequest) {
+        final List<HttpHeader> httpHeaders = httpRequest.getHeaders();
+        if (!httpHeaders.isEmpty()) {
+            Map<String, String> msgHeaders = new HashMap<>();
+            for (HttpHeader header : httpHeaders) {
+                String headerName = header.getName();
+                if (headerName.startsWith("X-")) {
+                    msgHeaders.put(headerName.substring(2), header.getValue());
+                }
+            }
+            return msgHeaders;
+        }
+        return Collections.emptyMap();
     }
 
 }
