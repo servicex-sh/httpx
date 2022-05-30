@@ -33,7 +33,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.charset.Charset;
-import java.security.AccessControlException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.*;
@@ -41,7 +40,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import static java.nio.charset.StandardCharsets.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Junk drawer of utility methods.
@@ -670,7 +669,7 @@ public final class Util {
         String value;
         try {
             value = System.getProperty(key);
-        } catch (AccessControlException ex) {
+        } catch (Exception ex) {
             return defaultValue;
         }
         return value != null ? value : defaultValue;
