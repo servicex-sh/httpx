@@ -338,6 +338,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
+            <!--suppress MavenPackageUpdate because of eventbridge-client requirement -->
             <version>3.14.9</version>
         </dependency>
         <dependency>
