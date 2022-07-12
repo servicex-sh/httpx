@@ -343,7 +343,12 @@ public class HttpxCommand implements Callable<Integer> {
         } else if (requestMethod.isGrpcMethod()) {
             result = new GrpcExecutor().execute(httpRequest);
         } else if (requestMethod.isGraphQLMethod()) {
-            result = new GraphqlExecutor().execute(httpRequest);
+            final String uri = httpRequest.getRequestTarget().getUri().toString();
+            if (uri.startsWith("rsocket")) { // GraphQL over RSocket
+                result = new RSocketExecutor().execute(httpRequest);
+            } else {
+                result = new GraphqlExecutor().execute(httpRequest);
+            }
         } else if (requestMethod.isDubboMethod()) {
             result = new DubboExecutor().execute(httpRequest);
         } else if (requestMethod.isSofaMethod()) {
