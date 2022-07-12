@@ -65,20 +65,33 @@ public class RSocketRequest {
         this.metadata = httpRequest.getHeader("Metadata");
         this.httpRequest = httpRequest;
         //graphql convert
-        if (Objects.equals(requestType, "GRAPHQLRS") || Objects.equals(dataMimeType, "application/graphql")) {
+        if (Objects.equals(requestType, "GRAPHQL")) {
             final String bodyText = httpRequest.bodyText();
-            if (Objects.equals(dataMimeType, "application/graphql")) {
+            String realContentType = httpRequest.getHeader("Content-Type");
+            if (realContentType == null || Objects.equals(realContentType, "application/graphql")) {
                 Map<String, Object> jsonRequest = new HashMap<>();
                 if (bodyText.startsWith("subscription")) {
                     graphqlOperationName = "subscription";
                 }
                 jsonRequest.put("query", bodyText);
+                // check body + variables json
+                int offset1 = bodyText.lastIndexOf('{');
+                int offset2 = bodyText.lastIndexOf('}');
+                if (offset2 > offset1) {
+                    String jsonText = bodyText.substring(offset1, offset2 + 1);
+                    if (jsonText.contains("\"")) {
+                        try {
+                            jsonRequest.put("variables", JsonUtils.readValue(jsonText, Map.class));
+                            jsonRequest.put("query", bodyText.subSequence(0, offset1));
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
                 String graphqlVariables = httpRequest.getHeader("x-graphql-variables");
                 if (graphqlVariables != null && graphqlVariables.startsWith("{")) {
                     try {
                         jsonRequest.put("variables", JsonUtils.readValue(graphqlVariables, Map.class));
                     } catch (Exception ignore) {
-
                     }
                 }
                 this.newBody = JsonUtils.writeValueAsString(jsonRequest);
@@ -197,8 +210,11 @@ public class RSocketRequest {
         if (path == null) {
             path = "";
         }
-        if (uri.getScheme().startsWith("ws") && path.startsWith("/rsocket")) {
-            path = path.substring(8);
+        if (uri.getScheme().contains("ws")) {
+            String endpointPath = getWebSocketEndpointPath(uri.toString());
+            if (!endpointPath.isEmpty()) {
+                path = path.substring(endpointPath.length());
+            }
         }
         if (path.startsWith("/")) {
             path = path.substring(1);
@@ -262,13 +278,32 @@ public class RSocketRequest {
 
     public URI getWebsocketRequestURI() {
         var connectionURL = uri.toString();
-        if (connectionURL.contains("/rsocket/")) { //rsocket as ws path
-            connectionURL = connectionURL.substring(0, connectionURL.indexOf("/rsocket") + 8);
-        } else { // without /rsocket
-            connectionURL = connectionURL.substring(0, connectionURL.indexOf('/', 10) + 1);
+        if (connectionURL.startsWith("rsocketws") || connectionURL.contains("+ws")) { //rsocket as ws path
+            connectionURL = connectionURL.substring(connectionURL.indexOf("ws"));
         }
-        connectionURL = connectionURL.replace("http://", "ws://").replace("https://", "wss://");
+        String endpointPath = getWebSocketEndpointPath(connectionURL);
+        if (!endpointPath.isEmpty()) {
+            connectionURL = connectionURL.substring(0, connectionURL.indexOf(endpointPath) + endpointPath.length());
+        }
         return URI.create(connectionURL);
+    }
+
+    private String getWebSocketEndpointPath(String url) {
+        int offset1;
+        if (url.startsWith("rsocket")) {
+            offset1 = url.indexOf('/', 15);
+        } else {
+            offset1 = url.indexOf('/', 7);
+        }
+        if (offset1 > 0) {
+            int offset2 = url.indexOf('/', offset1 + 1);
+            if (offset2 < 0) {
+                return url.substring(offset1);
+            } else {
+                return url.substring(offset1, offset2);
+            }
+        }
+        return "";
     }
 
     public String getRequestType() {
