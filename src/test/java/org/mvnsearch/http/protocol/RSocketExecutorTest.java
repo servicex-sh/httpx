@@ -50,8 +50,7 @@ public class RSocketExecutorTest {
         String httpFileCode = """
                 ### GraphQL query over RSocket request/response
                 //@name graphql-rs-req
-                GRAPHQLRS graphql
-                Host: ws://localhost:8080/rsocket
+                GRAPHQL rsocketws://localhost:8080/rsocket/graphql
                 Content-Type: application/graphql
                                
                 query {
@@ -72,13 +71,42 @@ public class RSocketExecutorTest {
     }
 
     @Test
+    public void testGraphQLOverRequestWithVariables() throws Exception {
+        @Language("HTTP Request")
+        String httpFileCode = """
+                ### GraphQL query over RSocket request/response
+                //@name graphql-rs-req
+                GRAPHQL rsocketws://localhost:8080/rsocket/graphql
+                Content-Type: application/graphql
+                               
+                query demo($bookId: ID){
+                     bookById(id: $bookId) {
+                         id
+                         name
+                         pageCount
+                         author {
+                             firstName
+                             lastName
+                         }
+                     }
+                }
+                 
+                {
+                   "bookId": "book-1"
+                }
+                """;
+        final HttpRequest httpRequest = HttpRequestParser.parse(httpFileCode, new HashMap<>()).get(0);
+        httpRequest.cleanBody();
+        new RSocketExecutor().execute(httpRequest);
+    }
+
+    @Test
     public void testGraphQLOverStream() throws Exception {
         @Language("HTTP Request")
         String httpFileCode = """
                 ### GraphQL subscription over RSocket Stream
                 //@name graphql-rs-sub
-                GRAPHQLRS graphql
-                Host: ws://localhost:8080/rsocket
+                GRAPHQL rsocketws://localhost:8080/rsocket/graphql
                 Content-Type: application/graphql
                                  
                 subscription { greetings }
