@@ -35,7 +35,7 @@ public class RSocketExecutor implements BaseExecutor {
             case "FNF" -> fireAndForget(rsocketRequest);
             case "STREAM" -> requestStream(rsocketRequest);
             case "METADATA_PUSH" -> metadataPush(rsocketRequest);
-            case "GRAPHQLRS" -> Objects.equals(rsocketRequest.getGraphqlOperationName(), "subscription") ? requestStream(rsocketRequest) : requestResponse(rsocketRequest);
+            case "GRAPHQL" -> Objects.equals(rsocketRequest.getGraphqlOperationName(), "subscription") ? requestStream(rsocketRequest) : requestResponse(rsocketRequest);
             default -> Collections.emptyList();
         };
     }
@@ -120,7 +120,8 @@ public class RSocketExecutor implements BaseExecutor {
     private RSocket createRSocket(RSocketRequest rsocketRequest) {
         var rsocketURI = rsocketRequest.getUri();
         ClientTransport clientTransport;
-        if (rsocketURI.getScheme().equalsIgnoreCase("tcp")) {
+        final String schema = rsocketURI.getScheme();
+        if (schema.equalsIgnoreCase("tcp") || schema.equalsIgnoreCase("rsocket")) {
             clientTransport = TcpClientTransport.create(rsocketURI.getHost(), rsocketURI.getPort());
         } else {
             clientTransport = WebsocketClientTransport.create(rsocketRequest.getWebsocketRequestURI());
