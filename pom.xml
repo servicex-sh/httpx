@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.mvnsearch</groupId>
     <artifactId>httpx</artifactId>
-    <version>0.32.0</version>
+    <version>0.33.0</version>
     <name>httpx</name>
     <description>CLI to run HTTP file</description>
     <url>https://servicex.sh</url>
@@ -497,7 +497,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.20</version>
+                <version>2020.0.21</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
