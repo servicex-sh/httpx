@@ -65,7 +65,7 @@ public class RSocketRequest {
         this.metadata = httpRequest.getHeader("Metadata");
         this.httpRequest = httpRequest;
         //graphql convert
-        if (Objects.equals(requestType, "GRAPHQL")) {
+        if (Objects.equals(requestType, "GRAPHQL") || Objects.equals(requestType, "GRAPHQLRS")) {
             final String bodyText = httpRequest.bodyText();
             String realContentType = httpRequest.getHeader("Content-Type");
             if (realContentType == null || Objects.equals(realContentType, "application/graphql")) {
