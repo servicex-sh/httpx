@@ -35,7 +35,8 @@ public class RSocketExecutor implements BaseExecutor {
             case "FNF" -> fireAndForget(rsocketRequest);
             case "STREAM" -> requestStream(rsocketRequest);
             case "METADATA_PUSH" -> metadataPush(rsocketRequest);
-            case "GRAPHQL" -> Objects.equals(rsocketRequest.getGraphqlOperationName(), "subscription") ? requestStream(rsocketRequest) : requestResponse(rsocketRequest);
+            case "GRAPHQL", "GRAPHQLRS" ->
+                    Objects.equals(rsocketRequest.getGraphqlOperationName(), "subscription") ? requestStream(rsocketRequest) : requestResponse(rsocketRequest);
             default -> Collections.emptyList();
         };
     }
