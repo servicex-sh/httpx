@@ -1,5 +1,7 @@
 #!/usr/bin/env just --justfile
 
+VERSION := "0.33.0"
+
 # build the project
 build:
    mvn -DskipTests package
@@ -41,3 +43,20 @@ updates:
 copy-dependencies:
    rm -rf target/dependency
    mvn dependency:copy-dependencies -DincludeGroupIds=software.amazon.awssdk
+
+# Docker image build
+image-build:
+   mkdir -p assembly
+   rm -rf assembly/*
+   (cd assembly; wget https://github.com/servicex-sh/httpx/releases/download/v{{VERSION}}/httpx-linux-x86_64.zip; unzip httpx-linux-x86_64.zip; rm -rf httpx-linux-x86_64.zip; chmod u+x httpx)
+   docker build -t linuxchina/httpx:{{VERSION}} .
+
+# httpx docker image test
+image-test:
+   docker run --rm linuxchina/httpx:{{VERSION}} --version
+
+# Push image to DockerHub
+image-push:
+   docker tag linuxchina/httpx:{{VERSION}} linuxchina/httpx:latest
+   docker push linuxchina/httpx:{{VERSION}}
+   docker push linuxchina/httpx:latest
