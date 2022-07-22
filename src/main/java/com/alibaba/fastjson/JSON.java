@@ -1,5 +1,6 @@
 package com.alibaba.fastjson;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.mvnsearch.http.utils.JsonUtils;
 
 import java.util.List;
@@ -24,6 +25,14 @@ public class JSON {
             } else {
                 return JsonUtils.writeValueAsString(obj);
             }
+        } catch (Exception ignore) {
+            return "{}";
+        }
+    }
+
+    public static String toJSONString(Object obj, SerializerFeature... features) {
+        try {
+            return JsonUtils.writeValueAsString(obj);
         } catch (Exception ignore) {
             return "{}";
         }
