@@ -47,10 +47,7 @@ import org.apache.rocketmq.common.protocol.route.QueueData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 import org.apache.rocketmq.remoting.netty.NettyDecoder;
 import org.apache.rocketmq.remoting.netty.NettyEncoder;
-import org.apache.rocketmq.remoting.protocol.LanguageCode;
-import org.apache.rocketmq.remoting.protocol.RemotingCommand;
-import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
-import org.apache.rocketmq.remoting.protocol.SerializeType;
+import org.apache.rocketmq.remoting.protocol.*;
 import org.eclipse.paho.mqttv5.client.internal.SSLNetworkModuleFactory;
 import org.eclipse.paho.mqttv5.client.internal.TCPNetworkModuleFactory;
 import org.eclipse.paho.mqttv5.client.logging.JSR47Logger;
@@ -143,10 +140,35 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
         }
         //rocketmq
-        final Class<?>[] rocketmqClassArray = {SendMessageRequestHeaderV2.class, SendMessageResponseHeader.class,
-                UnregisterClientRequestHeader.class, GetRouteInfoRequestHeader.class, BrokerData.class, QueueData.class,
-                TopicRouteData.class, NettyDecoder.class, NettyEncoder.class,
-                LanguageCode.class, RemotingCommand.class, RemotingSerializable.class, SerializeType.class};
+        final Class<?>[] rocketmqClassArray = {
+                org.apache.rocketmq.common.consumer.ConsumeFromWhere.class,
+                org.apache.rocketmq.common.protocol.header.GetConsumerListByGroupRequestHeader.class,
+                org.apache.rocketmq.common.protocol.header.GetConsumerListByGroupResponseBody.class,
+                org.apache.rocketmq.common.protocol.header.NotifyConsumerIdsChangedRequestHeader.class,
+                org.apache.rocketmq.common.protocol.header.PullMessageRequestHeader.class,
+                org.apache.rocketmq.common.protocol.header.PullMessageResponseHeader.class,
+                org.apache.rocketmq.common.protocol.header.QueryConsumerOffsetRequestHeader.class,
+                org.apache.rocketmq.common.protocol.header.QueryConsumerOffsetResponseHeader.class,
+                org.apache.rocketmq.common.protocol.heartbeat.ConsumeType.class,
+                org.apache.rocketmq.common.protocol.heartbeat.ConsumerData.class,
+                org.apache.rocketmq.common.protocol.heartbeat.HeartbeatData.class,
+                org.apache.rocketmq.common.protocol.heartbeat.MessageModel.class,
+                org.apache.rocketmq.common.protocol.heartbeat.ProducerData.class,
+                org.apache.rocketmq.common.protocol.heartbeat.SubscriptionData.class,
+                SendMessageRequestHeaderV2.class,
+                SendMessageResponseHeader.class,
+                UnregisterClientRequestHeader.class,
+                GetRouteInfoRequestHeader.class,
+                BrokerData.class,
+                QueueData.class,
+                TopicRouteData.class,
+                NettyDecoder.class,
+                NettyEncoder.class,
+                LanguageCode.class,
+                RemotingCommand.class,
+                RemotingCommandType.class,
+                RemotingSerializable.class,
+                SerializeType.class};
         for (Class<?> clazz : rocketmqClassArray) {
             registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
                     .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
