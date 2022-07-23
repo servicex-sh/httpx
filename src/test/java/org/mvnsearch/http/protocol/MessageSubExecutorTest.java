@@ -130,7 +130,7 @@ public class MessageSubExecutorTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
-                ### subscribe rabbitmq
+                ### subscribe rocketmq
                 SUB testTopic
                 URI: rocketmq://localhost:9876
                 """;
