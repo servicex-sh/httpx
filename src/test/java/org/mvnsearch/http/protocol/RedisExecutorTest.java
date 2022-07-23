@@ -86,7 +86,7 @@ public class RedisExecutorTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
-                ### redis eval
+                ### redis 7 fuctions
                 LOAD mylib
                 Host: localhost:16379
                 Content-Type: text/x-lua
