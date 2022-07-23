@@ -333,8 +333,10 @@ public class MessageSubscribeExecutor implements BasePubSubExecutor {
             // Register callback to execute on arrival of messages fetched from brokers.
             consumer.registerMessageListener((MessageListenerConcurrently) (msgList, context) -> {
                 for (MessageExt messageExt : msgList) {
-                    System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: " + messageExt.getMsgId()));
-                    System.out.println(prettyJsonFormat(new String(messageExt.getBody(), StandardCharsets.UTF_8)));
+                    System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: " + messageExt.getMsgId())
+                            + "\n"
+                            + prettyJsonFormat(new String(messageExt.getBody(), StandardCharsets.UTF_8))
+                    );
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             });
