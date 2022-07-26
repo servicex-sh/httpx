@@ -12,7 +12,9 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import java.io.StringReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -74,18 +76,20 @@ public class WebSocketExecutor extends HttpBaseExecutor {
                 .uri(requestUri)
                 .handle((inbound, outbound) -> Flux.<byte[]>create(fluxSink -> {
                     AtomicInteger receivedMsgCounter = new AtomicInteger(1);
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
                     inbound.receive().asString(StandardCharsets.UTF_8).handle((responseText, sink) -> {
                         try {
                             final int msgSequence = receivedMsgCounter.get();
                             if (messageStore.containsKey(msgSequence)) {
                                 final Flux<String> messages = Flux.fromIterable(messageStore.get(msgSequence))
                                         .doOnNext(sentMsg -> {
-                                            System.out.println("sent: \n" + sentMsg + "\n");
+                                            System.out.println(colorOutput("bold,yellow", dateFormat.format(new Date()) + " message sent: "));
+                                            System.out.println(prettyJsonFormat(sentMsg));
                                         });
                                 outbound.sendString(messages, StandardCharsets.UTF_8).then().subscribe();
                             }
                             receivedMsgCounter.incrementAndGet();
-                            System.out.println("received:");
+                            System.out.println(colorOutput("bold,green", dateFormat.format(new Date()) + " message received: "));
                             System.out.println(prettyJsonFormat(responseText));
                             System.out.println();
                             // complete
@@ -100,7 +104,8 @@ public class WebSocketExecutor extends HttpBaseExecutor {
                     }).subscribe();
                     if (messageStore.containsKey(0)) {
                         final Flux<String> messages = Flux.fromIterable(messageStore.get(0)).doOnNext(sentMsg -> {
-                            System.out.println("sent: \n" + sentMsg + "\n");
+                            System.out.println(colorOutput("bold,yellow", dateFormat.format(new Date()) + " message sent: "));
+                            System.out.println(prettyJsonFormat(sentMsg));
                         });
                         outbound.sendString(messages, StandardCharsets.UTF_8).then().subscribe();
                     } else {
