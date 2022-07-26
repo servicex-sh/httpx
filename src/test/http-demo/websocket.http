@@ -1,0 +1,22 @@
+### normal websocket request
+WEBSOCKET wss://ws.postman-echo.com/raw
+Content-Type: application/json
+
+{ "name": "jackie" }
+
+
+### normal websocket request
+//@name sequence messages
+WEBSOCKET wss://ws.postman-echo.com/raw
+Content-Type: application/json
+
+===
+{ "name": "Hello Server" }
+=== wait-for-server
+{
+  "message": "msg-1"
+}
+=== wait-for-server
+{
+  "message": "msg-2"
+}
