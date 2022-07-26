@@ -16,42 +16,7 @@ jobs:
           - os: macos-latest
             fileName: httpx-osx-x86_64
             file: target/httpx
-    steps:
-      - uses: actions/checkout@v3
-      - uses: graalvm/setup-graalvm@v1
-        with:
-          version: "22.2.0"
-          java-version: '17'
-          components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-      - name: GraalVM native image build
-        run: mvn -Pnative -DskipTests clean package
-      - name: Compress binaries
-        uses: svenstaro/upx-action@v2
-        with:
-          file: ${{ matrix.file }}
-          args: "-7"
-      - name: Upload binary
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.fileName }}
-          path: ${{ matrix.file }}
-
-  build-windows:
-    name: GraalVM - ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-2019
+          - os: windows-latest
             fileName: httpx-windows-x86_64.exe
             file: target/httpx.exe
     steps:
