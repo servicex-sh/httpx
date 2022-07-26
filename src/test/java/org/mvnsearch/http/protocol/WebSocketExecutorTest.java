@@ -5,16 +5,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.model.HttpRequestParser;
-import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
-import org.springframework.web.reactive.socket.client.WebSocketClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,31 +58,15 @@ public class WebSocketExecutorTest {
         HttpClient client = HttpClient.create();
         client.websocket()
                 .uri("wss://ws.postman-echo.com/raw")
-//                .uri("ws://localhost:8080/")
+                // .uri("ws://localhost:8080/")
                 .handle((inbound, outbound) -> {
                     inbound.receive()
                             .asString(StandardCharsets.UTF_8)
-                            .subscribe(data -> {
-                                System.out.println("Received: " + data);
-                            });
+                            .subscribe(data -> System.out.println("Received: " + data));
                     return outbound.sendString(Flux.just("hello world!"), StandardCharsets.UTF_8)
                             .neverComplete();
                 })
                 .blockLast();
     }
 
-    @Test
-    public void testWebSocketEcho2() {
-        WebSocketClient client = new ReactorNettyWebSocketClient();
-        client.execute(
-                        URI.create("ws://localhost:8080/"),
-                        session -> session.send(
-                                        Mono.just(session.textMessage("Hello Server")))
-                                .thenMany(session.receive()
-                                        .map(WebSocketMessage::getPayloadAsText)
-                                        .log())
-                                .then())
-                .block(Duration.ofSeconds(10L));
-
-    }
 }
