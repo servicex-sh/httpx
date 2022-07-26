@@ -260,3 +260,12 @@ NVIM nvim_exec_lua
 Content-Type: text/x-lua
 
 vim.api.nvim_command('!ls')
+
+### normal websocket request
+//@name ws-echo
+WEBSOCKET wss://ws.postman-echo.com/raw
+Content-Type: application/json
+
+{
+  "name": "jackie"
+}
