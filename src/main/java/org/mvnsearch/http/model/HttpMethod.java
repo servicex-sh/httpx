@@ -26,6 +26,7 @@ public class HttpMethod {
 
     public static final List<String> REDIS_METHODS = List.of("RSET", "HMSET", "EVAL", "LOAD");
     public static final List<String> SSH_METHODS = List.of("SSH");
+    public static final List<String> WEBSOCKET_METHODS = List.of("WEBSOCKET");
     private String name;
 
     public HttpMethod() {
@@ -71,6 +72,7 @@ public class HttpMethod {
                 || SUB_METHODS.contains(method)
                 || REDIS_METHODS.contains(method)
                 || SSH_METHODS.contains(method)
+                || WEBSOCKET_METHODS.contains(method)
                 || MEMCACHE_METHODS.contains(method);
     }
 
@@ -160,5 +162,9 @@ public class HttpMethod {
 
     public boolean isSSHMethod() {
         return SSH_METHODS.contains(name);
+    }
+
+    public boolean isWebSocketMethod() {
+        return WEBSOCKET_METHODS.contains(name);
     }
 }
