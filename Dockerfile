@@ -1,5 +1,8 @@
-FROM ubuntu:22.04
+# https://www.docker.com/blog/faster-multi-platform-builds-dockerfile-cross-compilation-guide/
+FROM --platform=$BUILDPLATFORM ubuntu:22.04
 
-COPY assembly/httpx /usr/bin/httpx
+ARG TARGETARCH
+
+COPY assembly/httpx-${TARGETARCH} /usr/bin/httpx
 
 ENTRYPOINT ["/usr/bin/httpx"]
