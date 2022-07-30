@@ -51,6 +51,10 @@ image-build:
    (cd assembly; wget https://github.com/servicex-sh/httpx/releases/download/v{{VERSION}}/httpx-linux-x86_64.zip; unzip httpx-linux-x86_64.zip; rm -rf httpx-linux-x86_64.zip; chmod u+x httpx)
    docker build -t linuxchina/httpx:{{VERSION}} .
 
+image-build-multi-platform:
+   docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag linuxchina/httpx:{{VERSION}} .
+   docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag linuxchina/httpx:latest .
+
 # httpx docker image test
 image-test:
    docker run --rm linuxchina/httpx:{{VERSION}} --version
