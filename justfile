@@ -54,9 +54,9 @@ image-build:
 # Docker image build
 image-build-arm64:
    docker build -t linuxchina/httpx:{{VERSION}}-arm64 .
-   docker build -t linuxchina/httpx:arm64-latest .
+   docker build -t linuxchina/httpx:latest-arm64 .
    docker push linuxchina/httpx:{{VERSION}}-arm64
-   docker push linuxchina/httpx:arm64-latest
+   docker push linuxchina/httpx:latest-arm64
 
 image-build-multi-platform:
    docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag linuxchina/httpx:{{VERSION}} .
