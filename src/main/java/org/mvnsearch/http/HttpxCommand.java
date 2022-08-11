@@ -26,6 +26,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -253,8 +254,14 @@ public class HttpxCommand implements Callable<Integer> {
     public Map<String, Object> constructHttpClientContext(Path httpFilePath) throws Exception {
         Map<String, Object> context = new HashMap<>();
         final Path httpFileDir = httpFilePath.toAbsolutePath().getParent();
-        final File envJsonFile = httpFileDir.resolve("http-client.env.json").toFile();
-        final File envPrivateJsonFile = httpFileDir.resolve("http-client.private.env.json").toFile();
+        File envJsonFile = httpFileDir.resolve("http-client.env.json").toFile();
+        File envPrivateJsonFile = httpFileDir.resolve("http-client.private.env.json").toFile();
+        if (!envJsonFile.exists()) { // resolve http-client.env.json from current directory if not found
+            envJsonFile = Paths.get("http-client.env.json").toFile();
+        }
+        if (!envPrivateJsonFile.exists()) { // resolve http-client.private.env.json from current directory if not found
+            envPrivateJsonFile = Paths.get("http-client.private.env.json").toFile();
+        }
         if (envJsonFile.exists()) { // load env.json into context
             final Map<String, Object> env = JsonUtils.readValue(envJsonFile, Map.class);
             context.putAll(env);
