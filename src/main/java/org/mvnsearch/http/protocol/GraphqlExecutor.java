@@ -22,11 +22,26 @@ public class GraphqlExecutor extends HttpBaseExecutor {
 
     public List<byte[]> execute(HttpRequest httpRequest) {
         String contentType = httpRequest.getHeader("Content-Type", "application/json");
+        String realContentType = httpRequest.getHeader("Content-Type");
+        final String bodyText = httpRequest.bodyText();
         byte[] requestJsonBody = httpRequest.getBodyBytes();
         try {
-            if (contentType.startsWith("application/graphql")) {  // convert graphql code into json object
+            if (realContentType == null || contentType.startsWith("application/graphql")) {  // convert graphql code into json object
                 Map<String, Object> jsonBody = new HashMap<>();
-                jsonBody.put("query", httpRequest.bodyText());
+                jsonBody.put("query", bodyText);
+                // check body + variables json
+                int offset1 = bodyText.lastIndexOf('{');
+                int offset2 = bodyText.lastIndexOf('}');
+                if (offset2 > offset1) {
+                    String jsonText = bodyText.substring(offset1, offset2 + 1);
+                    if (jsonText.contains("\"")) {
+                        try {
+                            jsonBody.put("variables", JsonUtils.readValue(jsonText, Map.class));
+                            jsonBody.put("query", bodyText.subSequence(0, offset1));
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
                 final String variablesJson = httpRequest.getHeader("X-GraphQL-Variables");
                 if (variablesJson != null && variablesJson.startsWith("{")) {
                     jsonBody.put("variables", JsonUtils.readValue(variablesJson, Map.class));
