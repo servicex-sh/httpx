@@ -22,7 +22,7 @@
         <spring-native.version>0.12.1</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.0</junit5.version>
-        <aws-java-sdk2.version>2.17.246</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.17.252</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -333,7 +333,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.21.4</version>
+            <version>3.21.5</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -344,7 +344,7 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>eventbridge-client</artifactId>
-            <version>1.3.9</version>
+            <version>1.3.10</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jacoco</groupId>
@@ -497,7 +497,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.21</version>
+                <version>2020.0.22</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
