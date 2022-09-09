@@ -1,0 +1,11 @@
+{
+  "name": "GraphQLZero GraphQL Schema",
+  "schemaPath": "graphql-zero-schema.graphql",
+  "extensions": {
+    "endpoints": {
+      "GraphQLZero Endpoint": {
+        "url": "https://graphqlzero.almansi.me/api"
+      }
+    }
+  }
+}
