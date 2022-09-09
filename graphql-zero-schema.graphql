@@ -1,0 +1,316 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+directive @cacheControl(maxAge: Int, scope: CacheControlScope) on OBJECT | FIELD_DEFINITION | INTERFACE
+
+type Address {
+    city: String
+    geo: Geo
+    street: String
+    suite: String
+    zipcode: String
+}
+
+type Album {
+    id: ID
+    photos(options: PageQueryOptions): PhotosPage
+    title: String
+    user: User
+}
+
+type AlbumsPage {
+    data: [Album]
+    links: PaginationLinks
+    meta: PageMetadata
+}
+
+type Comment {
+    body: String
+    email: String
+    id: ID
+    name: String
+    post: Post
+}
+
+type CommentsPage {
+    data: [Comment]
+    links: PaginationLinks
+    meta: PageMetadata
+}
+
+type Company {
+    bs: String
+    catchPhrase: String
+    name: String
+}
+
+type Geo {
+    lat: Float
+    lng: Float
+}
+
+type Mutation {
+    _: Int
+    createAlbum(input: CreateAlbumInput!): Album
+    createComment(input: CreateCommentInput!): Comment
+    createPhoto(input: CreatePhotoInput!): Photo
+    createPost(input: CreatePostInput!): Post
+    createTodo(input: CreateTodoInput!): Todo
+    createUser(input: CreateUserInput!): User
+    deleteAlbum(id: ID!): Boolean
+    deleteComment(id: ID!): Boolean
+    deletePhoto(id: ID!): Boolean
+    deletePost(id: ID!): Boolean
+    deleteTodo(id: ID!): Boolean
+    deleteUser(id: ID!): Boolean
+    updateAlbum(id: ID!, input: UpdateAlbumInput!): Album
+    updateComment(id: ID!, input: UpdateCommentInput!): Comment
+    updatePhoto(id: ID!, input: UpdatePhotoInput!): Photo
+    updatePost(id: ID!, input: UpdatePostInput!): Post
+    updateTodo(id: ID!, input: UpdateTodoInput!): Todo
+    updateUser(id: ID!, input: UpdateUserInput!): User
+}
+
+type PageLimitPair {
+    limit: Int
+    page: Int
+}
+
+type PageMetadata {
+    totalCount: Int
+}
+
+type PaginationLinks {
+    first: PageLimitPair
+    last: PageLimitPair
+    next: PageLimitPair
+    prev: PageLimitPair
+}
+
+type Photo {
+    album: Album
+    id: ID
+    thumbnailUrl: String
+    title: String
+    url: String
+}
+
+type PhotosPage {
+    data: [Photo]
+    links: PaginationLinks
+    meta: PageMetadata
+}
+
+type Post {
+    body: String
+    comments(options: PageQueryOptions): CommentsPage
+    id: ID
+    title: String
+    user: User
+}
+
+type PostsPage {
+    data: [Post]
+    links: PaginationLinks
+    meta: PageMetadata
+}
+
+type Query {
+    _: Int
+    album(id: ID!): Album
+    albums(options: PageQueryOptions): AlbumsPage
+    comment(id: ID!): Comment
+    comments(options: PageQueryOptions): CommentsPage
+    photo(id: ID!): Photo
+    photos(options: PageQueryOptions): PhotosPage
+    post(id: ID!): Post
+    posts(options: PageQueryOptions): PostsPage
+    todo(id: ID!): Todo
+    todos(options: PageQueryOptions): TodosPage
+    user(id: ID!): User
+    users(options: PageQueryOptions): UsersPage
+}
+
+type Todo {
+    completed: Boolean
+    id: ID
+    title: String
+    user: User
+}
+
+type TodosPage {
+    data: [Todo]
+    links: PaginationLinks
+    meta: PageMetadata
+}
+
+type User {
+    address: Address
+    albums(options: PageQueryOptions): AlbumsPage
+    company: Company
+    email: String
+    id: ID
+    name: String
+    phone: String
+    posts(options: PageQueryOptions): PostsPage
+    todos(options: PageQueryOptions): TodosPage
+    username: String
+    website: String
+}
+
+type UsersPage {
+    data: [User]
+    links: PaginationLinks
+    meta: PageMetadata
+}
+
+enum CacheControlScope {
+    PRIVATE
+    PUBLIC
+}
+
+enum OperatorKindEnum {
+    GTE
+    LIKE
+    LTE
+    NE
+}
+
+enum SortOrderEnum {
+    ASC
+    DESC
+}
+
+"The `Upload` scalar type represents a file upload."
+scalar Upload
+
+input AddressInput {
+    city: String
+    geo: GeoInput
+    street: String
+    suite: String
+    zipcode: String
+}
+
+input CompanyInput {
+    bs: String
+    catchPhrase: String
+    name: String
+}
+
+input CreateAlbumInput {
+    title: String!
+    userId: ID!
+}
+
+input CreateCommentInput {
+    body: String!
+    email: String!
+    name: String!
+}
+
+input CreatePhotoInput {
+    thumbnailUrl: String!
+    title: String!
+    url: String!
+}
+
+input CreatePostInput {
+    body: String!
+    title: String!
+}
+
+input CreateTodoInput {
+    completed: Boolean!
+    title: String!
+}
+
+input CreateUserInput {
+    address: AddressInput
+    company: CompanyInput
+    email: String!
+    name: String!
+    phone: String
+    username: String!
+    website: String
+}
+
+input GeoInput {
+    lat: Float
+    lng: Float
+}
+
+input OperatorOptions {
+    field: String
+    kind: OperatorKindEnum
+    value: String
+}
+
+input PageQueryOptions {
+    operators: [OperatorOptions]
+    paginate: PaginateOptions
+    search: SearchOptions
+    slice: SliceOptions
+    sort: [SortOptions]
+}
+
+input PaginateOptions {
+    limit: Int
+    page: Int
+}
+
+input SearchOptions {
+    q: String
+}
+
+input SliceOptions {
+    end: Int
+    limit: Int
+    start: Int
+}
+
+input SortOptions {
+    field: String
+    order: SortOrderEnum
+}
+
+input UpdateAlbumInput {
+    title: String
+    userId: ID
+}
+
+input UpdateCommentInput {
+    body: String
+    email: String
+    name: String
+}
+
+input UpdatePhotoInput {
+    thumbnailUrl: String
+    title: String
+    url: String
+}
+
+input UpdatePostInput {
+    body: String
+    title: String
+}
+
+input UpdateTodoInput {
+    completed: Boolean
+    title: String
+}
+
+input UpdateUserInput {
+    address: AddressInput
+    company: CompanyInput
+    email: String
+    name: String
+    phone: String
+    username: String
+    website: String
+}
