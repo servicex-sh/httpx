@@ -35,26 +35,22 @@ Content-Type: application/json
 
 ### query by json
 //@name query_by_json
-POST http://localhost:8080/graphql
+POST https://graphqlzero.almansi.me/api
 Content-Type: application/json
 
 {
-  "query": "{ films { title releaseYear}}"
+  "query": "query { post(id: 1) { id title } }"
 }
 
 ### graphql query
 //@name query
-GRAPHQL http://localhost:8080/graphql
-Content-Type: application/graphql
+GRAPHQL https://graphqlzero.almansi.me/api
 
-query {
-  bookById(id: "book-1") {
+query findPostById {
+  post(id: 1) {
     id
-    name
-    pageCount
-    author {
-      firstName
-      lastName
-    }
+    title
+    body
   }
 }
+
