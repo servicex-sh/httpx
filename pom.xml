@@ -490,7 +490,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.80.Final</version>
+                <version>4.1.81.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -568,6 +568,7 @@
                                 --enable-url-protocols=mailto
                                 --enable-url-protocols=http
                                 --enable-url-protocols=https
+                                --initialize-at-run-time=io.netty.handler.ssl.BouncyCastleAlpnSslUtils
                             </buildArgs>
                             <!--<classpath>
                                 <param>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</param>
