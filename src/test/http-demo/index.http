@@ -25,10 +25,22 @@ Content-Type: application/json
 
 ### grpc call SayHello
 //@name SayHello
-GRPC localhost:50052/Greeter/SayHello
+GRPC grpcb.in:9000/hello.HelloService/SayHello
 
 {
-  "name": "Jackie"
+  "greeting": "Jackie"
+}
+
+### graphql query
+//@name graphql-demo
+GRAPHQL https://graphqlzero.almansi.me/api
+
+query findPostById {
+  post(id: 1) {
+    id
+    title
+    body
+  }
 }
 
 ### graphql query over WebSocket
