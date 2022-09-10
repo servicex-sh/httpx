@@ -22,7 +22,7 @@
         <spring-native.version>0.12.1</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.0</junit5.version>
-        <aws-java-sdk2.version>2.17.269</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.17.271</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -173,7 +173,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>3.2.1</version>
+            <version>3.2.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.luben</groupId>
@@ -188,7 +188,7 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.15.0</version>
+            <version>5.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
