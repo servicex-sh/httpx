@@ -1,13 +1,13 @@
 #!/usr/bin/env httpx --httpfile
 
 ### get my internet ip
-# @name myip
+#@name myip
 GET https://httpbin.org/ip
 
 >>! myip.json
 
 ### inspection http post
-# @name post
+#@name post
 POST https://httpbin.org/post
 Content-Type: application/json
 
@@ -16,7 +16,7 @@ Content-Type: application/json
 ]
 
 ### RSocket Request
-// @name request
+#@name request
 RSOCKET com.example.UserService.findById
 Host: 127.0.0.1:42252
 Content-Type: application/json
@@ -24,7 +24,7 @@ Content-Type: application/json
 1
 
 ### grpc call SayHello
-//@name SayHello
+#@name SayHello
 GRPC grpcb.in:9000/hello.HelloService/SayHello
 
 {
@@ -32,7 +32,7 @@ GRPC grpcb.in:9000/hello.HelloService/SayHello
 }
 
 ### graphql query
-//@name graphql-demo
+#@name graphql-demo
 GRAPHQL https://graphqlzero.almansi.me/api
 
 query findPostById {
@@ -44,28 +44,28 @@ query findPostById {
 }
 
 ### graphql query over WebSocket
-//@name subscription
+#@name subscription
 GRAPHQL ws://localhost:4000/graphql
 Content-Type: application/graphql
 
 subscription { greetings }
 
 ### Dubbo sayHi
-//@name dubbo-hi
+#@name dubbo-hi
 DUBBO 127.0.0.1:20880/GreetingsService/sayHi(java.lang.String)
 Content-Type: application/json
 
 "jackie"
 
 ### sofa findById
-//@name sofa-byid
+#@name sofa-byid
 SOFA 127.0.0.1:12200/org.mvnsearch.HelloService/findById(java.lang.Integer)
 Content-Type: application/json
 
 1
 
 ### send kafka message
-//@name kafka-pub
+#@name kafka-pub
 PUB testTopic
 Host: kafka://localhost:9092
 Content-Type: application/json
@@ -75,12 +75,12 @@ Content-Type: application/json
 }
 
 ###  kafka message
-//@name kafka-sub
+#@name kafka-sub
 SUB testTopic
 Host: kafka://localhost:9092
 
 ### send Nats message
-//@name nats
+#@name nats
 PUB subject1
 Host: nats://localhost:4222
 Content-Type: application/json
@@ -90,7 +90,7 @@ Content-Type: application/json
 }
 
 ### listen Nats message
-//@name nats-sub
+#@name nats-sub
 SUB subject1
 Host: nats://localhost:4222
 
@@ -105,12 +105,12 @@ Content-Type: application/json
 }
 
 ### listen rabit message
-//@name rabbitmq-sub
+#@name rabbitmq-sub
 SUB queue3
 Host: amqp://localhost:5672
 
 ### publish redis message
-//@name redis-pub
+#@name redis-pub
 PUB channel1
 Host: redis://localhost:6379
 Content-Type: application/json
@@ -120,12 +120,12 @@ Content-Type: application/json
 }
 
 ### subscribe redis
-//@name redis-sub
+#@name redis-sub
 SUB channel1
 Host: redis://localhost:6379
 
 ### publish mqtt message
-//@name mqtt-pub
+#@name mqtt-pub
 PUB topic1
 Host: mqtt://localhost:1883
 Content-Type: application/json
@@ -135,12 +135,12 @@ Content-Type: application/json
 }
 
 ### subscribe mqtt
-//@name mqtt-sub
+#@name mqtt-sub
 SUB topic1
 Host: mqtt://localhost:1883
 
 ### send stomp message
-//@name stomp-pub
+#@name stomp-pub
 PUB queue3
 Host: stomp://localhost:61613
 Content-Type: application/json
@@ -150,12 +150,12 @@ Content-Type: application/json
 }
 
 ### subscribe stomp
-//@name stomp-sub
+#@name stomp-sub
 SUB queue3
 Host: stomp://localhost:61613
 
 ### publish rocketmq message
-//@name rocketmq-pub
+#@name rocketmq-pub
 PUB testTopic
 Host: rocketmq://localhost:9876
 Content-Type: application/json
@@ -165,7 +165,7 @@ Content-Type: application/json
 }
 
 ### send pulsar message
-//@name pulsar-pub
+#@name pulsar-pub
 PUB test-topic
 Host: pulsar://localhost:6650
 Content-Type: application/json
@@ -175,7 +175,7 @@ Content-Type: application/json
 }
 
 ### subscribe pulsar
-//@name pulsar-sub
+#@name pulsar-sub
 SUB test-topic
 Host: pulsar://localhost:6650
 
@@ -187,12 +187,12 @@ Content-Type: application/json
 "Jackie"
 
 ### subscribe zeromq
-//@name zero-sub
+#@name zero-sub
 SUB topic1
 Host: zeromq://localhost:5555
 
 ### memcache set
-//@name mem-set
+#@name mem-set
 MEMCACHE user.1
 URI: memcache://localhost:11211
 Content-Type: application/json
@@ -203,12 +203,12 @@ Content-Type: application/json
 }
 
 ### memcache set
-//@name mem-get
+#@name mem-get
 MEMCACHE user.1
 URI: memcache://localhost:11211
 
 ### redis set
-//@name redis-set
+#@name redis-set
 RSET nick
 Host: localhost:6379
 Content-Type: text/plain
@@ -216,7 +216,7 @@ Content-Type: text/plain
 Jackie
 
 ### redis hmset
-//@name redis-hmset
+#@name redis-hmset
 HMSET user.1
 Host: localhost:6379
 Content-Type: application/json
@@ -228,7 +228,7 @@ Content-Type: application/json
 }
 
 ### redis Lua eval
-//@name redis-eval
+#@name redis-eval
 EVAL 1 keyname1 value1
 Host: localhost:6379
 
@@ -236,7 +236,7 @@ local welcome = "Hello "
 return welcome .. KEYS[1]
 
 ### redis 7 fuctions
-//@name redis-mylib
+#@name redis-mylib
 LOAD mylib
 Host: localhost:16379
 Content-Type: text/x-lua
@@ -251,13 +251,13 @@ redis.register_function(
 
 
 ### ssh demo
-//@name ssh-demo
-SSH test:test@localhost:2022
+#@name ssh-demo
+SSH root@microservices.club
 
 ls -al
 
 ### msgpack request
-//@name msgpack-rpc
+#@name msgpack-rpc
 MSGPACK 127.0.0.1:18800/add
 Content-Type: application/json
 
@@ -267,14 +267,14 @@ Content-Type: application/json
 ]
 
 ### neovim request
-//@name nvim-ls
+#@name nvim-ls
 NVIM nvim_exec_lua
 Content-Type: text/x-lua
 
 vim.api.nvim_command('!ls')
 
 ### normal websocket request
-//@name ws-echo
+#@name ws-echo
 WEBSOCKET wss://ws.postman-echo.com/raw
 Content-Type: application/json
 
