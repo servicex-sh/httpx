@@ -34,18 +34,18 @@ Create index.http file with following code, then `chmod u+x index.http`
 #!/usr/bin/env httpx --httpfile
 
 ### get my internet ip
-# @name myip
+#@name myip
 GET https://httpbin.org/ip
 
 ### inspection http post
-# @name post
+#@name post
 POST https://httpbin.org/post
 Content-Type: application/json
 
 [ 1 ]
 
 ### RSocket Request
-// @name request
+#@name request
 RSOCKET com.example.UserService.findById
 Host: 127.0.0.1:42252
 Content-Type: application/json
@@ -53,7 +53,7 @@ Content-Type: application/json
 1
 
 ### grpc call SayHello
-//@name SayHello
+#@name SayHello
 GRPC localhost:50052/org.mvnsearch.service.Greeter/SayHello
 
 {
@@ -61,14 +61,14 @@ GRPC localhost:50052/org.mvnsearch.service.Greeter/SayHello
 }
 
 ### graphql query
-//@name query
+#@name query
 GRAPHQL http://localhost:8080/graphql
 Content-Type: application/graphql
 
 query { hello }
 
 ### send an email by Gmail
-//@name mail
+#@name mail
 MAIL mailto:demo@example.com
 Host: tls://smtp.gmail.com:587
 Authorization: Basic your_name@gmail.com:google_app_password
@@ -142,6 +142,11 @@ GET https://httpbin.org/ip
 
 * You should know the difference between ECMAScript 5.1 and Node.js
 * JavaScript code test is available for HTTP, gRPC, RSocket, Dubbo and other protocols with httpx
+      
+# Tips
+
+* Name request with `#@name myname`:  you can invoke request with `httpx myname`
+* Describe request with `### request description here`
 
 # How to build from source?
 
