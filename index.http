@@ -1,7 +1,7 @@
 #!/usr/bin/env httpx --httpfile
 
 ### get my internet ip
-# @name myip
+#@name myip
 GET https://httpbin.org/ip
 
 ### inspection http post
@@ -14,13 +14,13 @@ Content-Type: application/json
 ]
 
 ### inspection http get
-//@name get
+#@name get
 GET https://httpbin.org/get?
   id=123
   &value=content
 
 ### RSocket Request
-// @name request
+#@name request
 RSOCKET com.example.UserService.findById
 Host: 127.0.0.1:42252
 Content-Type: application/json
@@ -34,7 +34,7 @@ Host: 127.0.0.1:42252
 Content-Type: application/json
 
 ### query by json
-//@name query_by_json
+#@name query_by_json
 POST https://graphqlzero.almansi.me/api
 Content-Type: application/json
 
@@ -43,7 +43,7 @@ Content-Type: application/json
 }
 
 ### graphql query
-//@name query
+#@name query
 GRAPHQL https://graphqlzero.almansi.me/api
 
 query findPostById {
