@@ -5,7 +5,7 @@
 GET https://httpbin.org/ip
 
 ### inspection http post
-# @name post
+#@name post
 POST https://httpbin.org/post
 Content-Type: application/json
 
@@ -28,7 +28,7 @@ Content-Type: application/json
 1
 
 ### RSocket Stream
-//@name stream
+#@name stream
 STREAM com.example.UserService.findAll
 Host: 127.0.0.1:42252
 Content-Type: application/json
