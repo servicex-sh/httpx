@@ -564,7 +564,7 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.9.13</version>
+                        <version>0.9.14</version>
                         <configuration>
                             <mainClass>${start-class}</mainClass>
                             <imageName>${project.build.finalName}</imageName>
@@ -575,9 +575,10 @@
                                 --enable-url-protocols=https
                                 --initialize-at-run-time=io.netty.handler.ssl.BouncyCastleAlpnSslUtils
                             </buildArgs>
-                            <!--<classpath>
-                                <param>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</param>
-                            </classpath>-->
+                            <metadataRepository>
+                                <enabled>true</enabled>
+                                <version>0.2.1</version>
+                            </metadataRepository>
                         </configuration>
                         <executions>
                             <execution>
