@@ -107,6 +107,6 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                     });
                 }).block();
         //noinspection ConstantConditions
-        return List.of(bytes);
+        return bytes == null ? Collections.emptyList() : List.of(bytes);
     }
 }
