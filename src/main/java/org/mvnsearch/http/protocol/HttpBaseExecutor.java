@@ -9,6 +9,7 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpCookie;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.vendor.Nodejs;
+import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
 
@@ -89,22 +90,33 @@ public abstract class HttpBaseExecutor implements BaseExecutor {
                     String contentType = responseHeaders.get("Content-Type");
                     return byteBufMono.asByteArray().doOnNext(content -> {
                         if (contentType != null && isPrintable(contentType)) {
+                            String result;
                             if (contentType.contains("json")) {
-                                final String result = new String(content, StandardCharsets.UTF_8);
+                                result = new String(content, StandardCharsets.UTF_8);
                                 final String body = prettyJsonFormatWithJsonPath(result, httpRequest.getHeader("X-JSON-Path"));
                                 System.out.print(body);
-                                final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
-                                if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
-                                    System.out.println();
-                                    System.out.println("============Execute JS Test============");
-                                    final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, result);
-                                    System.out.println(jsTestOutput);
-                                }
                             } else {
-                                System.out.print(new String(content));
+                                result = new String(content);
+                                System.out.print(result);
+                            }
+                            final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
+                            if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
+                                System.out.println();
+                                System.out.println("============Execute JS Test============");
+                                final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, result);
+                                System.out.println(jsTestOutput);
                             }
                         }
-                    });
+                    }).switchIfEmpty(Mono.create(sink -> {
+                        final String javaScriptTestCode = httpRequest.getJavaScriptTestCode();
+                        if (javaScriptTestCode != null && !javaScriptTestCode.isEmpty()) {
+                            System.out.println();
+                            System.out.println("============Execute JS Test============");
+                            final String jsTestOutput = Nodejs.executeHttpClientCode(javaScriptTestCode, httpStatus.code(), httpResponseHeaders, contentType, "");
+                            System.out.println(jsTestOutput);
+                        }
+                        sink.success();
+                    }));
                 }).block();
         //noinspection ConstantConditions
         return bytes == null ? Collections.emptyList() : List.of(bytes);
