@@ -1,6 +1,6 @@
 #!/usr/bin/env just --justfile
 
-VERSION := "0.35.0"
+VERSION := "0.36.0"
 
 # build the project
 build:
