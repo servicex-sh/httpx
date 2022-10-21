@@ -22,7 +22,7 @@
         <spring-native.version>0.12.1</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.1</junit5.version>
-        <aws-java-sdk2.version>2.17.295</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.18.0</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
