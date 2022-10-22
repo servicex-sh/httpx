@@ -32,6 +32,7 @@ public class HttpRequest {
     private String jsTestCode;
     private String redirectResponse;
     private HttpRequestTarget requestTarget;
+    private final List<String> requestLines = new ArrayList<>();
 
     public HttpRequest() {
     }
@@ -54,6 +55,14 @@ public class HttpRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void addRequestLine(String line) {
+        requestLines.add(line);
+    }
+
+    public String getRequestCode() {
+        return StringUtils.join(requestLines, "\n");
     }
 
     public String getComment() {
@@ -236,6 +245,14 @@ public class HttpRequest {
         this.preScriptLines.add(line);
     }
 
+    public List<String> getPreScriptLines() {
+        return preScriptLines;
+    }
+
+    public void setPreScriptCode(String preScriptCode) {
+        this.preScriptCode = preScriptCode;
+    }
+
     public String getRedirectResponse() {
         return this.redirectResponse;
     }
@@ -415,15 +432,6 @@ public class HttpRequest {
      * clean body: extract javascript test code, redirect response etc
      */
     public void cleanBody(@Nullable Path httpFilePath) throws Exception {
-        //clean pre script
-        if (preScriptLines != null && !preScriptLines.isEmpty()) {
-            String scriptCode = StringUtils.join(preScriptLines, "\n");
-            int offsetStart = scriptCode.indexOf("< {%");
-            int offsetEnd = scriptCode.lastIndexOf("%}");
-            if (offsetEnd > offsetStart && offsetStart >= 0) {
-                this.preScriptCode = scriptCode.substring(offsetStart + 4, offsetEnd).trim();
-            }
-        }
         //clean body
         if (bodyLines != null && !bodyLines.isEmpty()) {
             int offset = 0;
