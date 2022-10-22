@@ -25,8 +25,10 @@ public class HttpRequest {
     private List<HttpHeader> headers;
     private boolean bodyStarted = false;
     private List<String> bodyLines;
+    private List<String> preScriptLines;
     private final List<Integer> lineNumbers = new ArrayList<>();
     private byte[] body;
+    private String preScriptCode;
     private String jsTestCode;
     private String redirectResponse;
     private HttpRequestTarget requestTarget;
@@ -227,6 +229,13 @@ public class HttpRequest {
         this.bodyLines.add(line);
     }
 
+    public void addPreScriptLine(String line) {
+        if (this.preScriptLines == null) {
+            preScriptLines = new ArrayList<>();
+        }
+        this.preScriptLines.add(line);
+    }
+
     public String getRedirectResponse() {
         return this.redirectResponse;
     }
@@ -234,6 +243,11 @@ public class HttpRequest {
     @Nullable
     public String getJavaScriptTestCode() {
         return this.jsTestCode;
+    }
+
+    @Nullable
+    public String getPreScriptCode() {
+        return preScriptCode;
     }
 
     public byte[] getBodyBytes() {
@@ -378,6 +392,11 @@ public class HttpRequest {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isRequestStarted() {
+        return requestLine != null;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isBodyStarted() {
         return bodyStarted;
     }
@@ -396,6 +415,16 @@ public class HttpRequest {
      * clean body: extract javascript test code, redirect response etc
      */
     public void cleanBody(@Nullable Path httpFilePath) throws Exception {
+        //clean pre script
+        if (preScriptLines != null && !preScriptLines.isEmpty()) {
+            String scriptCode = StringUtils.join(preScriptLines, "\n");
+            int offsetStart = scriptCode.indexOf("< {%");
+            int offsetEnd = scriptCode.lastIndexOf("%}");
+            if (offsetEnd > offsetStart && offsetStart >= 0) {
+                this.preScriptCode = scriptCode.substring(offsetStart + 4, offsetEnd).trim();
+            }
+        }
+        //clean body
         if (bodyLines != null && !bodyLines.isEmpty()) {
             int offset = 0;
             boolean bodyFromExternal = false;
