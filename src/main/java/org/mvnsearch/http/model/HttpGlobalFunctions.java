@@ -1,5 +1,6 @@
 package org.mvnsearch.http.model;
 
+import com.github.curiousoddman.rgxgen.RgxGen;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.HmacAlgorithms;
@@ -30,6 +31,13 @@ public class HttpGlobalFunctions {
     private final static Map<String, Function<String[], String>> FUNCTIONS = new HashMap<>();
 
     private HttpGlobalFunctions() {
+        FUNCTIONS.put("random.alphabetic", HttpGlobalFunctions::randomAlphabetic); // jetbrains
+        FUNCTIONS.put("random.alphanumeric", HttpGlobalFunctions::randomAlphanumeric); // jetbrains
+        FUNCTIONS.put("random.email", HttpGlobalFunctions::randomEmail); // jetbrains
+        FUNCTIONS.put("random.float", HttpGlobalFunctions::randomFloat); // jetbrains
+        FUNCTIONS.put("random.hexadecimal", HttpGlobalFunctions::randomHexadecimal); // jetbrains
+        FUNCTIONS.put("random.integer", HttpGlobalFunctions::randomInt); // jetbrains
+        FUNCTIONS.put("random.uuid", HttpGlobalFunctions::uuid); // jetbrains
         FUNCTIONS.put("uuid", HttpGlobalFunctions::uuid); // jetbrains
         FUNCTIONS.put("guid", HttpGlobalFunctions::uuid);
         FUNCTIONS.put("randomInt", HttpGlobalFunctions::randomInt); // jetbrains
@@ -77,6 +85,26 @@ public class HttpGlobalFunctions {
             max = Integer.parseInt(args[1]);
         }
         return String.valueOf(new Random().nextInt(min, max));
+    }
+
+    public static String randomFloat(String[] args) {
+        return String.valueOf(new Random().nextFloat());
+    }
+
+    public static String randomEmail(String[] args) {
+        return new RgxGen("[a-z][a-z1-9]{8}@example\\.com").generate();
+    }
+
+    public static String randomAlphabetic(String[] args) {
+        return new RgxGen("[a-zA-Z]{8}").generate();
+    }
+
+    public static String randomAlphanumeric(String[] args) {
+        return new RgxGen("[a-zA-Z0-9]{8}").generate();
+    }
+
+    public static String randomHexadecimal(String[] args) {
+        return new RgxGen("[A-F0-9]{8}").generate();
     }
 
     public static String timestamp(String[] args) {
