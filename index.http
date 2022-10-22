@@ -13,11 +13,19 @@ Content-Type: application/json
   1
 ]
 
+### hello pre script
+#@name script-demo
+< {%
+  request.variables.set("name","linux_china");
+  request.variables.set("age","22");
+%}
+GET https://httpbin.org/get?id=1&name={{name}}&age={{age}}
+
 ### inspection http get
 #@name get
 GET https://httpbin.org/get?
-  id=123
-  &value=content
+  id=123&
+  value=content
 
 ### RSocket Request
 #@name request
