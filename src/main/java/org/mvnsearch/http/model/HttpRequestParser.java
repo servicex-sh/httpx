@@ -42,7 +42,7 @@ public class HttpRequestParser {
                         httpRequest = new HttpRequest(index);
                         httpRequest.setComment(comment);
                     }
-                } else if (!httpRequest.isBodyStarted()) {
+                } else if (!httpRequest.isRequestStarted()) {
                     if ((line.startsWith("#") || line.startsWith("//"))) { //comment
                         String comment = (line.startsWith("#") ? line.substring(1) : line.substring(2)).trim();
                         if (comment.startsWith("@")) { // tag for httpRequest
@@ -52,17 +52,17 @@ public class HttpRequestParser {
                                 httpRequest.setName(parts[1].trim());
                             }
                             httpRequest.addTag(tag);
-                        } else {   // normal comment
-                            if (httpRequest.getComment() == null) {
-                                httpRequest.setComment(comment);
-                            }
                         }
-                    } else if (HttpMethod.isRequestLine(line)) {  // request line parse
+                    } else if (HttpMethod.isRequestLine(line)) {   // normal comment
                         int position = line.indexOf(' ');
                         final String method = line.substring(0, position);
                         httpRequest.setMethod(HttpMethod.valueOf(method));
                         httpRequest.setRequestLine(line.substring(position + 1));
-                    } else if ((rawLine.startsWith("  ") || rawLine.startsWith("\t"))) { // append request line parts in multi lines
+                    } else {
+                        httpRequest.addPreScriptLine(line);
+                    }
+                } else if (!httpRequest.isBodyStarted()) {
+                    if ((rawLine.startsWith("  ") || rawLine.startsWith("\t"))) { // append request line parts in multi lines
                         httpRequest.appendRequestLine(line);
                     } else if (line.indexOf(':') > 0 && !httpRequest.isBodyStarted()) { //http request headers parse: body should be empty
                         int position = line.indexOf(':');
