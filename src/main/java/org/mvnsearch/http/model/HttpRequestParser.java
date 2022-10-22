@@ -1,12 +1,15 @@
 package org.mvnsearch.http.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
+import org.mvnsearch.http.vendor.Nodejs;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -14,10 +17,10 @@ import java.util.function.Function;
 public class HttpRequestParser {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpRequestParser.class);
 
-    public static List<HttpRequest> parse(String httpFileCode, Map<String, Object> context) {
+    public static List<HttpRequest> splitRequests(String httpFileCode) {
         List<HttpRequest> requests = new ArrayList<>();
         try {
-            final BufferedReader bufferedReader = new BufferedReader(new StringReader(replaceVariables(httpFileCode, context)));
+            final BufferedReader bufferedReader = new BufferedReader(new StringReader(httpFileCode));
             List<String> lines = bufferedReader.lines().toList();
             int index = 1;
             int lineNumber = 1;
@@ -58,10 +61,74 @@ public class HttpRequestParser {
                         final String method = line.substring(0, position);
                         httpRequest.setMethod(HttpMethod.valueOf(method));
                         httpRequest.setRequestLine(line.substring(position + 1));
+                        httpRequest.addRequestLine(rawLine);
                     } else {
                         httpRequest.addPreScriptLine(line);
                     }
-                } else if (!httpRequest.isBodyStarted()) {
+                } else {
+                    httpRequest.addRequestLine(rawLine);
+                }
+                httpRequest.addLineNumber(lineNumber);
+                lineNumber++;
+            }
+            if (httpRequest.isFilled()) {  //add last httpRequest
+                requests.add(httpRequest);
+            }
+        } catch (Exception e) {
+            log.error("HTX-002-500", e);
+        }
+        return requests;
+    }
+
+    public static void parse(HttpRequest httpRequest, Map<String, Object> context) {
+        try {
+            Map<String, Object> newContext = new HashMap<>(context);
+            //clean pre script
+            final List<String> preScriptLines = httpRequest.getPreScriptLines();
+            if (preScriptLines != null && !preScriptLines.isEmpty()) {
+                String scriptCode = StringUtils.join(preScriptLines, "\n");
+                int offsetStart = scriptCode.indexOf("< {%");
+                int offsetEnd = scriptCode.lastIndexOf("%}");
+                if (offsetEnd > offsetStart && offsetStart >= 0) {
+                    httpRequest.setPreScriptCode(scriptCode.substring(offsetStart + 4, offsetEnd).trim());
+                }
+            }
+            // execute pre script and inject context variables
+            if (httpRequest.getPreScriptCode() != null) {
+                final String jsTestOutput = Nodejs.executePreScriptCode(httpRequest.getPreScriptCode());
+                if (!jsTestOutput.isEmpty()) {
+                    final BufferedReader bufferedReader = new BufferedReader(new StringReader(jsTestOutput));
+                    List<String> outputLines = bufferedReader.lines().toList();
+                    for (String outputLine : outputLines) {
+                        if (outputLine.startsWith("__variable:")) {
+                            final String[] variable = outputLine.substring(outputLine.indexOf(":") + 1).split(",", 2);
+                            newContext.put(variable[0], variable[1]);
+                        }
+                    }
+                }
+            }
+            // replace variables and parse request
+            final BufferedReader bufferedReader = new BufferedReader(new StringReader(replaceVariables(httpRequest.getRequestCode(), newContext)));
+            List<String> lines = bufferedReader.lines().toList();
+            int offset = 0;
+            String requestLine = null;
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i).trim();
+                if (!line.isEmpty() && HttpMethod.isRequestLine(line)) {
+                    requestLine = lines.get(i);
+                    offset = i;
+                }
+            }
+            // reset request line
+            if (requestLine != null) {
+                int position = requestLine.indexOf(' ');
+                final String method = requestLine.substring(0, position);
+                httpRequest.setMethod(HttpMethod.valueOf(method));
+                httpRequest.setRequestLine(requestLine.substring(position + 1));
+            }
+            for (String rawLine : lines.subList(offset + 1, lines.size())) {
+                String line = rawLine.trim();
+                if (!httpRequest.isBodyStarted()) {
                     if ((rawLine.startsWith("  ") || rawLine.startsWith("\t"))) { // append request line parts in multi lines
                         httpRequest.appendRequestLine(line);
                     } else if (line.indexOf(':') > 0 && !httpRequest.isBodyStarted()) { //http request headers parse: body should be empty
@@ -83,16 +150,18 @@ public class HttpRequestParser {
                 } else {  // parse httpRequest body
                     httpRequest.addBodyLine(rawLine);
                 }
-                httpRequest.addLineNumber(lineNumber);
-                lineNumber++;
-            }
-            if (httpRequest.isFilled()) {  //add last httpRequest
-                requests.add(httpRequest);
             }
         } catch (Exception e) {
             log.error("HTX-002-500", e);
         }
-        return requests;
+    }
+
+    public static List<HttpRequest> parse(String httpFileCode, Map<String, Object> context) {
+        final List<HttpRequest> request = splitRequests(httpFileCode);
+        for (HttpRequest httpRequest : request) {
+            parse(httpRequest, context);
+        }
+        return request;
     }
 
     public static String replaceVariables(String httpFile, Map<String, Object> context) {
