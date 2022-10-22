@@ -161,7 +161,7 @@ public class HttpxCommand implements Callable<Integer> {
             // load global variables into context
             injectGlobalVariables(context);
             // parse http requests
-            final List<HttpRequest> requests = HttpRequestParser.parse(httpCode, context);
+            final List<HttpRequest> requests = HttpRequestParser.splitRequests(httpCode);
             // list summary for code completion
             if (summary) {
                 for (HttpRequest request : requests) {
@@ -182,6 +182,7 @@ public class HttpxCommand implements Callable<Integer> {
             // list all requests
             if (listRequests) {
                 for (HttpRequest request : requests) {
+                    HttpRequestParser.parse(request, context);
                     String comment = request.getComment();
                     if (comment == null) {
                         comment = "";
@@ -212,6 +213,7 @@ public class HttpxCommand implements Callable<Integer> {
             if (runAllRequests) {
                 for (HttpRequest request : requests) {
                     System.out.println("=============" + request.getName() + "==================");
+                    HttpRequestParser.parse(request, context);
                     execute(request, httpFilePath);
                 }
                 return 0;
@@ -232,6 +234,7 @@ public class HttpxCommand implements Callable<Integer> {
                             System.out.println("=========================================");
                         }
                         targetFound = true;
+                        HttpRequestParser.parse(request, context);
                         if (example != null) {  // generate Language SDK example code
                             generateCode(request, httpFilePath);
                         } else { //execute request
