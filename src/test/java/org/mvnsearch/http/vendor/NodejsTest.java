@@ -24,4 +24,15 @@ public class NodejsTest {
         String result = Nodejs.executeHttpClientCode(jsCode, statusCode, headers, contentType, body);
         System.out.println(result);
     }
+
+    @Test
+    public void testExecutePreScript() throws Exception {
+        @Language("JavaScript")
+        String jsCode = """
+                request.variables.set("name","jackie");
+                request.variables.set("age","2");
+                """;
+        String result = Nodejs.executePreScriptCode(jsCode);
+        System.out.println(result);
+    }
 }
