@@ -62,7 +62,7 @@ public class Nodejs {
                 //noinspection ConstantConditions
                 httpClientPreScriptJS = IOUtils.toString(Nodejs.class.getResourceAsStream("/http-client-pre-stub.js"), StandardCharsets.UTF_8);
             }
-            String jsCode = httpClientPreScriptJS + preScriptCode;
+            String jsCode = httpClientPreScriptJS +"\n" + preScriptCode;
             ProcessBuilder pb = new ProcessBuilder("node");
             Process p = pb.start();
             p.getOutputStream().write(jsCode.getBytes(StandardCharsets.UTF_8));
