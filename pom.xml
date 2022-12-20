@@ -22,7 +22,7 @@
         <spring-native.version>0.12.1</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.1</junit5.version>
-        <aws-java-sdk2.version>2.18.32</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.19.0</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>23.0.0</version>
+            <version>23.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.curious-odd-man</groupId>
@@ -343,7 +343,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.21.10</version>
+            <version>3.21.12</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -486,7 +486,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>
-            <version>5.2</version>
+            <version>5.2.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -501,14 +501,14 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.84.Final</version>
+                <version>4.1.86.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.25</version>
+                <version>2020.0.26</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -583,7 +583,7 @@
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
-                                <version>0.2.3</version>
+                                <version>0.2.5</version>
                             </metadataRepository>
                         </configuration>
                         <executions>
