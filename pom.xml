@@ -22,7 +22,7 @@
         <spring-native.version>0.12.1</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.1</junit5.version>
-        <aws-java-sdk2.version>2.19.0</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.19.3</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -407,7 +407,7 @@
         <dependency>
             <groupId>com.aliyun.mns</groupId>
             <artifactId>aliyun-sdk-mns</artifactId>
-            <version>1.1.9.1</version>
+            <version>1.1.9.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.aliyun</groupId>
