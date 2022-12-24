@@ -4,7 +4,10 @@ import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpRequest;
 import org.mvnsearch.http.utils.JsonUtils;
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.UnifiedJedis;
+import redis.clients.jedis.json.Path;
+import redis.clients.jedis.json.Path2;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -21,12 +24,39 @@ public class RedisExecutor implements BasePubSubExecutor {
         }
         URI redisURI = httpRequest.getRequestTarget().getUri();
         final UriAndSubject redisUriAndKey = getRedisUriAndChannel(redisURI, httpRequest);
-        try (Jedis jedis = new Jedis(redisUriAndKey.uri())) {
+        URI uri = URI.create(redisUriAndKey.uri());
+        try (UnifiedJedis jedis = new UnifiedJedis(new HostAndPort(uri.getHost(), uri.getPort()))) {
             String key = redisUriAndKey.subject();
             switch (methodName) {
                 case "RSET" -> {
                     jedis.set(key, httpRequest.bodyText());
                     System.out.print("Succeeded to set value!");
+                }
+                case "JSONSET" -> {
+                    String jsonKey = key;
+                    String jsonPath = "$";
+                    String jsonBody = httpRequest.bodyText();
+                    if (key.contains("/$")) {
+                        jsonKey = key.substring(0, key.indexOf("/$"));
+                        jsonPath = key.substring(key.indexOf("/$") + 1);
+                    }
+                    jedis.jsonSet(jsonKey, Path2.of(jsonPath), jsonBody);
+                    System.out.print("Succeeded to execute JSON.SET for " + jsonKey + "!");
+                }
+                case "JSONGET" -> {
+                    String jsonKey = key;
+                    String jsonPath = "$";
+                    if (key.contains("/$")) {
+                        jsonKey = key.substring(0, key.indexOf("/$"));
+                        jsonPath = key.substring(key.indexOf("/$") + 1);
+                    }
+                    final Object jsonResult = jedis.jsonGet(jsonKey, Path.of(jsonPath));
+                    if (jsonResult != null) {
+                        System.out.println(JsonUtils.writeValueAsPrettyColorString(jsonResult));
+                    } else {
+                        System.out.print("Key not found: " + key);
+                    }
+
                 }
                 case "EVAL" -> {
                     String luaScript = httpRequest.bodyText();
