@@ -10,7 +10,7 @@ services:
       - "5672:5672"
       - "15672:15672"
   redis:
-    image: redis:7.0.0
+    image: redis/redis-stack:latest
     ports:
       - "16379:6379"
   maildev:
