@@ -235,6 +235,23 @@ Content-Type: application/json
   age: 20
 }
 
+### redis json set
+#@name redis-jsonset
+JSONSET user.1/$
+Host: localhost:16379
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "jackie",
+  "age": 42
+}
+
+### redis json get
+#@name redis-jsonget
+JSONGET user.1/$
+Host: localhost:16379
+
 ### redis Lua eval
 #@name redis-eval
 EVAL 1 keyname1 value1
