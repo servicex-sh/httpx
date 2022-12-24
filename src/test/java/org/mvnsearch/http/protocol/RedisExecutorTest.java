@@ -38,7 +38,38 @@ public class RedisExecutorTest {
                 Host: localhost:6379
                 Content-Type: application/json
                                 
-                { "id": 1, "name": "jackie", age: 40}
+                { "id": 1, "name": "jackie", "age": 40}
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new RedisExecutor().execute(request);
+    }
+
+    @Test
+    public void testRedisJsonSet() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### redis json set
+                JSONSET user.1/$
+                Host: localhost:16379
+                Content-Type: application/json
+                                
+                { "id": 1, "name": "jackie", "age": 40}
+                """;
+        HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
+        request.cleanBody();
+        new RedisExecutor().execute(request);
+    }
+
+    @Test
+    public void testRedisJsonGet() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        @Language("HTTP Request")
+        String httpFile = """
+                ### redis json get
+                JSONGET user.1/$
+                Host: localhost:16379
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
