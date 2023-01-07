@@ -373,6 +373,8 @@ public class HttpxCommand implements Callable<Integer> {
             result = new NeovimExecutor().execute(httpRequest);
         } else if (requestMethod.isJsonRPCMethod()) {
             result = new JsonRpcExecutor().execute(httpRequest);
+        } else if (requestMethod.isTRPCMethod()) {
+            result = new TrpcExecutor().execute(httpRequest);
         } else if (requestMethod.isThriftMethod()) {
             result = new ThriftExecutor().execute(httpRequest);
         } else if (requestMethod.isZeromqMethod()) {
