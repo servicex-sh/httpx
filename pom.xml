@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.7</version>
+        <version>2.7.8</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.mvnsearch</groupId>
@@ -22,7 +22,7 @@
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.1</junit5.version>
-        <aws-java-sdk2.version>2.19.12</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.19.21</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>23.1.0</version>
+            <version>24.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.curious-odd-man</groupId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
-            <version>2.3.1</version>
+            <version>2.3.2</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>3.3.1</version>
+            <version>3.3.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.luben</groupId>
@@ -215,6 +215,14 @@
             <artifactId>pulsar-client-original</artifactId>
             <version>2.10.3</version>
             <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.beust</groupId>
                     <artifactId>jcommander</artifactId>
@@ -272,7 +280,7 @@
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
-            <version>2.16.5</version>
+            <version>2.16.6</version>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
@@ -438,7 +446,7 @@
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser</artifactId>
-            <version>2.1.10</version>
+            <version>2.1.11</version>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
