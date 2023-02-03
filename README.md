@@ -147,6 +147,7 @@ GET https://httpbin.org/ip
 
 * Name request with `#@name myname`:  you can invoke request with `httpx myname`
 * Describe request with `### request description here`
+* Generate http file from openapi: please refer [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) `openapi-generator-cli generate -i https://api.opendota.com/api  -g jetbrains-http-client -o dotaClient`
 
 # How to build from source?
 
