@@ -444,11 +444,6 @@
             <version>${aws-java-sdk2.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.swagger.parser.v3</groupId>
-            <artifactId>swagger-parser</artifactId>
-            <version>2.1.11</version>
-        </dependency>
-        <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>folsom</artifactId>
             <version>1.15.0</version>
