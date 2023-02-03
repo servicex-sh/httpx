@@ -30,7 +30,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "unused"})
 @Component
-@Command(name = "httpx", version = "0.39.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
+@Command(name = "httpx", version = "0.40.0", description = "CLI to run http file", mixinStandardHelpOptions = true)
 public class HttpxCommand implements Callable<Integer> {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpxCommand.class);
     @CommandLine.Unmatched
