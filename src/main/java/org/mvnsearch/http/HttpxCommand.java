@@ -2,8 +2,6 @@ package org.mvnsearch.http;
 
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
-import org.mvnsearch.http.gen.CodeGenerator;
-import org.mvnsearch.http.gen.OpenAPIGenerator;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
 import org.mvnsearch.http.model.HttpMethod;
@@ -27,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -44,12 +41,8 @@ public class HttpxCommand implements Callable<Integer> {
     private boolean displayGlobalVariables;
     @Option(names = {"-p"}, description = "Profile")
     private String[] profile;
-    @Option(names = {"-e"}, description = "Example code generate")
-    private String example;
     @Option(names = {"-x"}, description = "HTTP proxy")
     private String httpProxy;
-    @Option(names = {"--import"}, description = "Import OpenAPI/AsyncAPI URL to generate HTTP file")
-    private String importURL;
     @Option(names = {"-f", "--httpfile"}, description = "Http file, and default is index.http")
     private String httpFile;
     @Option(names = {"-t"}, description = "Targets to run")
@@ -76,9 +69,6 @@ public class HttpxCommand implements Callable<Integer> {
         if (displayGlobalVariables) {
             printGlobalVariables();
             return 0;
-        }
-        if (importURL != null && !importURL.isEmpty()) {
-            return importAPI();
         }
         if (httpFile == null) {
             httpFile = "index.http";
@@ -235,11 +225,7 @@ public class HttpxCommand implements Callable<Integer> {
                         }
                         targetFound = true;
                         HttpRequestParser.parse(request, context);
-                        if (example != null) {  // generate Language SDK example code
-                            generateCode(request, httpFilePath);
-                        } else { //execute request
-                            execute(request, httpFilePath);
-                        }
+                        execute(request, httpFilePath);
                     }
                 }
             }
@@ -408,14 +394,6 @@ public class HttpxCommand implements Callable<Integer> {
         }*/
     }
 
-    public void generateCode(HttpRequest httpRequest, Path httpFilePath) throws Exception {
-        httpRequest.cleanBody(httpFilePath);
-        String result = new CodeGenerator().generate(httpRequest, example);
-        if (!result.isEmpty()) {
-            System.out.println(result);
-        }
-    }
-
     void writeResponse(String redirectResponse, List<byte[]> content) {
         String[] parts = redirectResponse.split("\\s+", 2);
         String responseFile = parts[1];
@@ -466,25 +444,6 @@ public class HttpxCommand implements Callable<Integer> {
     private void printGlobalVariables() {
         final Map<String, Object> globalVariables = loadGlobalVariables();
         System.out.println(JsonUtils.writeValueAsPrettyColorString(globalVariables));
-    }
-
-    public int importAPI() {
-        try {
-            String content = new OpenAPIGenerator().generateHttpFileFromOpenAPI(importURL, targets);
-            if (httpFile != null) {
-                Path destHttpFile = Path.of(httpFile);
-                if (destHttpFile.toFile().exists()) {
-                    Files.writeString(destHttpFile, content, StandardOpenOption.APPEND);
-                } else {
-                    Files.writeString(destHttpFile, content);
-                }
-            } else {
-                System.out.println(content);
-            }
-        } catch (Exception e) {
-            log.error("HTX-003-500", e);
-        }
-        return 0;
     }
 
     @Nullable
