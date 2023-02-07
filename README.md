@@ -164,6 +164,7 @@ installed in `~/.m2/jdks`.
 * httpbin: HTTP test https://httpbin.org/
 * grpcbin: gRPC test https://grpcb.in/
 * GraphQLZero: https://graphqlzero.almansi.me/  endpoint: https://graphqlzero.almansi.me/api
+* Ethereal Email: Ethereal is a fake SMTP service for email sending test https://ethereal.email/
 
 # References
 
