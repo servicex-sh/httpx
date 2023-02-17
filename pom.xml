@@ -22,7 +22,7 @@
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.2</junit5.version>
-        <aws-java-sdk2.version>2.19.30</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.20.6</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -280,7 +280,7 @@
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
-            <version>2.16.7</version>
+            <version>2.16.8</version>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
@@ -498,14 +498,14 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.86.Final</version>
+                <version>4.1.89.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.26</version>
+                <version>2020.0.28</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -567,7 +567,7 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.9.19</version>
+                        <version>0.9.20</version>
                         <configuration>
                             <mainClass>${start-class}</mainClass>
                             <imageName>${project.build.finalName}</imageName>
@@ -580,7 +580,7 @@
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
-                                <version>0.2.5</version>
+                                <version>0.2.6</version>
                             </metadataRepository>
                         </configuration>
                         <executions>
