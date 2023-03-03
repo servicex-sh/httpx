@@ -22,7 +22,7 @@
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.2</junit5.version>
-        <aws-java-sdk2.version>2.20.6</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.20.16</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.0.0</version>
+            <version>24.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.curious-odd-man</groupId>
@@ -345,7 +345,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.21.12</version>
+            <version>3.22.0</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -380,7 +380,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20220924</version>
+            <version>20230227</version>
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
