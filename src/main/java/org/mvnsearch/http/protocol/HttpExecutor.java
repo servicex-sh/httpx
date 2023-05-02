@@ -32,7 +32,7 @@ public class HttpExecutor extends HttpBaseExecutor {
         }
         final String httpMethod = httpRequest.getMethod().getName();
         HttpClient.ResponseReceiver<?> responseReceiver = switch (httpMethod) {
-            case "POST" -> client.post().send(httpRequest.requestBody());
+            case "POST", "CHATGPT" -> client.post().send(httpRequest.requestBody());
             case "PUT" -> client.put().send(httpRequest.requestBody());
             case "DELETE" -> client.delete();
             case "HEAD" -> client.head();
