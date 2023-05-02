@@ -381,6 +381,8 @@ public class HttpxCommand implements Callable<Integer> {
             result = new AwsExecutor().execute(httpRequest);
         } else if (requestMethod.isAliyunMethod()) {
             result = new AliyunExecutor().execute(httpRequest);
+        } else if (requestMethod.isChatGPTMethod()) {
+            result = new ChatGPTExecutor().execute(httpRequest);
         } else {
             result = Collections.emptyList();
             System.out.print("Not support: " + requestMethod.getName());
