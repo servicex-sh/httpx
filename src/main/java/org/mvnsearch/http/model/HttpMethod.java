@@ -28,6 +28,7 @@ public class HttpMethod {
     public static final List<String> REDIS_METHODS = List.of("RSET", "HMSET", "JSONSET", "JSONGET", "EVAL", "LOAD");
     public static final List<String> SSH_METHODS = List.of("SSH");
     public static final List<String> WEBSOCKET_METHODS = List.of("WEBSOCKET");
+    public static final List<String> CHATGPT_METHODS = List.of("CHATGPT");
     private String name;
 
     public HttpMethod() {
@@ -75,6 +76,7 @@ public class HttpMethod {
                 || REDIS_METHODS.contains(method)
                 || SSH_METHODS.contains(method)
                 || WEBSOCKET_METHODS.contains(method)
+                || CHATGPT_METHODS.contains(method)
                 || MEMCACHE_METHODS.contains(method);
     }
 
@@ -129,6 +131,7 @@ public class HttpMethod {
     public boolean isJsonRPCMethod() {
         return JSONRPC_METHODS.contains(name);
     }
+
     public boolean isTRPCMethod() {
         return TRPC_METHODS.contains(name);
     }
@@ -171,5 +174,9 @@ public class HttpMethod {
 
     public boolean isWebSocketMethod() {
         return WEBSOCKET_METHODS.contains(name);
+    }
+
+    public boolean isChatGPTMethod() {
+        return CHATGPT_METHODS.contains(name);
     }
 }
