@@ -22,7 +22,7 @@
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.2</junit5.version>
-        <aws-java-sdk2.version>2.20.51</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.20.58</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
-            <version>2.3.2</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -198,12 +198,12 @@
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>bookkeeper-common-allocator</artifactId>
-            <version>4.14.7</version>
+            <version>4.16.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>circe-checksum</artifactId>
-            <version>4.14.7</version>
+            <version>4.16.1</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -213,7 +213,7 @@
         <dependency>
             <groupId>org.apache.pulsar</groupId>
             <artifactId>pulsar-client-original</artifactId>
-            <version>2.10.4</version>
+            <version>3.0.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
