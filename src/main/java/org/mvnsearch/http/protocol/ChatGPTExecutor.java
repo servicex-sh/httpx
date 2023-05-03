@@ -39,7 +39,7 @@ public class ChatGPTExecutor extends HttpExecutor {
         httpRequest.setHeaders(headers);
         //execute http chatRequest
         final List<byte[]> result = super.execute(httpRequest);
-        if (result.size() > 0 && httpRequest.getHeader("Accept") == null) {
+        if (result.size() > 0) {
             String json = new String(result.get(0));
             try {
                 Map<String, Object> response = JsonUtils.readValue(json, Map.class);
