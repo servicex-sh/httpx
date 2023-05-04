@@ -74,23 +74,31 @@ public class ChatGPTExecutor extends HttpExecutor {
     List<Map<String, String>> convertMdToMessages(String mdText) {
         String userMsgContent = mdText;
         List<Map<String, String>> messages = new ArrayList<>();
+        // system message
         Pattern systemMsgPattern = Pattern.compile("(\\S.+\\n)*.+\\{\\.system}");
         final Optional<MatchResult> systemMsgFound = systemMsgPattern.matcher(userMsgContent).results().findFirst();
         if (systemMsgFound.isPresent()) {
             String matchedText = systemMsgFound.get().group();
+            userMsgContent = userMsgContent.replace(matchedText, "").trim();
             String systemMsgContent = matchedText.replace("{.system}", "").trim();
             messages.add(Map.of("role", "system", "content", systemMsgContent));
-            userMsgContent = userMsgContent.replace(matchedText, "");
         }
+        // assistant messages
+        List<Map<String, String>> assistantMessages = new ArrayList<>();
         Pattern assistantMsgPattern = Pattern.compile("(\\S.+\\n)*.+\\{\\.assistant}");
-        final Optional<MatchResult> assistantMsgFound = assistantMsgPattern.matcher(userMsgContent).results().findFirst();
-        if (assistantMsgFound.isPresent()) {
-            String matchedText = assistantMsgFound.get().group();
-            String assistantMsgContent = matchedText.replace("{.system}", "").trim();
-            messages.add(Map.of("role", "assistant", "content", assistantMsgContent));
-            userMsgContent = userMsgContent.replace(assistantMsgContent, "");
+        final List<MatchResult> matchResults = assistantMsgPattern.matcher(userMsgContent).results().toList();
+        for (MatchResult matchResult : matchResults) {
+            String matchedText = matchResult.group();
+            userMsgContent = userMsgContent.replace(matchedText, "").trim();
+            String assistantMsgContent = matchedText.replace("{.assistant}", "").trim();
+            assistantMessages.add(Map.of("role", "assistant", "content", assistantMsgContent));
         }
+        // user message
         messages.add(Map.of("role", "user", "content", userMsgContent.trim()));
+        // append assistant messages
+        if (!assistantMessages.isEmpty()) {
+            messages.addAll(assistantMessages);
+        }
         return messages;
     }
 
