@@ -6,6 +6,8 @@ import org.mvnsearch.http.utils.JsonUtils;
 
 import java.net.URI;
 import java.util.*;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 
 
 public class ChatGPTExecutor extends HttpExecutor {
@@ -70,8 +72,25 @@ public class ChatGPTExecutor extends HttpExecutor {
     }
 
     List<Map<String, String>> convertMdToMessages(String mdText) {
+        String userMsgContent = mdText;
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "user", "content", mdText));
+        Pattern systemMsgPattern = Pattern.compile("(\\S.+\\n)*.+\\{\\.system}");
+        final Optional<MatchResult> systemMsgFound = systemMsgPattern.matcher(mdText).results().findFirst();
+        if (systemMsgFound.isPresent()) {
+            String matchedText = systemMsgFound.get().group();
+            String systemMsgContent = matchedText.replace("{.system}", "").trim();
+            messages.add(Map.of("role", "system", "content", systemMsgContent));
+            userMsgContent = mdText.replace(matchedText, "");
+        }
+        Pattern assistantMsgPattern = Pattern.compile("(\\S.+\\n)*.+\\{\\.assistant}");
+        final Optional<MatchResult> assistantMsgFound = assistantMsgPattern.matcher(mdText).results().findFirst();
+        if (assistantMsgFound.isPresent()) {
+            String matchedText = assistantMsgFound.get().group();
+            String assistantMsgContent = matchedText.replace("{.system}", "").trim();
+            messages.add(Map.of("role", "assistant", "content", assistantMsgContent));
+            userMsgContent = userMsgContent.replace(assistantMsgContent, "");
+        }
+        messages.add(Map.of("role", "user", "content", userMsgContent.trim()));
         return messages;
     }
 
