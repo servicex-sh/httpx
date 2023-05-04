@@ -16,14 +16,15 @@ public class ChatGPTExecutorTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
-                ### hello post
+                ### ChatGPT with JBang
                 CHATGPT https://api.openai.com/v1/chat/completions
                 Content-Type: text/markdown
                         
-                You are to generate Kotlin code in the style of jbang, and main class must be named Hello.
-                Do not add any additional text. {.system}
-                
-                Build a CLI app with Picocli 4.7.3 library, and include name and email options.
+                You are to generate Java code in the style of jbang, and main class must be named Hello. {.system}
+                                
+                Build a CLI app with Picocli 4.7.3 library, and include name and email options. Do not add any additional text.
+                                
+                Please use Java 17. {.assistant}
                 """;
         HttpRequest request = HttpRequestParser.parse(httpFile, context).get(0);
         request.cleanBody();
