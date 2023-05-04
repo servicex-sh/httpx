@@ -18,8 +18,8 @@ Content-Type: application/json
 ### hello pre script
 #@name script-demo
 < {%
-  request.variables.set("name","linux_china");
-  request.variables.set("age","22");
+    request.variables.set("name", "linux_china");
+    request.variables.set("age", "22");
 %}
 GET https://httpbin.org/get?id=1&name={{name}}&age={{age}}
 
@@ -306,3 +306,9 @@ Content-Type: application/json
 {
   "name": "jackie"
 }
+
+### ChatGP demo
+#@name chatgp
+CHATGPT https://api.openai.com/v1/chat/completions
+
+What's Java? Could you give a simple example?
