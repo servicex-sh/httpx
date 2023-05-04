@@ -308,7 +308,7 @@ Content-Type: application/json
 }
 
 ### ChatGP demo
-#@name chatgp
+#@name chatgpt
 CHATGPT https://api.openai.com/v1/chat/completions
 
 What's Java? Could you give a simple example?
