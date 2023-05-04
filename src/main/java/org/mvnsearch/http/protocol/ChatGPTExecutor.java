@@ -75,15 +75,15 @@ public class ChatGPTExecutor extends HttpExecutor {
         String userMsgContent = mdText;
         List<Map<String, String>> messages = new ArrayList<>();
         Pattern systemMsgPattern = Pattern.compile("(\\S.+\\n)*.+\\{\\.system}");
-        final Optional<MatchResult> systemMsgFound = systemMsgPattern.matcher(mdText).results().findFirst();
+        final Optional<MatchResult> systemMsgFound = systemMsgPattern.matcher(userMsgContent).results().findFirst();
         if (systemMsgFound.isPresent()) {
             String matchedText = systemMsgFound.get().group();
             String systemMsgContent = matchedText.replace("{.system}", "").trim();
             messages.add(Map.of("role", "system", "content", systemMsgContent));
-            userMsgContent = mdText.replace(matchedText, "");
+            userMsgContent = userMsgContent.replace(matchedText, "");
         }
         Pattern assistantMsgPattern = Pattern.compile("(\\S.+\\n)*.+\\{\\.assistant}");
-        final Optional<MatchResult> assistantMsgFound = assistantMsgPattern.matcher(mdText).results().findFirst();
+        final Optional<MatchResult> assistantMsgFound = assistantMsgPattern.matcher(userMsgContent).results().findFirst();
         if (assistantMsgFound.isPresent()) {
             String matchedText = assistantMsgFound.get().group();
             String assistantMsgContent = matchedText.replace("{.system}", "").trim();
