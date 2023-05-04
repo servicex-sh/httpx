@@ -57,7 +57,7 @@ public class ChatGPTExecutor extends HttpExecutor {
                             String text = ((Map<String, String>) choice.get("message")).get("content");
                             System.out.println("\n");
                             System.out.println("=================ChatGPT Answer==================");
-                            System.out.println("\n");
+                            System.out.println();
                             System.out.println(text.trim());
                         }
                     }
