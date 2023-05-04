@@ -27,7 +27,13 @@ public class ChatGPTExecutor extends HttpExecutor {
         final List<HttpHeader> headers = new ArrayList<>(httpRequest.getHeaders());
         headers.removeIf(header -> header.getName().startsWith("X-") || header.getName().startsWith("Content-Type"));
         if (httpRequest.getHeader("Authorization") == null) {
-            final String openAIToken = System.getenv("OPENAI_API_KEY");
+            String openAIToken = httpRequest.getHeader("X-OPENAI-API-KEY");
+            if (openAIToken == null) {
+                openAIToken = httpRequest.getHeader("X-OPENAI_API_KEY");
+            }
+            if (openAIToken == null) {
+                openAIToken = System.getenv("OPENAI_API_KEY");
+            }
             if (openAIToken == null) {
                 System.err.println("Please set OPENAI_API_KEY environment variable");
                 return Collections.emptyList();
