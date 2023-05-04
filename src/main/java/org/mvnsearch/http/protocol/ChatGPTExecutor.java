@@ -58,7 +58,7 @@ public class ChatGPTExecutor extends HttpExecutor {
                             System.out.println("\n");
                             System.out.println("=================ChatGPT Answer==================");
                             System.out.println("\n");
-                            System.out.println(text);
+                            System.out.println(text.trim());
                         }
                     }
                 }
