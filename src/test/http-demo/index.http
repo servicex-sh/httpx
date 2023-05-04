@@ -311,4 +311,12 @@ Content-Type: application/json
 #@name chatgpt
 CHATGPT https://api.openai.com/v1/chat/completions
 
-What's Java? Could you give a simple example?
+You are a Java developer. Please write unit test with JUnit 5 for the following code:
+
+```java
+public class UserService {
+    public String findNickById(Long id) {
+        return "nick:" + id;
+    }
+}
+```
