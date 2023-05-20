@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.11</version>
+        <version>2.7.12</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.mvnsearch</groupId>
@@ -22,7 +22,7 @@
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.3</junit5.version>
-        <aws-java-sdk2.version>2.20.62</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.20.69</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -349,7 +349,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.23.0</version>
+            <version>3.23.1</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -450,7 +450,7 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>folsom</artifactId>
-            <version>1.15.0</version>
+            <version>1.15.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.mwiede</groupId>
@@ -502,21 +502,21 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.91.Final</version>
+                <version>4.1.92.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.31</version>
+                <version>2020.0.32</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.14.2</version>
+                <version>2.14.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
