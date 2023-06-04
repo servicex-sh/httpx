@@ -22,7 +22,7 @@
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.3</junit5.version>
-        <aws-java-sdk2.version>2.20.69</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.20.78</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -294,7 +294,7 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>4.4.0</version>
+            <version>4.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>
@@ -455,7 +455,7 @@
         <dependency>
             <groupId>com.github.mwiede</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.2.8</version>
+            <version>0.2.9</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -502,7 +502,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.92.Final</version>
+                <version>4.1.93.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
