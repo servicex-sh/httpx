@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
+        <version>2.7.13</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.mvnsearch</groupId>
@@ -22,7 +22,7 @@
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
         <junit5.version>5.9.3</junit5.version>
-        <aws-java-sdk2.version>2.20.86</aws-java-sdk2.version>
+        <aws-java-sdk2.version>2.20.90</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -193,7 +193,7 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.17.0</version>
+            <version>5.18.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
@@ -349,7 +349,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.23.3</version>
+            <version>3.23.2</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -384,7 +384,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
+            <version>20230618</version>
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -571,7 +571,7 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.9.21</version>
+                        <version>0.9.23</version>
                         <configuration>
                             <mainClass>${start-class}</mainClass>
                             <imageName>${project.build.finalName}</imageName>
@@ -584,7 +584,7 @@
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
-                                <version>0.2.7</version>
+                                <version>0.3.2</version>
                             </metadataRepository>
                         </configuration>
                         <executions>
