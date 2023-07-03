@@ -21,10 +21,11 @@ public class GrpcExecutor implements BaseExecutor {
             List<String> command = new ArrayList<>();
             command.add("grpcurl");
             final URI requestUri = httpRequest.getRequestTarget().getUri();
-            if (requestUri.getScheme().equals("http")) {
-                command.add("-plaintext");
-            } else {
+            final String grpcSchema = requestUri.getScheme();
+            if (grpcSchema.equals("https") || grpcSchema.equals("grpcs")) {
                 command.add("-insecure");
+            } else {
+                command.add("-plaintext");
             }
             for (HttpHeader header : httpRequest.getHeaders()) {
                 command.add("-H");
