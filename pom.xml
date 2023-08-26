@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.13</version>
+        <version>2.7.15</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.mvnsearch</groupId>
@@ -21,8 +21,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
-        <junit5.version>5.9.3</junit5.version>
-        <aws-java-sdk2.version>2.20.90</aws-java-sdk2.version>
+        <junit5.version>5.10.0</junit5.version>
+        <aws-java-sdk2.version>2.20.135</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>org.msgpack</groupId>
             <artifactId>jackson-dataformat-msgpack</artifactId>
-            <version>0.9.3</version>
+            <version>0.9.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.skjolber.jackson</groupId>
@@ -198,12 +198,12 @@
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>bookkeeper-common-allocator</artifactId>
-            <version>4.16.1</version>
+            <version>4.16.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>circe-checksum</artifactId>
-            <version>4.16.1</version>
+            <version>4.16.2</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -284,7 +284,7 @@
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
-            <version>2.16.12</version>
+            <version>2.16.14</version>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
@@ -309,7 +309,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>32.0.1-jre</version>
+            <version>32.1.2-jre</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -450,12 +450,12 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>folsom</artifactId>
-            <version>1.15.1</version>
+            <version>1.16.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.mwiede</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.2.9</version>
+            <version>0.2.11</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -502,14 +502,14 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.93.Final</version>
+                <version>4.1.97.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.33</version>
+                <version>2020.0.35</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
