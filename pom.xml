@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.mvnsearch</groupId>
     <artifactId>httpx</artifactId>
-    <version>0.42.0</version>
+    <version>0.42.1</version>
     <name>httpx</name>
     <description>CLI to run HTTP file</description>
     <url>https://servicex.sh</url>
@@ -549,17 +549,17 @@
 
     <repositories>
         <repository>
-            <id>spring-release</id>
-            <name>Spring release</name>
-            <url>https://repo.spring.io/release</url>
+            <id>spring-milestone</id>
+            <name>Spring Milestone</name>
+            <url>https://repo.spring.io/artifactory/milestone</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
-            <id>spring-release</id>
-            <name>Spring release</name>
-            <url>https://repo.spring.io/release</url>
+            <id>spring-milestone</id>
+            <name>Spring Milestone</name>
+            <url>https://repo.spring.io/artifactory/milestone</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -571,7 +571,7 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.9.23</version>
+                        <version>0.9.26</version>
                         <configuration>
                             <mainClass>${start-class}</mainClass>
                             <imageName>${project.build.finalName}</imageName>
@@ -584,7 +584,7 @@
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
-                                <version>0.3.2</version>
+                                <version>0.3.4</version>
                             </metadataRepository>
                         </configuration>
                         <executions>
