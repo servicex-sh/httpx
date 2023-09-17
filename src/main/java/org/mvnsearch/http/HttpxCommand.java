@@ -4,10 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
 import org.mvnsearch.http.logging.HttpxErrorCodeLoggerFactory;
-import org.mvnsearch.http.model.HttpMethod;
-import org.mvnsearch.http.model.HttpRequest;
-import org.mvnsearch.http.model.HttpRequestParser;
-import org.mvnsearch.http.model.HttpRequestTarget;
+import org.mvnsearch.http.model.*;
 import org.mvnsearch.http.model.extension.HttpxExtensionRequest;
 import org.mvnsearch.http.protocol.*;
 import org.mvnsearch.http.utils.JsonUtils;
@@ -151,7 +148,8 @@ public class HttpxCommand implements Callable<Integer> {
             // load global variables into context
             injectGlobalVariables(context);
             // parse http requests
-            final List<HttpRequest> requests = HttpRequestParser.splitRequests(httpCode);
+            final HttpFile httpFile = HttpRequestParser.parseHttpFile(httpCode);
+            final List<HttpRequest> requests = httpFile.getRequests();
             // list summary for code completion
             if (summary) {
                 for (HttpRequest request : requests) {
