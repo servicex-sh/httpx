@@ -58,8 +58,10 @@ public class HttpRequestParserTest {
         Map<String, Object> context = new HashMap<>();
         @Language("HTTP Request")
         String httpFile = """
+                @host = https://httpbin.org
+                
                 ### hello post
-                POST https://httpbin.org/post
+                POST {{host}}/post
                 Content-Type: application/json
 
                 {
