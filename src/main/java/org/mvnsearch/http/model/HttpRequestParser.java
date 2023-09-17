@@ -17,17 +17,33 @@ import java.util.function.Function;
 public class HttpRequestParser {
     private static final HttpxErrorCodeLogger log = HttpxErrorCodeLoggerFactory.getLogger(HttpRequestParser.class);
 
-    public static List<HttpRequest> splitRequests(String httpFileCode) {
+    public static HttpFile parseHttpFile(String httpFileCode) {
+        HttpFile httpFile = new HttpFile();
         List<HttpRequest> requests = new ArrayList<>();
+        httpFile.setRequests(requests);
         try {
             final BufferedReader bufferedReader = new BufferedReader(new StringReader(httpFileCode));
-            List<String> lines = bufferedReader.lines().toList();
+            List<String> rawLines = bufferedReader.lines().toList();
+            List<String> lines = rawLines;
             int index = 1;
             int lineNumber = 1;
             //remove shebang
             if (lines.get(0).startsWith("#!/usr/bin/env")) {
                 lines = lines.subList(1, lines.size());
                 lineNumber++;
+            }
+            for (String line : lines) {
+                if (line.startsWith("@")) {
+                    httpFile.addVariableLine(line);
+                    lineNumber++;
+                } else if (line.trim().isEmpty()) {
+                    lineNumber++;
+                } else {
+                    break;
+                }
+            }
+            if (lineNumber > 1) {
+                lines = rawLines.subList(lineNumber - 1, rawLines.size());
             }
             HttpRequest httpRequest = new HttpRequest(index);
             for (String rawLine : lines) {
@@ -77,7 +93,7 @@ public class HttpRequestParser {
         } catch (Exception e) {
             log.error("HTX-002-500", e);
         }
-        return requests;
+        return httpFile;
     }
 
     public static void parse(HttpRequest httpRequest, Map<String, Object> context) {
@@ -157,7 +173,11 @@ public class HttpRequestParser {
     }
 
     public static List<HttpRequest> parse(String httpFileCode, Map<String, Object> context) {
-        final List<HttpRequest> request = splitRequests(httpFileCode);
+        final HttpFile httpFile = parseHttpFile(httpFileCode);
+        if (!httpFile.getVariables().isEmpty()) {
+            context.putAll(httpFile.getVariables());
+        }
+        final List<HttpRequest> request = httpFile.getRequests();
         for (HttpRequest httpRequest : request) {
             parse(httpRequest, context);
         }
