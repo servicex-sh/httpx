@@ -21,8 +21,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
-        <junit5.version>5.10.0</junit5.version>
-        <aws-java-sdk2.version>2.21.0</aws-java-sdk2.version>
+        <junit5.version>5.10.1</junit5.version>
+        <aws-java-sdk2.version>2.21.40</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -193,7 +193,7 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.19.0</version>
+            <version>5.20.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
@@ -487,7 +487,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>
-            <version>5.2.1</version>
+            <version>5.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -509,7 +509,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2020.0.36</version>
+                <version>2020.0.38</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
