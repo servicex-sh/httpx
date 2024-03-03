@@ -20,11 +20,12 @@ jobs:
           - os: macos-14
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: graalvm/setup-graalvm@v1
         with:
+          distribution: "graalvm-community"
+          version: '22.3.3'
           java-version: '17'
-          distribution: 'temurin'
-          cache: maven
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build with Maven
         run: mvn -DskipTests -B package --file pom.xml
