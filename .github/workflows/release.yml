@@ -20,7 +20,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: "22.3.3"
+          distribution: "graalvm-community"
+          version: '22.3.3'
           java-version: '17'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -59,7 +60,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: "22.3.3"
+          distribution: "graalvm-community"
+          version: '22.3.3'
           java-version: '17'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
