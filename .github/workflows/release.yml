@@ -17,15 +17,15 @@ jobs:
             fileName: httpx-windows-x86_64.exe
             file: target/httpx.exe
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: "22.3.2"
+          version: "22.3.3"
           java-version: '17'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Maven dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -38,7 +38,7 @@ jobs:
           file: ${{ matrix.file }}
           args: "-7"
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.fileName }}
           path: ${{ matrix.file }}
@@ -52,16 +52,19 @@ jobs:
           - os: macos-latest
             fileName: httpx-osx-x86_64
             file: target/httpx
+          - os: macos-14
+            fileName: httpx-osx-aarch64
+            file: target/httpx
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: "22.3.2"
+          version: "22.3.3"
           java-version: '17'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Maven dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -69,7 +72,7 @@ jobs:
       - name: GraalVM native image build
         run: mvn -Pnative -DskipTests clean package
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.fileName }}
           path: ${{ matrix.file }}
