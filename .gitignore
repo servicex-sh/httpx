@@ -156,3 +156,4 @@ aliyun.http
 aws.http
 azure.http
 assembly/
+temp/
