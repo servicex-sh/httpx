@@ -92,19 +92,19 @@ public class HttpGlobalFunctions {
     }
 
     public static String randomEmail(String[] args) {
-        return new RgxGen("[a-z][a-z1-9]{8}@example\\.com").generate();
+        return  RgxGen.parse("[a-z][a-z1-9]{8}@example\\.com").generate();
     }
 
     public static String randomAlphabetic(String[] args) {
-        return new RgxGen("[a-zA-Z]{8}").generate();
+        return RgxGen.parse("[a-zA-Z]{8}").generate();
     }
 
     public static String randomAlphanumeric(String[] args) {
-        return new RgxGen("[a-zA-Z0-9]{8}").generate();
+        return RgxGen.parse("[a-zA-Z0-9]{8}").generate();
     }
 
     public static String randomHexadecimal(String[] args) {
-        return new RgxGen("[A-F0-9]{8}").generate();
+        return RgxGen.parse("[A-F0-9]{8}").generate();
     }
 
     public static String timestamp(String[] args) {
