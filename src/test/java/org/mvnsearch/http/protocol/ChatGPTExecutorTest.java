@@ -18,7 +18,6 @@ public class ChatGPTExecutorTest {
         String httpFile = """
                 ### ChatGPT with JBang
                 CHATGPT https://api.openai.com/v1/chat/completions
-                Content-Type: text/markdown
                         
                 You are to generate Java code in the style of jbang, and main class must be named Hello. {.system}
                                 

@@ -37,12 +37,12 @@ public class TarpcExecutor extends HttpBaseExecutor {
                   "Request": {
                     "context": {
                       "deadline": {
-                        "secs_since_epoch": %d,
-                        "nanos_since_epoch": %d
+                        "secs": %d,
+                        "nanos": %d
                       },
                       "trace_context": {
                         "trace_id": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-                        "span_id": 2661146547092162534,
+                        "span_id": 481056967432925815,
                         "sampling_decision": "Unsampled"
                       }
                     },
@@ -52,7 +52,7 @@ public class TarpcExecutor extends HttpBaseExecutor {
                     }
                   }
                 }
-                """.formatted(now.getEpochSecond(), now.getNano(),
+                """.formatted(9, 999641000,
                 functionName,
                 httpRequest.bodyText());
         try (SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress(tarpcUri.getHost(), tarpcUri.getPort()))) {
@@ -61,8 +61,8 @@ public class TarpcExecutor extends HttpBaseExecutor {
             ByteBuffer buffer = ByteBuffer.allocate(content.length + 4);
             buffer.put((byte) 0x00);
             buffer.put((byte) 0x00);
-            buffer.put((byte) 0x01);
-            buffer.put((byte) 0x0C);
+            buffer.put((byte) 0x00);
+            buffer.put((byte) 0xEC);
             // buffer.put((byte) 0x7B);
             // buffer.put((byte) 0x22);
             // buffer.put((byte) 0x52);
