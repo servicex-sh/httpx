@@ -37,7 +37,6 @@ import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.pulsar.common.protocol.ByteBufPair;
 import org.apache.rocketmq.common.protocol.header.SendMessageRequestHeaderV2;
 import org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader;
 import org.apache.rocketmq.common.protocol.header.UnregisterClientRequestHeader;
@@ -224,7 +223,7 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 org.apache.pulsar.client.impl.conf.ConsumerConfigurationData.class,
                 org.apache.pulsar.client.impl.conf.ProducerConfigurationData.class,
                 org.apache.pulsar.client.util.SecretsSerializer.class,
-                ByteBufPair.Encoder.class,
+                org.apache.pulsar.common.protocol.ByteBufPair.Encoder.class,
                 org.apache.pulsar.common.protocol.PulsarDecoder.class,
                 io.netty.channel.socket.nio.NioDatagramChannel.class,
                 io.netty.channel.socket.nio.NioSocketChannel.class
