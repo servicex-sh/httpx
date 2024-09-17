@@ -21,8 +21,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
-        <junit5.version>5.10.2</junit5.version>
-        <aws-java-sdk2.version>2.25.1</aws-java-sdk2.version>
+        <junit5.version>5.11.0</junit5.version>
+        <aws-java-sdk2.version>2.28.2</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -193,7 +193,7 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.21.0</version>
+            <version>5.22.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
@@ -284,7 +284,7 @@
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
-            <version>2.17.7</version>
+            <version>2.20.2</version>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
