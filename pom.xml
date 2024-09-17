@@ -198,12 +198,12 @@
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>bookkeeper-common-allocator</artifactId>
-            <version>4.16.4</version>
+            <version>4.17.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>circe-checksum</artifactId>
-            <version>4.16.4</version>
+            <version>4.17.1</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
