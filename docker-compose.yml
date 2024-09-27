@@ -1,7 +1,6 @@
-version: "3"
 services:
   rabbitmq:
-    image: rabbitmq:3.10.0-management
+    image: rabbitmq:3.13.7-management
     volumes:
       - ./src/test/etc/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     ports:
@@ -13,16 +12,16 @@ services:
     image: redis/redis-stack:latest
     ports:
       - "16379:6379"
-  maildev:
-    image: soulteary/maildev:2.0.5
+  mailpit:
+    image: axllent/mailpit:v1.20.5
     ports:
       - "1025:1025"
-      - "1080:1080"
-  redpanda:
-    image: vectorized/redpanda:latest
+      - "8025:8025"
+  kafka:
+    image: apache/kafka-native:latest
     ports:
       - "9092:9092"
-    command: redpanda start --overprovisioned --smp 1 --memory 1G --reserve-memory 0M --node-id 0 --check=false
+      - "9093:9093"
   sshd-test:
     image: linuxchina/sshd-test:latest
     ports:
