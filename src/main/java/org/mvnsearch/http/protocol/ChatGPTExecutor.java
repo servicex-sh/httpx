@@ -21,7 +21,7 @@ public class ChatGPTExecutor extends HttpExecutor {
         // body
         String mdBody = httpRequest.bodyText();
         Map<String, Object> chatRequest = new HashMap<>();
-        chatRequest.put("model", httpRequest.getHeader("X-Model", "gpt-3.5-turbo"));
+        chatRequest.put("model", httpRequest.getHeader("X-Model", "gpt-4o-mini"));
         chatRequest.put("temperature", Double.parseDouble(httpRequest.getHeader("X-Temperature", "1")));
         chatRequest.put("messages", convertMdToMessages(mdBody));
         httpRequest.setBodyBytes(JsonUtils.writeValueAsBytes(chatRequest));
