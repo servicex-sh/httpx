@@ -34,6 +34,26 @@ public class HttpRequestParserTest {
     }
 
     @Test
+    public void testReplaceEnvVariables() throws Exception {
+        Map<String, Object> context = new HashMap<>();
+        context.put("base-url", "https://httpbin.org");
+        context.put("token", "xxx.yyy.zzz");
+        @Language("HTTP Request")
+        String httpFile = """
+                ### hello post
+                POST {{base-url}}/post
+                Content-Type: application/json
+                Authorization: bear {{token}}
+                
+                {
+                  "nick": "{{$env.NICK}}"
+                }
+                """;
+        final String newHttpFile = HttpRequestParser.replaceVariables(httpFile, context);
+        System.out.println(newHttpFile);
+    }
+
+    @Test
     public void testReplaceVariables() throws Exception {
         Map<String, Object> context = new HashMap<>();
         context.put("base-url", "https://httpbin.org");
@@ -44,7 +64,7 @@ public class HttpRequestParserTest {
                 POST {{base-url}}/post
                 Content-Type: application/json
                 Authorization: bear {{token}}
-
+                
                 {
                   "id": 1
                 }
@@ -63,11 +83,11 @@ public class HttpRequestParserTest {
                 ### hello post
                 POST {{host}}/post
                 Content-Type: application/json
-
+                
                 {
                   "id": 1
                 }
-                                
+                
                 > {%
                     client.test("Request executed successfully", function() {
                         client.assert(response.status === 200, "Response status is not 200");
@@ -114,17 +134,17 @@ public class HttpRequestParserTest {
                 POST {{base-url}}/post
                 Content-Type: application/json
                 Authorization: bear {{token}}
-                       
+                
                 {
                   "id": 1
                 }
-                                
+                
                 ### second get
-                                
-                                
+                
+                
                 GET {{base-url}}/ip
                 Host: localhost
-                              
+                
                 """;
         List<HttpRequest> requests = HttpRequestParser.parse(httpFile, context);
         assertThat(requests).isNotEmpty();
@@ -145,11 +165,11 @@ public class HttpRequestParserTest {
                 POST {{base-url}}/post
                 Content-Type: application/json
                 Authorization: bear {{token}}
-
+                
                 {
                   "id": 1
                 }
-                                
+                
                 """;
         List<HttpRequest> httpRequests = HttpRequestParser.parse(httpFile, context);
         assertThat(httpRequests).isNotEmpty();
