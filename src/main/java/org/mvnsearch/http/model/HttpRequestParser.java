@@ -1,5 +1,6 @@
 package org.mvnsearch.http.model;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.mvnsearch.http.logging.HttpxErrorCodeLogger;
@@ -203,7 +204,16 @@ public class HttpRequestParser {
             }
             String name = httpFile.substring(offset, temp).trim();
             Object value;
-            if (name.startsWith("$")) { // function
+            if (name.startsWith("$env.")) { // function
+                final String variableName = name.substring(5);
+                final Map<String, String> envMap = System.getenv();
+                if (envMap.containsKey(variableName)) {
+                    value = envMap.get(variableName);
+                } else {
+                    Dotenv dotenv = Dotenv.load();
+                    value = dotenv.get(variableName, "");
+                }
+            } else if (name.startsWith("$")) { // function
                 value = evaluateFunction(name, context);
             } else {  // env variable
                 value = context.get(name);
