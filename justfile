@@ -43,6 +43,11 @@ copy-dependencies:
    rm -rf target/dependency
    mvn dependency:copy-dependencies -DincludeGroupIds=software.amazon.awssdk
 
+majar-version:
+   rm -rf target/dependency
+   mvn dependency:copy-dependencies
+   jarviz bytecode show --directory=target/dependency > bytecode-info.txt
+
 # Docker image build
 image-build:
    mkdir -p assembly
