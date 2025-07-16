@@ -21,8 +21,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-native.version>0.12.2</spring-native.version>
         <picocli.version>4.6.3</picocli.version>
-        <junit5.version>5.11.3</junit5.version>
-        <aws-java-sdk2.version>2.30.12</aws-java-sdk2.version>
+        <junit5.version>5.13.3</junit5.version>
+        <aws-java-sdk2.version>2.32.0</aws-java-sdk2.version>
         <start-class>org.mvnsearch.http.HttpxApplication</start-class>
     </properties>
 
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>com.github.curious-odd-man</groupId>
             <artifactId>rgxgen</artifactId>
-            <version>2.0</version>
+            <version>3.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.activation</groupId>
@@ -289,7 +289,13 @@
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
-            <version>2.21.1</version>
+            <version>2.21.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-lts8on</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
@@ -314,12 +320,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.6-jre</version>
+            <version>33.4.8-jre</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.12.1</version>
+            <version>2.13.1</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -393,7 +399,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20250107</version>
+            <version>20250517</version>
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -461,10 +467,11 @@
             <artifactId>folsom</artifactId>
             <version>1.21.0</version>
         </dependency>
+        <!-- don't upgrade because Java 24 build-->
         <dependency>
             <groupId>com.github.mwiede</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.2.26</version>
+            <version>0.2.24</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -549,6 +556,14 @@
         </extensions>
         <finalName>httpx</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
