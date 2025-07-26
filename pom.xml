@@ -542,74 +542,34 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>0.11.0</version>
+                <configuration>
+                    <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                    <buildArgs>
+                        <arg>--enable-preview</arg>
+                        <arg>-Os</arg>
+                    </buildArgs>
+                    <metadataRepository>
+                        <version>0.3.23</version>
+                    </metadataRepository>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>add-reachability-metadata</id>
+                        <goals>
+                            <goal>add-reachability-metadata</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>native</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>0.11.0</version>
-                        <configuration>
-                            <mainClass>${start-class}</mainClass>
-                            <imageName>${project.build.finalName}</imageName>
-                            <buildArgs>
-                                --no-fallback
-                                --enable-url-protocols=mailto
-                                --enable-url-protocols=http
-                                --enable-url-protocols=https
-                                --initialize-at-run-time=io.netty.handler.ssl.BouncyCastleAlpnSslUtils
-                            </buildArgs>
-                            <metadataRepository>
-                                <enabled>true</enabled>
-                                <version>0.3.23</version>
-                            </metadataRepository>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <configuration>
-                            <classifier>exec</classifier>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <executable>upx</executable>
-                            <arguments>
-                                <argument>-7</argument>
-                                <argument>target/httpx</argument>
-                            </arguments>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
