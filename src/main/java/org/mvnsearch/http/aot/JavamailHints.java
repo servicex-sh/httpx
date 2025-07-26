@@ -3,28 +3,21 @@ package org.mvnsearch.http.aot;
 import com.sun.mail.handlers.*;
 import com.sun.mail.smtp.SMTPProvider;
 import com.sun.mail.smtp.SMTPTransport;
-import org.springframework.nativex.hint.NativeHint;
-import org.springframework.nativex.hint.ResourceHint;
-import org.springframework.nativex.hint.TypeHint;
-import org.springframework.nativex.type.NativeConfiguration;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 
-@NativeHint(
-        types = @TypeHint(types = {
-                SMTPProvider.class,
-                SMTPTransport.class,
-                multipart_mixed.class,
-                text_plain.class,
-                text_html.class,
-                text_xml.class,
-                message_rfc822.class
-        }),
-        resources = {
-                @ResourceHint(patterns = {
-                        "org/springframework/mail/javamail/mime.types",
-                        "META-INF/mailcap",
-                        "META-INF/javamail.*"
-                })
-        }
-)
-public class JavamailHints implements NativeConfiguration {
+public class JavamailHints implements RuntimeHintsRegistrar {
+    @Override
+    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        hints.reflection().registerType(SMTPProvider.class);
+        hints.reflection().registerType(SMTPTransport.class);
+        hints.reflection().registerType(multipart_mixed.class);
+        hints.reflection().registerType(text_plain.class);
+        hints.reflection().registerType(text_html.class);
+        hints.reflection().registerType(text_xml.class);
+        hints.reflection().registerType(message_rfc822.class);
+        hints.resources().registerPattern("org/springframework/mail/javamail/mime.types");
+        hints.resources().registerPattern("META-INF/mailcap");
+        hints.resources().registerPattern("META-INF/javamail.*");
+    }
 }

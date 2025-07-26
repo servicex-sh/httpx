@@ -55,52 +55,37 @@ import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.client.spi.NetworkModuleFactory;
 import org.eclipse.paho.mqttv5.client.websocket.WebSocketNetworkModuleFactory;
 import org.eclipse.paho.mqttv5.client.websocket.WebSocketSecureNetworkModuleFactory;
-import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.BeanFactoryNativeConfigurationProcessor;
-import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeConfigurationRegistry;
-import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeResourcesEntry;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.nativex.hint.TypeAccess;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.net.ssl.SSLSocketFactory;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 
 
-public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProcessor {
+public class ThirdLibrariesHints implements RuntimeHintsRegistrar {
     @Override
-    public void process(ConfigurableListableBeanFactory beanFactory, NativeConfigurationRegistry registry) {
-        // hessian
-        registry.reflection().forType(Date.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS).build();
-        registry.reflection().forType(Time.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS).build();
-        registry.reflection().forType(Timestamp.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS).build();
+    public void registerHints(RuntimeHints registry, ClassLoader classLoader) {
         // javamail
-        registry.reflection().forType(MailSSLSocketFactory.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
-        registry.reflection().forType(SSLSocketFactory.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
-        // kafka
+        registry.reflection().registerType(MailSSLSocketFactory.class);
+        registry.reflection().registerType(SSLSocketFactory.class);
         final Class<?>[] kafkaClassArray = {ConsumerConfig.class, KafkaConsumer.class, RangeAssignor.class,
                 KafkaProducer.class, ProducerConfig.class, ProducerRecord.class, DefaultPartitioner.class,
                 LongDeserializer.class, LongSerializer.class, StringDeserializer.class, StringSerializer.class,
                 CooperativeStickyAssignor.class};
         for (Class<?> clazz : kafkaClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
-        registry.resources().add(NativeResourcesEntry.of("kafka/kafka-version.properties"));
+        registry.resources().registerResource(new ClassPathResource("kafka/kafka-version.properties"));
         //rabbitmq
-        registry.resources().add(NativeResourcesEntry.of("rabbitmq-amqp-client.properties"));
+        registry.resources().registerResource(new ClassPathResource("rabbitmq-amqp-client.properties"));
         //nats
-        registry.reflection().forType(SocketDataPort.class).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+        registry.reflection().registerType(SocketDataPort.class);
         //aliyun event bridge
         final Class<?>[] aliyunClassArray = {com.aliyun.credentials.models.Config.class, com.aliyun.eventbridge.models.Config.class,
                 CloudEvent.class, PutEventsResponse.class, PutEventsResponseEntry.class,
                 TeaModel.class, TeaRequest.class, TeaResponse.class, TeaPair.class,};
         for (Class<?> clazz : aliyunClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         // aliyun core sdk
         final Class<?>[] aliyunSdkCoreClassArray = {
@@ -112,31 +97,27 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 ApacheHttpClient.class,
         };
         for (Class<?> clazz : aliyunSdkCoreClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
-        registry.resources().add(NativeResourcesEntry.of("project.properties"));
-        registry.resources().add(NativeResourcesEntry.of("endpoints.json"));
-        registry.resources().add(NativeResourcesEntry.of("regions.txt"));
+        registry.resources().registerResource(new ClassPathResource("project.properties"));
+        registry.resources().registerResource(new ClassPathResource("endpoints.json"));
+        registry.resources().registerResource(new ClassPathResource("regions.txt"));
         // aliyun MNS
         final Class<?>[] mnsClassArray = {MNSClient.class, DefaultMNSClient.class};
         for (Class<?> clazz : mnsClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
-        registry.resources().add(NativeResourcesEntry.of("versioninfo.properties"));
-        registry.resources().add(NativeResourcesEntry.ofBundle("common"));
+        registry.resources().registerResource(new ClassPathResource("versioninfo.properties"));
+        registry.resources().registerResourceBundle("common");
         //gson
         final Class<?>[] gsonClassArray = {Gson.class, GsonBuilder.class, TypeToken.class, JsonElement.class};
         for (Class<?> clazz : gsonClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //fastjson
         final Class<?>[] fastjsonClassArray = {JSONArray.class, JSONObject.class};
         for (Class<?> clazz : fastjsonClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //rocketmq
         final Class<?>[] rocketmqClassArray = {
@@ -169,26 +150,24 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 RemotingSerializable.class,
                 SerializeType.class};
         for (Class<?> clazz : rocketmqClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //eclipse paho mqtt5 client
-        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/logging/JSR47Logger.class"));
-        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/client/internal/nls/logcat.properties"));
-        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/mqttv5/common/nls/logcat.properties"));
-        registry.resources().add(NativeResourcesEntry.ofBundle("org/eclipse/paho/mqttv5/common/nls/messages"));
+        registry.resources().registerResource(new ClassPathResource("org/eclipse/paho/mqttv5/logging/JSR47Logger.class"));
+        registry.resources().registerResource(new ClassPathResource("org/eclipse/paho/mqttv5/client/internal/nls/logcat.properties"));
+        registry.resources().registerResource(new ClassPathResource("org/eclipse/paho/mqttv5/common/nls/logcat.properties"));
+        registry.resources().registerResourceBundle("org/eclipse/paho/mqttv5/common/nls/messages");
         final Class<?>[] mqtt5ClassArray = {Logger.class, JSR47Logger.class, LoggerFactory.class,
                 NetworkModuleFactory.class, WebSocketNetworkModuleFactory.class,
                 WebSocketSecureNetworkModuleFactory.class, SSLNetworkModuleFactory.class,
                 TCPNetworkModuleFactory.class};
         for (Class<?> clazz : mqtt5ClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //eclipse paho mqtt3 client
-        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/client/mqttv3/logging/JSR47Logger.class"));
-        registry.resources().add(NativeResourcesEntry.of("org/eclipse/paho/client/mqttv3/internal/nls/logcat.properties"));
-        registry.resources().add(NativeResourcesEntry.ofBundle("org/eclipse/paho/client/mqttv3/internal/nls/messages"));
+        registry.resources().registerResource(new ClassPathResource("org/eclipse/paho/client/mqttv3/logging/JSR47Logger.class"));
+        registry.resources().registerResource(new ClassPathResource("org/eclipse/paho/client/mqttv3/internal/nls/logcat.properties"));
+        registry.resources().registerResourceBundle("org/eclipse/paho/client/mqttv3/internal/nls/messages");
         final Class<?>[] mqtt3ClassArray = {
                 org.eclipse.paho.client.mqttv3.logging.Logger.class,
                 org.eclipse.paho.client.mqttv3.logging.JSR47Logger.class,
@@ -200,8 +179,7 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 org.eclipse.paho.client.mqttv3.internal.TCPNetworkModuleFactory.class,
         };
         for (Class<?> clazz : mqtt3ClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //apache pulsar
         final Class<?>[] pulsarClassArray = {
@@ -229,14 +207,12 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 io.netty.channel.socket.nio.NioSocketChannel.class
         };
         for (Class<?> clazz : pulsarClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //sofa RPC
         final Class<?>[] sofaClassArray = {SofaRequest.class, SofaResponse.class};
         for (Class<?> clazz : sofaClassArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //jsch by https://github.com/mwiede/jsch
         try {
@@ -293,8 +269,7 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                     Class.forName("com.jcraft.jsch.jce.TripleDESCTR"),
             };
             for (Class<?> clazz : jschClassArray) {
-                registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                        .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+                registry.reflection().registerType(clazz);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -306,8 +281,7 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 org.ini4j.spi.IniParser.class
         };
         for (Class<?> clazz : ini4jArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //json-smart
         final Class<?>[] jsonSmartArray = {
@@ -318,16 +292,14 @@ public class ThirdLibrariesHints implements BeanFactoryNativeConfigurationProces
                 net.minidev.json.JSONStreamAwareEx.class
         };
         for (Class<?> clazz : jsonSmartArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
         //msgpack
         final Class<?>[] msgPackArray = {
                 org.msgpack.jackson.dataformat.MessagePackExtensionType.class
         };
         for (Class<?> clazz : msgPackArray) {
-            registry.reflection().forType(clazz).withAccess(TypeAccess.DECLARED_CONSTRUCTORS)
-                    .withAccess(TypeAccess.DECLARED_METHODS).withAccess(TypeAccess.DECLARED_FIELDS).build();
+            registry.reflection().registerType(clazz);
         }
     }
 }
